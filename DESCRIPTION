@@ -1,0 +1,13 @@
+Package: ParBayesianOptimization
+Title: Parallel Bayesian Optimization of Hyperparameters
+Version: 0.0.1
+Authors@R: person("Samuel", "Wilson", email = "samwilson303@gmail.com", role = c("aut", "cre"))
+Description: Converge to best hyperparameter set by iteratively fitting gaussian processes.
+Depends: R (>= 3.5.0), data.table (>= 1.11.8), GauPro, stats, foreach
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.0.9000
+Suggests: knitr,rmarkdown,xgboost,doParallel,ggplot2
+VignetteBuilder: knitr
+Maintainer: Samuel Wilson <samwilson303@gmail.com>

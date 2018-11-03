@@ -1,0 +1,167 @@
+---
+title: "Advanced Features of ParBayesianOptimization"
+author: "Samuel Wilson"
+date: "October 31, 2018"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{advancedFeatures}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(width = 1000)
+```
+
+### Running in Parallel
+
+Fortunuately, the most time intensive part of our parameter search (running the scoring function) can easily be done in parallel. ```PayBayesianOptimization``` creates a flexible framework for setting up your parameter search as efficiently as possible. The steps are similar to a vanilla implementation of BayesianOptimization as seen in the first vignette, we just need to load a package that allows us to register a parallel backend and define a few extra variables. On a Windows machine, you can use ```doParallel```:
+
+```{r eval = TRUE, results='hide', echo=TRUE, message=FALSE}
+library("xgboost")
+library("ParBayesianOptimization")
+library("doParallel")
+
+data(agaricus.train, package = "xgboost")
+
+Folds <- list(Fold1 = as.integer(seq(1,nrow(agaricus.train$data),by = 3))
+            , Fold2 = as.integer(seq(2,nrow(agaricus.train$data),by = 3))
+            , Fold3 = as.integer(seq(3,nrow(agaricus.train$data),by = 3)))
+
+scoringFunction <- function(max_depth, min_child_weight, subsample) {
+
+  dtrain <- xgb.DMatrix(agaricus.train$data,label = agaricus.train$label)
+  
+  Pars <- list( booster = "gbtree"
+              , eta = 0.01
+              , max_depth = max_depth
+              , min_child_weight = min_child_weight
+              , subsample = subsample
+              , objective = "binary:logistic"
+              , eval_metric = "auc")
+
+  xgbcv <- xgb.cv(params = Pars
+                , data = dtrain
+                , nround = 100
+                , folds = Folds
+                , prediction = TRUE
+                , showsd = TRUE
+                , early_stopping_rounds = 5
+                , maximize = TRUE
+                , verbose = 0)
+
+  return(list(Score = max(xgbcv$evaluation_log$test_auc_mean)
+            , nrounds = xgbcv$best_iteration
+             )
+         )
+}
+
+bounds <- list( max_depth = c(2L, 10L)
+              , min_child_weight = c(1L, 100L)
+              , subsample = c(0.25, 1))
+
+kern <- "Matern52"
+
+acq <- "ei"
+```
+
+From here, we need to define two important function parameters, ```export``` and ```packages```. These tell the foreach loop which packages/variables need to be loaded into each parallel instance:
+
+```{r eval = TRUE, results='hide', echo=TRUE}
+packages <- 'xgboost'
+
+export <- c('Folds','agaricus.train')
+```
+
+We are now ready to start our parameter search. If you want to make full use of your core cluster, bulkNew should be set to be the same as the number of registered cores. Once again, we can interrogate ```ScoreResults$BestPar``` to see the best parameters as of each iteration:
+
+```{r eval = FALSE, echo=TRUE}
+cl <- makeCluster(2)
+registerDoParallel(cl)
+ScoreResult <- BayesianOptimization(FUN = scoringFunction
+                                  , bounds = bounds
+                                  , initPoints = 10
+                                  , bulkNew = 2
+                                  , nIters = 14
+                                  , kern = kern
+                                  , acq = acq
+                                  , verbose = 1
+                                  , parallel = TRUE
+                                  , packages = packages
+                                  , export = export
+                                  , noiseAdd = 0.25)
+```
+*******
+### Re-using Intermediary Results in Later Experiment
+
+Unfortunately, our experiments do not always give us the results we want. Maybe we didn't let it run long enough, or maybe we used the wrong kernel. It could be very time intensive and aggravating to re-initialize the process. Fortunately, the ```BayesianOptimization``` function allows us to, at every update, save our parameter-score pairs as an RDS and re-use them as our initial set in the future. This ensures that the time intensive process of running the scoring function is not wasted.  
+
+All we need to do is specify the path/filename in the ```saveIntermediary``` parameter (this code is not meant to be run):
+```{r eval = FALSE, results='hide', echo=TRUE}
+ScoreResults <- BayesianOptimization(
+      FUN = scoringFunction
+    , bounds = bounds
+    ...
+    , saveIntermediary = "../Intermediary Results/Experiment1.RDS"
+    ...
+  )
+```
+
+If a file currently exists, it **WILL** be overwritten. After this process has run, this file can be recalled and passed to the ```BayesianOptimization``` function in the ```leftoff``` parameter:  
+```{r eval = FALSE, results='hide', echo=TRUE}
+
+priorRuns <- readRDS("../Intermediary Results/Experiment1.RDS") 
+
+ScoreResults <- BayesianOptimization(
+      FUN = scoringFunction
+    , bounds = bounds
+    ...
+    , saveIntermediary = "../Intermediary Results/Experiment2.RDS"
+    , leftOff = priorRuns
+    ...
+  )
+```
+
+When a leftOff table is provided, depending on how the experiment is set up, one of two things will happen:  
+
+  1. If ```initialize``` is TRUE, the process will initialize normally and append the leftOff table when it fits Gaussian Process'  
+  2. If ```initialize``` is FALSE, the process will treat leftOff as the only initial parameter-score pairs. We can start fitting our priors without having to run the scoring function at all!  
+  
+Keep in mind, if you change your bounds, you will need to delete any rows from your leftOff table that fall outside the bounds.
+
+********
+### Adjusting the noiseAdd parameter
+
+Once we have extracted the next expected optimal parameter set from the Gaussian process, we have several decisions to make. We can run 1 new scoringFunction at the new parameter, or we can run the scoring function n times in parallel at n different parameter sets. If we run several scoringFunctions in parallel, we need to decide where the other n-1 parameter sets come from. For the sake of decreasing uncertainty around the estimated optimal parameter, this process pulls the other n-1 parameter sets from a shape(4,4) beta distribution centered at the estimated optimal parameter.
+
+As an example, let's say our min_child_weight is bounded between [0,10] and the Gaussian process says that our acquisition function is maximized at min_child_weight = 6. We can control how the process randomly samples around this point by using the noiseAdd parameter, which tells the process the percentage of the range specified by ```bounds``` to sample:
+
+```{r eval = TRUE, echo=FALSE}
+library(ggplot2)
+
+y1 <- function(x) {
+  (x-7)^3*(5-(x))^3/15
+}
+
+y2 <- function(x) {
+  (x-8)^3*(4-(x))^3/1700
+}
+
+ggplot(data.frame(x=c(0,10)), aes(x)) +
+  stat_function(fun = y1, geom = "line", aes(colour = "red"), xlim = c(5,7)) +
+  stat_function(fun = y2, geom = "line", aes(colour = "blue"), xlim = c(4,8)) +
+  scale_x_continuous(name = "min_child_weight", breaks = seq(0,10,1), limits = c(0,10)) +
+  scale_y_continuous(limits=c(0,0.075)) +
+  scale_color_discrete(name = "noiseAdd", labels = c("0.4", "0.2")) +
+  ylab("Density") +
+  ggtitle("Distributions Sampled for Different noiseAdd Values") +
+  theme(plot.margin=unit(c(0.5,1,0.5,0.5),"cm"))
+
+```
+
+
+
+
+
+
