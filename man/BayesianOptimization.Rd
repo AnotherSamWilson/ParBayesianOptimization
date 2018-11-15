@@ -100,10 +100,10 @@ If 1, progress will be printed. If 2, progress and information about new paramet
 }
 \value{
 A list containing details about the process:
-\item{GPlist}{  The list of the gaussian process objects that were fit.}
-\item{OptParDT}{  The optimal parameters according to each gaussian process}
-\item{ScoreDT}{  A list of all parameter-score pairs, as well as extra columns from FUN}
-\item{BestPars}{  The best parameter set at each iteration}
+\item{GPlist}{The list of the gaussian process objects that were fit.}
+\item{acqMaximums}{The optimal parameters according to each gaussian process}
+\item{ScoreDT}{A list of all parameter-score pairs, as well as extra columns from FUN}
+\item{BestPars}{The best parameter set at each iteration}
 }
 \description{
 Flexible Bayesian optimization of model hyperparameters.

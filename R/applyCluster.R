@@ -30,7 +30,7 @@ applyCluster <- function(e = parent.frame()) {
     clusterPoints <- head(clusterPoints[get("GP_Utility") >= e$minClusterUtility,
                                       ][order(-get("GP_Utility"))]
                          ,e$runNew)
-    drop <- c("GP_Utility","Cluster") # So data.table doesn't throw an error.
+    drop <- c("GP_Utility","Cluster") # So data.table doesn't throw a warning
 
   }
 

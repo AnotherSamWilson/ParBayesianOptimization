@@ -56,9 +56,10 @@
 #'   Increase this for a higher chance to find global optimum, at the expense of more time.
 #' @param convThresh convergence threshold passed to \code{factr} when the \code{optim} function (L-BFGS-B) is called.
 #'   Lower values will take longer to converge, but may be more accurate.
-#' @param minClusterUtility the minimum percentage of the optimal utility required for a less optimal local
-#'   maximum to be included as a candidate parameter set in the next scoring function. If \code{NULL},
-#'   only the global optimum will be used as a candidate parameter set.
+#' @param minClusterUtility number 0-1. Represents the minimum percentage of the optimal utility
+#'   required for a less optimal local maximum to be included as a candidate parameter
+#'   set in the next scoring function. If \code{NULL}, only the global optimum will be
+#'   used as a candidate parameter set.
 #' @param noiseAdd if bulkNew > 1, specifies how much noise to add to the optimal candidate parameter set
 #'   to obtain the other \code{bulkNew-1} candidate parameter sets. New random draws are pulled from
 #'   a shape(4,4) beta distribution centered at the optimal candidate parameter set
@@ -66,10 +67,10 @@
 #' @param verbose Whether or not to print progress. If 0, nothing will be printed.
 #'   If 1, progress will be printed. If 2, progress and information about new parameter-score pairs will be printed.
 #' @return A list containing details about the process:
-#' \item{GPlist}{  The list of the gaussian process objects that were fit.}
-#' \item{OptParDT}{  The optimal parameters according to each gaussian process}
-#' \item{ScoreDT}{  A list of all parameter-score pairs, as well as extra columns from FUN}
-#' \item{BestPars}{  The best parameter set at each iteration}
+#' \item{GPlist}{The list of the gaussian process objects that were fit.}
+#' \item{acqMaximums}{The optimal parameters according to each gaussian process}
+#' \item{ScoreDT}{A list of all parameter-score pairs, as well as extra columns from FUN}
+#' \item{BestPars}{The best parameter set at each iteration}
 #' @references Jasper Snoek, Hugo Larochelle, Ryan P. Adams (2012) \emph{Practical Bayesian Optimization of Machine Learning Algorithms}
 #' @examples
 #' \dontrun{
@@ -199,7 +200,7 @@ BayesianOptimization <- function(
   if (nrow(leftOff) > 0){
     if (sum(sapply(ParamNames, CheckBounds,leftOff, bounds))>0) stop("leftOff not within bounds.")
   }
-  if (nrow(leftOff)+initPoints+nrow(initGrid) >= nIters) stop("Rows in initial set will be larger than nIters")
+  if (nrow(leftOff)+initialize*(initPoints+nrow(initGrid)) >= nIters) stop("Rows in initial set will be larger than nIters")
   if (verbose > 0 & bulkNew < Workers & parallel) cat("bulkNew is less than the threads registered on the parallel back end - process may not utilize all workers.\n")
 
 
@@ -319,7 +320,7 @@ BayesianOptimization <- function(
                          , convThresh = convThresh
                          )
 
-    if (sum(LocalOptims$gradCount > 2) == 0) cat("\n  2a) WARNING - No initial points converged.\n      Process may just be sampling random points.\n      Try decreasing convThresh.")
+    if (sum(LocalOptims$gradCount > 2) == 0) stop("\n  2a) WARNING - No initial points converged.\n      Process may just be sampling random points.\n      Try decreasing convThresh.")
 
     fromCluster <- applyCluster()
     acqMaximums <- rbind(acqMaximums, data.table("Iteration" = Iter, fromCluster$clusterPoints))
