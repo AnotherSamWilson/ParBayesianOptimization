@@ -4,7 +4,7 @@
 \alias{RandParams}
 \title{Generate Random Parameters}
 \usage{
-RandParams(x, Rpoints, bounds)
+RandParams(x, Rpoints, boundsDT)
 }
 \arguments{
 \item{x}{Parameter Name}

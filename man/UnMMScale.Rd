@@ -4,17 +4,17 @@
 \alias{UnMMScale}
 \title{Undo Min-Max Scale}
 \usage{
-UnMMScale(x, Table, bounds)
+UnMMScale(x, table, boundsDT)
 }
 \arguments{
 \item{x}{Parameter Name}
 
-\item{Table}{A data.table of scaled parameter sets}
+\item{table}{A data.table of scaled parameter sets}
 
 \item{bounds}{the original bounds list}
 }
 \value{
-a data.table the same length as Table with un-scaled parameters
+a data.table the same length as \code{table} with un-scaled parameters
 }
 \description{
 Un-scales a data.table of parameter sets from a 0-1 range

@@ -47,12 +47,14 @@ maxAcq <- function(GP, TryOver, acq = "ucb", y_max, kappa, eps, parallel, ParMet
     # Sometimes optim doesn't actually cap the bounds at 0 and 1.
     Pars <- sapply(optim_result$par,function(x){pmin(pmax(x,0),1)})
 
-    as.data.table(as.list(c(Pars,GP_Utility = optim_result$value)))
+    as.data.table(as.list(c( Pars
+                           , GP_Utility = optim_result$value
+                           , gradCount = optim_result$counts[[2]]
+                           )
+                          )
+                  )
 
 
   }
 }
 utils::globalVariables(c("i"))
-
-
-

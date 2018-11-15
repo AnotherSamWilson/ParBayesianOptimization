@@ -30,15 +30,17 @@ CheckBounds <- function(x, Table, bounds) sum(!between(Table[[x]], lower = bound
 #' @return a data.table of random parameters
 #' @keywords internal
 #' @export
-RandParams <- function(x, Rpoints, bounds) {
+RandParams <- function(x, Rpoints, boundsDT) {
 
-  if (class(bounds[[x]]) == "integer"){
+  B <- boundsDT[get("N") == x,]
 
-    base::sample(bounds[[x]][[1]]:bounds[[x]][[2]], size = Rpoints, replace = TRUE)
+  if (B$C == "integer"){
+
+    base::sample(B$L:B$U, size = Rpoints, replace = TRUE)
 
   } else {
 
-    runif(Rpoints, min = bounds[[x]][[1]], max = bounds[[x]][[2]])
+    runif(Rpoints, min = B$L, max =B$U)
 
   }
 }
@@ -49,13 +51,14 @@ RandParams <- function(x, Rpoints, bounds) {
 #' Scales a data.table of parameter sets to a 0-1 range
 #'
 #' @param x Parameter Name
-#' @param Table A data.table of parameter sets
+#' @param table A data.table of parameter sets
 #' @param bounds the original bounds list
-#' @return a data.table the same length as Table with scaled parameters
+#' @return a data.table the same length as \code{table} with scaled parameters
 #' @keywords internal
 #' @export
-MinMaxScale <- function(x, Table, bounds) {
-  (Table[[x]]-bounds[[x]][[1]]) / (bounds[[x]][[2]]-bounds[[x]][[1]])
+MinMaxScale <- function(x, table, boundsDT) {
+  B <- boundsDT[get("N") == x,]
+  (table[[x]]-B$L) / (B$U-B$L)
 }
 
 
@@ -65,13 +68,17 @@ MinMaxScale <- function(x, Table, bounds) {
 #' Un-scales a data.table of parameter sets from a 0-1 range
 #'
 #' @param x Parameter Name
-#' @param Table A data.table of scaled parameter sets
+#' @param table A data.table of scaled parameter sets
 #' @param bounds the original bounds list
-#' @return a data.table the same length as Table with un-scaled parameters
+#' @return a data.table the same length as \code{table} with un-scaled parameters
 #' @keywords internal
 #' @export
-UnMMScale <- function(x, Table, bounds) {
-  (bounds[[x]][[2]]-bounds[[x]][[1]])*Table[[x]]+bounds[[x]][[1]]
+UnMMScale <- function(x, table, boundsDT) {
+  B <- boundsDT[get("N") == x,]
+
+  if (B$C == "integer") {
+    return(round((B$U-B$L)*table[[x]]+B$L,0))
+  } else  return((B$U-B$L)*table[[x]]+B$L)
 }
 
 
@@ -79,9 +86,10 @@ UnMMScale <- function(x, Table, bounds) {
 #'
 #' @description
 #' This function exists so GauPro doesn't have to be loaded to run BayesianOptimization
+#'
 #' @param kern a kernel
 #' @param beta the log10(theta) the lengthscale parameter
-#' @return a data.table the same length as Table with un-scaled parameters
+#' @return an GauPro_kernel_beta R6 class
 #' @keywords internal
 #' @export
 assignKern <- function(kern,beta) {

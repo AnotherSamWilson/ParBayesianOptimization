@@ -50,15 +50,15 @@ updateGP <- function(GP, kern, X, Z, acq, scaleList, parallel) {
 
     if (acq == "eips") {
 
-      GPs <- GP[[1]]$update(Xnew = X, Znew = Z[,1])
+      GPs <- GP[[1]]$update(Xnew = X, Znew = Z[,1], nug.update = TRUE)
 
-      GPe <- GP[[2]]$update(Xnew = X, Znew = Z[,2])
+      GPe <- GP[[2]]$update(Xnew = X, Znew = Z[,2], nug.update = TRUE)
 
       GP <- list(GPs,GPe)
 
     } else {
 
-      GP <- GP$update(Xnew = X, Z[,1])
+      GP <- GP$update(Xnew = X, Z[,1], nug.update = TRUE)
 
     }
   }

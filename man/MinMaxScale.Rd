@@ -4,17 +4,17 @@
 \alias{MinMaxScale}
 \title{Min-Max Scale}
 \usage{
-MinMaxScale(x, Table, bounds)
+MinMaxScale(x, table, boundsDT)
 }
 \arguments{
 \item{x}{Parameter Name}
 
-\item{Table}{A data.table of parameter sets}
+\item{table}{A data.table of parameter sets}
 
 \item{bounds}{the original bounds list}
 }
 \value{
-a data.table the same length as Table with scaled parameters
+a data.table the same length as \code{table} with scaled parameters
 }
 \description{
 Scales a data.table of parameter sets to a 0-1 range

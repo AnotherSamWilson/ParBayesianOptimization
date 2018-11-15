@@ -56,6 +56,9 @@
 #'   Increase this for a higher chance to find global optimum, at the expense of more time.
 #' @param convThresh convergence threshold passed to \code{factr} when the \code{optim} function (L-BFGS-B) is called.
 #'   Lower values will take longer to converge, but may be more accurate.
+#' @param minClusterUtility the minimum percentage of the optimal utility required for a less optimal local
+#'   maximum to be included as a candidate parameter set in the next scoring function. If \code{NULL},
+#'   only the global optimum will be used as a candidate parameter set.
 #' @param noiseAdd if bulkNew > 1, specifies how much noise to add to the optimal candidate parameter set
 #'   to obtain the other \code{bulkNew-1} candidate parameter sets. New random draws are pulled from
 #'   a shape(4,4) beta distribution centered at the optimal candidate parameter set
@@ -103,29 +106,31 @@
 #'
 #'   return(list(Score = max(xgbcv$evaluation_log$test_auc_mean)
 #'               , nrounds = xgbcv$best_iteration
-#'               )
 #'   )
-#'
-#'   bounds <- list( max_depth = c(2L, 10L)
-#'                   , min_child_weight = c(1L, 100L)
-#'                   , subsample = c(0.25, 1))
-#'
-#'   kern <- "Matern52"
-#'
-#'   acq <- "ei"
-#'
-#'   ScoreResult <- BayesianOptimization(FUN = scoringFunction
-#'                                       , bounds = bounds
-#'                                       , initPoints = 10
-#'                                       , bulkNew = 1
-#'                                       , nIters = 12
-#'                                       , kern = kern
-#'                                       , acq = acq
-#'                                       , kappa = 2.576
-#'                                       , verbose = 1
-#'                                       , parallel = FALSE)
+#'   )
 #' }
-#' @importFrom data.table data.table setDT setcolorder := as.data.table
+#'
+#'
+#' bounds <- list( max_depth = c(2L, 10L)
+#'                 , min_child_weight = c(1, 100)
+#'                 , subsample = c(0.25, 1))
+#'
+#' kern <- "Matern52"
+#'
+#' acq <- "ei"
+#'
+#' ScoreResult <- BayesianOptimization(FUN = scoringFunction
+#'                                     , bounds = bounds
+#'                                     , initPoints = 10
+#'                                     , bulkNew = 1
+#'                                     , nIters = 12
+#'                                     , kern = kern
+#'                                     , acq = acq
+#'                                     , kappa = 2.576
+#'                                     , verbose = 1
+#'                                     , parallel = FALSE)
+#' }
+#' @importFrom data.table data.table setDT setcolorder := as.data.table copy .I
 #' @importFrom utils head
 #' @importFrom GauPro GauPro_kernel_model Matern52 Matern32 Exponential Gaussian
 #' @export
@@ -151,6 +156,7 @@ BayesianOptimization <- function(
   , eps = 0.0
   , gsPoints = 100
   , convThresh = 1e7
+  , minClusterUtility = NULL
   , noiseAdd = 0.25
   , verbose = 1
 ) {
@@ -165,6 +171,13 @@ BayesianOptimization <- function(
   Overwrites <- 0
   Iter <- 0
   kern <- assignKern(kern,beta)
+  boundsDT <- data.table( N = ParamNames
+                        , L = sapply(bounds, function(x) x[1])
+                        , U = sapply(bounds, function(x) x[2])
+                        , C = sapply(bounds, function(x) class(x))
+  )
+
+
 
   # Define processing function
   ParMethod <- function(x) if(x) {`%dopar%`} else {`%do%`}
@@ -197,7 +210,7 @@ BayesianOptimization <- function(
       if (nrow(initGrid)>0){
         InitFeedParams <- initGrid
       } else{
-        InitFeedParams <- data.table(sapply(ParamNames,RandParams,initPoints, bounds))
+        InitFeedParams <- data.table(sapply(ParamNames,RandParams,initPoints, boundsDT))
       }
 
       if (verbose > 0) cat("\nRunning initial scoring function",nrow(InitFeedParams),"times in",Workers,"thread(s).\n")
@@ -212,7 +225,7 @@ BayesianOptimization <- function(
                         , .export = export
                         ) %op% {
 
-          Params <- InitFeedParams[iter,]
+          Params <- InitFeedParams[get("iter"),]
           Elapsed <- system.time(Result <- do.call(what = FUN, args = as.list(Params)))
           data.table(Params,Elapsed = Elapsed[[3]],as.data.table(Result))
 
@@ -251,14 +264,13 @@ BayesianOptimization <- function(
 
   # Setup for iterations
   GPlist <- list()
+  acqMaximums <- data.table()
   scaleList <- list(score = max(abs(ScoreDT$Score)), elapsed = max(ScoreDT$Elapsed))
   GP <- NULL
-  OptParDT <- data.table(ScoreDT[0,c("Iteration",ParamNames), with = F])
-  BestPars <- data.table( Iteration = Iter
-                       , ScoreDT[which.max(Score),c(ParamNames,"Score",extraRet),with = F]
+  BestPars <- data.table( "Iteration" = Iter
+                       , ScoreDT[which.max(get("Score")),c(ParamNames,"Score",extraRet),with = F]
                        , elapsedSecs = round(difftime(Time,StartT,units = "secs"),0)
                        )
-
 
   # Start the iterative GP udpates
   while(nrow(ScoreDT) < nIters){
@@ -276,29 +288,26 @@ BayesianOptimization <- function(
         acq <- stopImpatient$newAcq
       }
 
-
     # Fit GP
-    newD <- ScoreDT[Iteration == Iter-1,]
+    newD <- ScoreDT[get("Iteration") == Iter-1,]
     if (verbose > 0) cat("\n  1) Fitting Gaussian process...")
     GP <- updateGP( GP = GP
                   , kern = kern
-                  , X = matrix(sapply(ParamNames, MinMaxScale, newD, bounds), nrow = nrow(newD))
-                  , Z = matrix(as.matrix(newD[,.(Score/scaleList$score,Elapsed/scaleList$elapsed)]), nrow = nrow(newD))
+                  , X = matrix(sapply(ParamNames, MinMaxScale, newD, boundsDT), nrow = nrow(newD))
+                  , Z = matrix(as.matrix(newD[,.(get("Score")/scaleList$score,Elapsed/scaleList$elapsed)]), nrow = nrow(newD))
                   , acq = acq
                   , scaleList = scaleList
                   , parallel = parallel)
-
-
 
     # Store GP in list
     GPlist[[Iter]] <- GP
 
     # Create random points to initialize local maximum search.
-    LocalTries <- data.table(sapply(ParamNames,RandParams,gsPoints,bounds))
-    LocalTryMM <- data.table(sapply(ParamNames,MinMaxScale,LocalTries,bounds))
+    LocalTries <- data.table(sapply(ParamNames,RandParams,gsPoints,boundsDT))
+    LocalTryMM <- data.table(sapply(ParamNames,MinMaxScale,LocalTries,boundsDT))
 
     # Try gsPoints starting points to find parameter set that optimizes Acq
-    if (verbose > 0) cat("\n  2) Running global optimum search...")
+    if (verbose > 0) cat("\n  2) Running local optimum search...")
     LocalOptims <- maxAcq( GP = GP
                          , TryOver = LocalTryMM
                          , acq = acq
@@ -310,24 +319,21 @@ BayesianOptimization <- function(
                          , convThresh = convThresh
                          )
 
+    if (sum(LocalOptims$gradCount > 2) == 0) cat("\n  2a) WARNING - No initial points converged.\n      Process may just be sampling random points.\n      Try decreasing convThresh.")
 
-    # Extract the best GP_Utility, and then reverse scaling
-    NewP <- LocalOptims[order(-GP_Utility)]
-    NewPUMM <- data.table(sapply(ParamNames, UnMMScale, NewP, bounds))[rep(1,runNew)]
+    fromCluster <- applyCluster()
+    acqMaximums <- rbind(acqMaximums, data.table("Iteration" = Iter, fromCluster$clusterPoints))
+    newScorePars <- sapply(ParamNames, UnMMScale, fromCluster$newSet, boundsDT)
 
+    if (runNew < 2) {
+      newScorePars <- as.data.table(as.list(newScorePars))
+    } else{
+      newScorePars <- data.table(newScorePars)
+    }
 
-    # Save the best parameters for this Gaussian Process
-    OptParDT <- rbind(OptParDT, data.table(Iteration = Iter, NewPUMM[1,]))
-
-    # Add noise to optimal parameter set.
-    NoisyP <- sapply(ParamNames, ApplyNoise, Table = NewPUMM, bounds = bounds, saveFirst = TRUE, noiseAdd = noiseAdd)
-    if (runNew == 1) {NoisyP <- as.data.table(as.list(NoisyP))
-    } else NoisyP <- data.table(NoisyP)
-
-
-    if (verbose > 0) cat("\n  3) Running scoring function",nrow(NoisyP),"times in",Workers,"thread(s)...\n")
+    if (verbose > 0) cat("\n  3) Running scoring function",nrow(newScorePars),"times in",Workers,"thread(s)...\n")
     sink("NUL")
-    NewResults <- foreach( iter = 1:nrow(NoisyP)
+    NewResults <- foreach( iter = 1:nrow(newScorePars)
                          , .combine = rbind
                          , .multicombine = TRUE
                          , .inorder = FALSE
@@ -337,9 +343,9 @@ BayesianOptimization <- function(
                          , .export = export
                          ) %op% {
 
-            Params <- NoisyP[iter,]
+            Params <- newScorePars[get("iter"),]
             Elapsed <- system.time(Result <- do.call(what = FUN, args = as.list(Params)))
-            data.table(NoisyP[iter,], Elapsed = Elapsed[[3]], as.data.table(Result))
+            data.table(newScorePars[get("iter"),], Elapsed = Elapsed[[3]], as.data.table(Result))
 
             }
     sink()
@@ -354,22 +360,22 @@ BayesianOptimization <- function(
 
       if (max(NewResults$Score) > max(ScoreDT$Score)) {
         cat("\nNew best parameter set found:\n")
-        print(NewResults[which.max(Score),], row.names = FALSE)
+        print(NewResults[which.max(get("Score")),], row.names = FALSE)
       } else {
         cat("\nMaximum score was not raised this round. Best score is still:\n")
-        print(ScoreDT[which.max(Score),], row.names = FALSE)
+        print(ScoreDT[which.max(get("Score")),], row.names = FALSE)
       }
     }
 
     ScoreDT <- rbind(ScoreDT
-                    ,data.table(Iteration = rep(Iter,nrow(NewResults))
+                    ,data.table("Iteration" = rep(Iter,nrow(NewResults))
                                ,NewResults
                                )
                     )
     BestPars <- rbind(BestPars
-                     ,data.table( Iteration = Iter
-                               , ScoreDT[which.max(Score),c(ParamNames,"Score",extraRet),with = F]
-                               , elapsedSecs = round(difftime(Time,StartT,units = "secs"),0)
+                     ,data.table("Iteration" = Iter
+                               , ScoreDT[which.max(get("Score")),c(ParamNames,"Score",extraRet),with = F]
+                               , "elapsedSecs" = round(difftime(Time,StartT,units = "secs"),0)
                                )
                     )
 
@@ -390,7 +396,7 @@ BayesianOptimization <- function(
   RetList <- list()
   names(GPlist) <- paste0("GP_", 1:Iter)
   RetList$GPlist <- GPlist
-  RetList$OptParDT <- OptParDT
+  RetList$acqMaximums <- acqMaximums
   RetList$ScoreDT <- ScoreDT
   RetList$BestPars <- BestPars
 
@@ -398,4 +404,4 @@ BayesianOptimization <- function(
 
 
 }
-utils::globalVariables(c("iter","Iteration","Score",".","GauPro_kernel_beta","GauPro_kernel_model","GP_Utility"))
+utils::globalVariables(c("."))

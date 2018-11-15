@@ -12,7 +12,7 @@ assignKern(kern, beta)
 \item{beta}{the log10(theta) the lengthscale parameter}
 }
 \value{
-a data.table the same length as Table with un-scaled parameters
+an GauPro_kernel_beta R6 class
 }
 \description{
 This function exists so GauPro doesn't have to be loaded to run BayesianOptimization

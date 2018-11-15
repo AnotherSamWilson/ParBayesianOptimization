@@ -9,8 +9,8 @@ BayesianOptimization(FUN, bounds, saveIntermediate = NULL,
   initialize = TRUE, initGrid = NULL, initPoints = 0, bulkNew = 1,
   nIters = 0, kern = "Matern52", beta = 0, acq = "ucb",
   stopImpatient = list(newAcq = "ucb", rounds = Inf), kappa = 2.576,
-  eps = 0, gsPoints = 100, convThresh = 1e+07, noiseAdd = 0.25,
-  verbose = 1)
+  eps = 0, gsPoints = 100, convThresh = 1e+07,
+  minClusterUtility = NULL, noiseAdd = 0.25, verbose = 1)
 }
 \arguments{
 \item{FUN}{the function to be maximized. This function should return a named list with at least 1 component.
@@ -86,6 +86,10 @@ Increase this for a higher chance to find global optimum, at the expense of more
 \item{convThresh}{convergence threshold passed to \code{factr} when the \code{optim} function (L-BFGS-B) is called.
 Lower values will take longer to converge, but may be more accurate.}
 
+\item{minClusterUtility}{the minimum percentage of the optimal utility required for a less optimal local
+maximum to be included as a candidate parameter set in the next scoring function. If \code{NULL},
+only the global optimum will be used as a candidate parameter set.}
+
 \item{noiseAdd}{if bulkNew > 1, specifies how much noise to add to the optimal candidate parameter set
 to obtain the other \code{bulkNew-1} candidate parameter sets. New random draws are pulled from
 a shape(4,4) beta distribution centered at the optimal candidate parameter set
@@ -103,6 +107,66 @@ A list containing details about the process:
 }
 \description{
 Flexible Bayesian optimization of model hyperparameters.
+}
+\examples{
+\dontrun{
+library("xgboost")
+library("ParBayesianOptimization")
+
+data(agaricus.train, package = "xgboost")
+
+Folds <- list(  Fold1 = as.integer(seq(1,nrow(agaricus.train$data),by = 3))
+                , Fold2 = as.integer(seq(2,nrow(agaricus.train$data),by = 3))
+                , Fold3 = as.integer(seq(3,nrow(agaricus.train$data),by = 3)))
+
+scoringFunction <- function(max_depth, min_child_weight, subsample) {
+
+  dtrain <- xgb.DMatrix(agaricus.train$data,label = agaricus.train$label)
+
+  Pars <- list( booster = "gbtree"
+                , eta = 0.01
+                , max_depth = max_depth
+                , min_child_weight = min_child_weight
+                , subsample = subsample
+                , objective = "binary:logistic"
+                , eval_metric = "auc")
+
+  xgbcv <- xgb.cv(params = Pars,
+                  data = dtrain
+                  , nround = 100
+                  , folds = Folds
+                  , prediction = TRUE
+                  , showsd = TRUE
+                  , early_stopping_rounds = 5
+                  , maximize = TRUE
+                  , verbose = 0)
+
+  return(list(Score = max(xgbcv$evaluation_log$test_auc_mean)
+              , nrounds = xgbcv$best_iteration
+  )
+  )
+}
+
+
+bounds <- list( max_depth = c(2L, 10L)
+                , min_child_weight = c(1, 100)
+                , subsample = c(0.25, 1))
+
+kern <- "Matern52"
+
+acq <- "ei"
+
+ScoreResult <- BayesianOptimization(FUN = scoringFunction
+                                    , bounds = bounds
+                                    , initPoints = 10
+                                    , bulkNew = 1
+                                    , nIters = 12
+                                    , kern = kern
+                                    , acq = acq
+                                    , kappa = 2.576
+                                    , verbose = 1
+                                    , parallel = FALSE)
+}
 }
 \references{
 Jasper Snoek, Hugo Larochelle, Ryan P. Adams (2012) \emph{Practical Bayesian Optimization of Machine Learning Algorithms}
