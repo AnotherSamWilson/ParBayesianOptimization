@@ -320,7 +320,7 @@ BayesianOptimization <- function(
                          , convThresh = convThresh
                          )
 
-    if (sum(LocalOptims$gradCount > 2) == 0) stop("\n  2a) WARNING - No initial points converged.\n      Process may just be sampling random points.\n      Try decreasing convThresh.")
+    if (sum(LocalOptims$gradCount > 2) == 0) cat("\n  2a) WARNING - No initial points converged.\n      Process may just be sampling random points.\n      Try decreasing convThresh.")
 
     fromCluster <- applyCluster()
     acqMaximums <- rbind(acqMaximums, data.table("Iteration" = Iter, fromCluster$clusterPoints))
