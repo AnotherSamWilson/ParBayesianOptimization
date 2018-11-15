@@ -55,10 +55,19 @@ applyCluster <- function(e = parent.frame()) {
                       , scaled = TRUE
                       )
 
+      # Named vectors cannot be directly coerced to data.table
+      if (e$runNew-newPoints < 2) {
+        noisyP <- as.data.table(as.list(noisyP))
+      } else{
+        noisyP <- data.table(noisyP)
+      }
+
       if (nrow(fintersect(ScaleDT,data.table(noisyP))) == 0) {
         newSet <- rbind(clusterPoints[,(drop) := NULL],noisyP)
         break
       }
+
+      unique(rbind(ScaleDT,noisyP))
 
       tries <- tries + 1
 

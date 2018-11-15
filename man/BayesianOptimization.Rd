@@ -86,9 +86,10 @@ Increase this for a higher chance to find global optimum, at the expense of more
 \item{convThresh}{convergence threshold passed to \code{factr} when the \code{optim} function (L-BFGS-B) is called.
 Lower values will take longer to converge, but may be more accurate.}
 
-\item{minClusterUtility}{the minimum percentage of the optimal utility required for a less optimal local
-maximum to be included as a candidate parameter set in the next scoring function. If \code{NULL},
-only the global optimum will be used as a candidate parameter set.}
+\item{minClusterUtility}{number 0-1. Represents the minimum percentage of the optimal utility
+required for a less optimal local maximum to be included as a candidate parameter
+set in the next scoring function. If \code{NULL}, only the global optimum will be
+used as a candidate parameter set.}
 
 \item{noiseAdd}{if bulkNew > 1, specifies how much noise to add to the optimal candidate parameter set
 to obtain the other \code{bulkNew-1} candidate parameter sets. New random draws are pulled from

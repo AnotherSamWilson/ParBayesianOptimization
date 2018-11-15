@@ -191,7 +191,7 @@ BayesianOptimization <- function(
   if (!initialize & nrow(leftOff) == 0) stop("initialize cannot be FALSE if leftOff is not provided. Set initialize to TRUE and provide either initGrid or initPoints. You can provide leftOff AND initialize if you want.\n")
   if (initialize & nrow(initGrid) == 0 & initPoints <= 0) stop("initialize is TRUE but neither initGrid or initPoints were provided")
   if (initPoints > 0 & nrow(initGrid)>0) stop("initGrid and initPoints are specified, choose one.")
-  if (initPoints <= 0 & nrow(initGrid)==0) stop("neither initGrid or initPoints are specified, choose one or provide leftOff")
+  if (initPoints <= 0 & nrow(initGrid)==0 & nrow(leftOff) == 0) stop("neither initGrid or initPoints are specified, choose one or provide leftOff")
   if (parallel & (Workers == 1)) stop("parallel is set to TRUE but no back end is registered.\n")
   if (!parallel & Workers > 1 & verbose > 0) cat("parallel back end is registered, but parallel is set to false. Process will not be run in parallel.\n")
   if (nrow(initGrid)>0) {

@@ -40,9 +40,9 @@ library("ParBayesianOptimization")
 
 data(agaricus.train, package = "xgboost")
 
-Folds <- list(  Fold1 = as.integer(seq(1,nrow(agaricus.train$data),by = 3))
-                , Fold2 = as.integer(seq(2,nrow(agaricus.train$data),by = 3))
-                , Fold3 = as.integer(seq(3,nrow(agaricus.train$data),by = 3)))
+Folds <- list(Fold1 = as.integer(seq(1,nrow(agaricus.train$data),by = 3))
+            , Fold2 = as.integer(seq(2,nrow(agaricus.train$data),by = 3))
+            , Fold3 = as.integer(seq(3,nrow(agaricus.train$data),by = 3)))
 ```
 
 Now we need to define the scoring function. This function should, at a minimum, return a list with a ```Score``` element, which is the model evaluation metric we want to maximize. We can also retain other pieces of information created by the scoring function by including them as named elements of the returned list. In this case, we want to retain the optimal number of rounds determined by the ```xgb.cv```:
@@ -53,24 +53,24 @@ scoringFunction <- function(max_depth, min_child_weight, subsample) {
   dtrain <- xgb.DMatrix(agaricus.train$data,label = agaricus.train$label)
   
   Pars <- list( booster = "gbtree"
-                , eta = 0.01
-                , max_depth = max_depth
-                , min_child_weight = min_child_weight
-                , subsample = subsample
-                , objective = "binary:logistic"
-                , eval_metric = "auc")
+              , eta = 0.01
+              , max_depth = max_depth
+              , min_child_weight = min_child_weight
+              , subsample = subsample
+              , objective = "binary:logistic"
+              , eval_metric = "auc")
 
-  xgbcv <- xgb.cv(params = Pars,
-                  data = dtrain
-                  , nround = 100
-                  , folds = Folds
-                  , prediction = TRUE
-                  , showsd = TRUE
-                  , early_stopping_rounds = 5
-                  , maximize = TRUE
-                  , verbose = 0)
+  xgbcv <- xgb.cv(params = Pars
+                , data = dtrain
+                , nround = 100
+                , folds = Folds
+                , prediction = TRUE
+                , showsd = TRUE
+                , early_stopping_rounds = 5
+                , maximize = TRUE
+                , verbose = 0)
 
-  return(list(Score = max(xgbcv$evaluation_log$test_auc_mean)
+  return(list( Score = max(xgbcv$evaluation_log$test_auc_mean)
              , nrounds = xgbcv$best_iteration
              )
          )
@@ -86,7 +86,7 @@ Some other objects we need to define are the bounds, GP kernel and acquisition f
 
 ```{r eval = TRUE}
 bounds <- list( max_depth = c(2L, 10L)
-              , min_child_weight = c(1L, 100L)
+              , min_child_weight = c(1, 100)
               , subsample = c(0.25, 1))
 
 kern <- "Matern52"

@@ -58,7 +58,7 @@ scoringFunction <- function(max_depth, min_child_weight, subsample) {
 }
 
 bounds <- list( max_depth = c(2L, 10L)
-              , min_child_weight = c(1L, 100L)
+              , min_child_weight = c(1, 100)
               , subsample = c(0.25, 1))
 
 kern <- "Matern52"
@@ -131,33 +131,25 @@ When a leftOff table is provided, depending on how the experiment is set up, one
 Keep in mind, if you change your bounds, you will need to delete any rows from your leftOff table that fall outside the bounds.
 
 ********
-### Adjusting the noiseAdd parameter
+### Adjusting noiseAdd and minClusterUtility
 
-Once we have extracted the next expected optimal parameter set from the Gaussian process, we have several decisions to make. We can run 1 new scoringFunction at the new parameter, or we can run the scoring function n times in parallel at n different parameter sets. If we run several scoringFunctions in parallel, we need to decide where the other n-1 parameter sets come from. For the sake of decreasing uncertainty around the estimated optimal parameter, this process pulls the other n-1 parameter sets from a shape(4,4) beta distribution centered at the estimated optimal parameter.
+If we want to run n scoring functions in parallel, an important decision we need to make is how to choose the next n parameter candidate sets. One logical choice is the parameter set which maximizes our acquisition function. However, we still need to decide on the other n-1 sets. There are two good choices:
 
-As an example, let's say our min_child_weight is bounded between [0,10] and the Gaussian process says that our acquisition function is maximized at min_child_weight = 6. We can control how the process randomly samples around this point by using the noiseAdd parameter, which tells the process the percentage of the range specified by ```bounds``` to sample:
+  1. Add noise to the global optimum to sample nearby points.
+  2. Determine if there are other local optimums which may be nearly as good
+  
+This package allows you to do both. Using the ```minClusterUtility``` parameter, you can specify the minimum percentage utility of the global optimum required for a different local optimum to be considered. As an example, let's say we are optimizing 1 hyperparameter ```min_child_weight```, which is bounded between [0,10]. Our acquisition function may look like the following:
 
 ```{r eval = TRUE, echo=FALSE}
-library(ggplot2)
+knitr::include_graphics("Optimums.png")
+```
 
-y1 <- function(x) {
-  (x-7)^3*(5-(x))^3/15
-}
+In this case, we may want to run our scoring function on both the global and local maximum. If ```minClusterUtility``` is set to be at least 1.83/2.14 ~ 0.855, the process would use both the local and global maximums as candidate parameter sets in the next round.
 
-y2 <- function(x) {
-  (x-8)^3*(4-(x))^3/1700
-}
+However, this doesn't fully solve our problem. In the example above, we had 2 local maximums, but what if we want to run 10 instances of our scoring function in parallel? We would need to come up with 8 other sets of parameters. For the sake of decreasing uncertainty around the most promising parameter sets, this process samples from a shape(4,4) beta distribution centered at the estimated optimal parameters. In the example above, our acquisition function was maximized at ```min_child_weight = 4```. The figure below shows the effect that adjusting the ```noiseAdd``` parameter has on how we draw the other 8 candidate parameter sets:
 
-ggplot(data.frame(x=c(0,10)), aes(x)) +
-  stat_function(fun = y1, geom = "line", aes(colour = "red"), xlim = c(5,7)) +
-  stat_function(fun = y2, geom = "line", aes(colour = "blue"), xlim = c(4,8)) +
-  scale_x_continuous(name = "min_child_weight", breaks = seq(0,10,1), limits = c(0,10)) +
-  scale_y_continuous(limits=c(0,0.075)) +
-  scale_color_discrete(name = "noiseAdd", labels = c("0.4", "0.2")) +
-  ylab("Density") +
-  ggtitle("Distributions Sampled for Different noiseAdd Values") +
-  theme(plot.margin=unit(c(0.5,1,0.5,0.5),"cm"))
-
+```{r eval = TRUE, echo=FALSE}
+knitr::include_graphics("Distributions.png")
 ```
 
 
