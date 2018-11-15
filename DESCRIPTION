@@ -6,7 +6,7 @@ Description: Fast, flexible framework for implementing Bayesian optimization of 
 	hyperparameters according to the methods described in Snoek et al. <arXiv:1206.2944>.
 	The package allows the user to run scoring function in parallel, save intermediary 
 	results, and tweak other aspects of the process to fully utilize the computing resources
-	available to the user.	
+	available to the user.
 URL: https://github.com/AnotherSamWilson/ParBayesianOptimization
 BugReports: https://github.com/AnotherSamWilson/ParBayesianOptimization/issues
 Depends: R (>= 3.5.0), data.table (>= 1.11.8), GauPro, stats, foreach, dbscan
