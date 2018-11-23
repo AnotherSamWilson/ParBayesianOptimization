@@ -7,7 +7,6 @@
 #' @importFrom dbscan dbscan
 #' @importFrom data.table fintersect
 #' @return the number of values that are outside the bounds/
-#' @export
 
 applyCluster <- function(e = parent.frame()) {
 
@@ -21,7 +20,7 @@ applyCluster <- function(e = parent.frame()) {
 
   } else{
 
-    Clust <- dbscan(Lo2,eps = length(Lo2)*sqrt(2)/e$convThresh, minPts = 1)
+    Clust <- dbscan(Lo2,eps = length(Lo2)*sqrt(2)/1e3, minPts = 1)
 
     Lo2[,"Cluster" := Clust$cluster]
     clusterPoints <- copy(Lo2[Lo2[,.I[which.max(get("GP_Utility"))], by = get("Cluster")]$V1])

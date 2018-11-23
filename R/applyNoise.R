@@ -10,7 +10,6 @@
 #' @importFrom stats rbeta
 #' @return a data.table with the same number of rows as \code{table} with noise added
 #' @keywords internal
-#' @export
 #'
 applyNoise <- function( x
                       , table
@@ -36,4 +35,3 @@ applyNoise <- function( x
   return(Vec)
 
 }
-

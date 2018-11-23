@@ -16,7 +16,6 @@
 #' @importFrom data.table as.data.table
 #' @import foreach
 #' @keywords internal
-#' @export
 
 maxAcq <- function(GP, TryOver, acq = "ucb", y_max, kappa, eps, parallel, ParMethod, convThresh) {
 

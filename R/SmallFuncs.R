@@ -14,7 +14,6 @@
 #' @param bounds the bounds list
 #' @importFrom data.table between
 #' @return the number of values that are outside the bounds/
-#' @export
 CheckBounds <- function(x, Table, bounds) sum(!between(Table[[x]], lower = bounds[[x]][[1]], upper = bounds[[x]][[2]]))
 
 
@@ -29,7 +28,6 @@ CheckBounds <- function(x, Table, bounds) sum(!between(Table[[x]], lower = bound
 #' @importFrom stats runif
 #' @return a data.table of random parameters
 #' @keywords internal
-#' @export
 RandParams <- function(x, Rpoints, boundsDT) {
 
   B <- boundsDT[get("N") == x,]
@@ -55,7 +53,6 @@ RandParams <- function(x, Rpoints, boundsDT) {
 #' @param bounds the original bounds list
 #' @return a data.table the same length as \code{table} with scaled parameters
 #' @keywords internal
-#' @export
 MinMaxScale <- function(x, table, boundsDT) {
   B <- boundsDT[get("N") == x,]
   (table[[x]]-B$L) / (B$U-B$L)
@@ -72,7 +69,6 @@ MinMaxScale <- function(x, table, boundsDT) {
 #' @param bounds the original bounds list
 #' @return a data.table the same length as \code{table} with un-scaled parameters
 #' @keywords internal
-#' @export
 UnMMScale <- function(x, table, boundsDT) {
   B <- boundsDT[get("N") == x,]
 
@@ -91,7 +87,6 @@ UnMMScale <- function(x, table, boundsDT) {
 #' @param beta the log10(theta) the lengthscale parameter
 #' @return an GauPro_kernel_beta R6 class
 #' @keywords internal
-#' @export
 assignKern <- function(kern,beta) {
 
   if(kern == "Matern32"){kern <- Matern32$new(beta)

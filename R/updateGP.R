@@ -10,7 +10,6 @@
 #' @param scaleList list of scaling parameters for the responses
 #' @return A data table of local optimums.
 #' @keywords internal
-#' @export
 
 updateGP <- function(GP, kern, X, Z, acq, scaleList, parallel) {
 

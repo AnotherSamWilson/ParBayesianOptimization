@@ -12,7 +12,6 @@
 #' @importFrom stats dnorm pnorm
 #' @return The acquisition function value.
 #' @keywords internal
-#' @export
 
 calcAcq <- function(Params, GP, acq, y_max, kappa, eps) {
   # Utility Function Type
