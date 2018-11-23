@@ -28,10 +28,10 @@ Idealy, we would use the information from prior model evaluations to guide us in
 4.  New parameter-score pairs are found
 5.  Repeat steps 2-4 until some stopping criteria is met
 
-Graphical Intuition
--------------------
+Bayesian Optimization Intuition
+-------------------------------
 
-As an example, let's say we are only tuning 1 hyperparameter in an xgboost model, min\_child weight in (0,1). We have initialized the process by randomly sampling the scoring function 6 times, and get the following results:
+As an example, let's say we are only tuning 1 hyperparameter in an xgboost model, min\_child weight within the bounds \[0,1\]. We have initialized the process by randomly sampling the scoring function 6 times, and get the following results:
 
 |  min\_child\_weight|      Score|
 |-------------------:|----------:|
@@ -155,24 +155,24 @@ The console informs us that the process initialized by running `scoringFunction`
 ``` r
 ScoreResult$ScoreDT
 #>     Iteration max_depth min_child_weight subsample Elapsed     Score nrounds
-#>  1:         0         3               21 0.4527621    0.37 0.9947540      10
-#>  2:         0         4               63 0.6965777    0.21 0.9782343       1
-#>  3:         0         3               45 0.9528065    0.27 0.9874717       3
-#>  4:         0         2               54 0.8177109    0.30 0.9869460       8
-#>  5:         0        10               20 0.7861882    2.53 0.9991937      97
-#>  6:         0        10               12 0.2594141    0.72 0.9962943      16
-#>  7:         0        10                6 0.4839067    0.57 0.9991430       9
-#>  8:         0         7               58 0.5443817    0.18 0.9779723       1
-#>  9:         0        10               22 0.5056945    1.79 0.9970410      52
-#> 10:         0        10               27 0.6718752    0.39 0.9943417       6
-#> 11:         1        10                1 0.9089677    0.28 0.9984757       1
-#> 12:         2        10                1 0.6652759    0.43 0.9986620       5
+#>  1:         0        10               18 0.7882644    1.27 0.9986003      37
+#>  2:         0         3               67 0.8582202    0.34 0.9846677       6
+#>  3:         0         7               86 0.7967788    0.18 0.9779723       1
+#>  4:         0         6                9 0.7329761    0.48 0.9984480       6
+#>  5:         0         3               99 0.7115102    0.21 0.9782927       2
+#>  6:         0         6               21 0.6472898    0.82 0.9971340      18
+#>  7:         0        10               26 0.7480464    0.36 0.9945603       5
+#>  8:         0        10               73 0.7836358    0.18 0.9779723       1
+#>  9:         0         8               96 0.5279121    0.44 0.9768317      13
+#> 10:         0         2                6 0.7806679    0.48 0.9906920      18
+#> 11:         1         9                1 0.6982218    0.30 0.9984757       1
+#> 12:         2         9                1 0.8002098    0.23 0.9984757       2
 ```
 
 ``` r
 ScoreResult$BestPars
 #>    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs
-#> 1:         0        10               20 0.7861882 0.9991937      97      8 secs
-#> 2:         1        10               20 0.7861882 0.9991937      97     18 secs
-#> 3:         2        10               20 0.7861882 0.9991937      97     28 secs
+#> 1:         0        10               18 0.7882644 0.9986003      37      6 secs
+#> 2:         1        10               18 0.7882644 0.9986003      37     14 secs
+#> 3:         2        10               18 0.7882644 0.9986003      37     21 secs
 ```
