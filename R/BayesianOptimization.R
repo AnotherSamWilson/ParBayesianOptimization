@@ -24,7 +24,7 @@
 #' @param export character vector of object names needed to evaluate \code{FUN}.
 #' @param packages character vector of the packages needed to run \code{FUN}.
 #' @param initialize should the process initialize a parameter-Score pair set? If \code{FALSE}, \code{leftOff} must be provided.
-#' @param initGrid user specified points to sample the target function, should
+#' @param initGrid user specified points to sample the scoring function, should
 #'   be a \code{data.frame} or \code{data.table} with identical column names as bounds.
 #' @param initPoints number of randomly chosen points to sample the
 #'   scoring function before Bayesian Optimization fitting the Gaussian Process.
@@ -48,9 +48,10 @@
 #' }
 #' @param stopImpatient a list containing \code{rounds} and \code{newAcq}, if \code{acq = "eips"} you
 #'   can switch the acquisition function to \code{newAcq} after \code{rounds} parameter-score pairs are found.
-#' @param kappa tunable parameter kappa of GP Upper Confidence Bound, to balance exploitation against exploration,
-#'   increasing kappa will incentivise exploration.
-#' @param eps tunable parameter epsilon of ei, eips and poi. Balances exploitation against exploration.
+#' @param kappa tunable parameter kappa of the upper confidence bound. Tunes exploitation/exploration.
+#'   Increasing kappa will increase the importance that variance (unexplored space) has, therefore
+#'   incentivising exploration.
+#' @param eps tunable parameter epsilon of ei, eips and poi. Tunes exploitation/exploration.
 #'   Increasing eps will make the "improvement" threshold higher.
 #' @param gsPoints integer that specifies how many initial points to try when searching for the optimal parameter set.
 #'   Increase this for a higher chance to find global optimum, at the expense of more time.
@@ -183,6 +184,7 @@ BayesianOptimization <- function(
   StartT <- Sys.time()
 
   # Set counters and other helper objects
+  mco <- list(preschedule=FALSE)
   ParamNames <- names(bounds)
   packages <- unique(c('data.table',packages))
   setDT(initGrid)
@@ -235,6 +237,7 @@ BayesianOptimization <- function(
       if (verbose > 0) cat("\nRunning initial scoring function",nrow(InitFeedParams),"times in",Workers,"thread(s).\n")
       sink("NUL")
       ScoreDT <- foreach( iter = 1:nrow(InitFeedParams)
+                        , .options.multicore = mco
                         , .combine = rbind
                         , .multicombine = TRUE
                         , .inorder = FALSE
@@ -353,6 +356,7 @@ BayesianOptimization <- function(
     if (verbose > 0) cat("\n  3) Running scoring function",nrow(newScorePars),"times in",Workers,"thread(s)...\n")
     sink("NUL")
     NewResults <- foreach( iter = 1:nrow(newScorePars)
+                         , .options.multicore = mco
                          , .combine = rbind
                          , .multicombine = TRUE
                          , .inorder = FALSE
