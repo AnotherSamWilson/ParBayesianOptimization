@@ -12,7 +12,7 @@
 
 <meta name="author" content="Samuel Wilson" />
 
-<meta name="date" content="2018-11-15" />
+<meta name="date" content="2019-02-25" />
 
 <title>Introduction to ParBayesianOptimization</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Introduction to ParBayesianOptimization</h1>
 <h4 class="author"><em>Samuel Wilson</em></h4>
-<h4 class="date"><em>2018-11-15</em></h4>
+<h4 class="date"><em>2019-02-25</em></h4>
 
 
 
@@ -156,7 +156,6 @@ acq &lt;-<span class="st"> &quot;ei&quot;</span></code></pre></div>
                                   , <span class="dt">kern =</span> kern
                                   , <span class="dt">acq =</span> acq
                                   , <span class="dt">kappa =</span> <span class="fl">2.576</span>
-                                  , <span class="dt">gsPoints =</span> <span class="dv">200</span>
                                   , <span class="dt">verbose =</span> <span class="dv">1</span>
                                   , <span class="dt">parallel =</span> <span class="ot">FALSE</span>)
 <span class="co">#&gt; </span>
@@ -174,23 +173,23 @@ acq &lt;-<span class="st"> &quot;ei&quot;</span></code></pre></div>
 <p>The console informs us that the process initialized by running <code>scoringFunction</code> 10 times. It then fit a Gaussian process to the parameter-score pairs, found the global optimum of the acquisition function, and ran <code>scoringFunction</code> again. This process continued until we had 12 parameter-score pairs. You can interrogate the <code>ScoreResult</code> object to see the results:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ScoreResult<span class="op">$</span>ScoreDT
 <span class="co">#&gt;     Iteration max_depth min_child_weight subsample Elapsed     Score nrounds</span>
-<span class="co">#&gt;  1:         0         7        69.779582 0.7336753    0.14 0.9779723       1</span>
-<span class="co">#&gt;  2:         0         9        55.269856 0.6517663    0.31 0.9835217       8</span>
-<span class="co">#&gt;  3:         0         9        27.557603 0.4428883    0.52 0.9928417      20</span>
-<span class="co">#&gt;  4:         0         3        20.788160 0.3791343    0.13 0.9892793       1</span>
-<span class="co">#&gt;  5:         0         8        48.962160 0.7818707    0.19 0.9881603       3</span>
-<span class="co">#&gt;  6:         0         8        57.418718 0.9439246    0.28 0.9881503       7</span>
-<span class="co">#&gt;  7:         0         5        38.560753 0.6203772    0.23 0.9897887       5</span>
-<span class="co">#&gt;  8:         0         9        24.774254 0.9070661    0.66 0.9968733      20</span>
-<span class="co">#&gt;  9:         0        10        57.906844 0.8786701    0.22 0.9877853       4</span>
-<span class="co">#&gt; 10:         0         9         7.184887 0.6849947    1.58 0.9997660      55</span>
-<span class="co">#&gt; 11:         1         5         1.000000 1.0000000    0.20 0.9970903       1</span>
-<span class="co">#&gt; 12:         2         8         1.000000 0.6734338    0.22 0.9984757       1</span></code></pre></div>
+<span class="co">#&gt;  1:         0         3         88.65888 0.6623601    0.26 0.9798713       7</span>
+<span class="co">#&gt;  2:         0         2         31.55358 0.7719899    0.18 0.9857990       4</span>
+<span class="co">#&gt;  3:         0         5         57.70384 0.7619098    0.23 0.9867847       5</span>
+<span class="co">#&gt;  4:         0        10         79.70718 0.6683172    0.14 0.9779723       1</span>
+<span class="co">#&gt;  5:         0         8         94.82892 0.6042736    0.42 0.9788503      20</span>
+<span class="co">#&gt;  6:         0         4         18.83014 0.3648694    0.79 0.9964300      38</span>
+<span class="co">#&gt;  7:         0         8         37.56893 0.4993864    0.48 0.9899477      18</span>
+<span class="co">#&gt;  8:         0         5         31.75624 0.7588633    0.23 0.9934477       3</span>
+<span class="co">#&gt;  9:         0         4         28.44487 0.9674808    1.69 0.9988797      61</span>
+<span class="co">#&gt; 10:         0         2         74.43830 0.6166652    0.09 0.9779723       1</span>
+<span class="co">#&gt; 11:         1         5          1.00000 1.0000000    0.18 0.9970903       1</span>
+<span class="co">#&gt; 12:         2         5         24.11644 1.0000000    1.96 0.9990043      87</span></code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ScoreResult<span class="op">$</span>BestPars
-<span class="co">#&gt;    Iteration max_depth min_child_weight subsample    Score nrounds elapsedSecs</span>
-<span class="co">#&gt; 1:         0         9         7.184887 0.6849947 0.999766      55      5 secs</span>
-<span class="co">#&gt; 2:         1         9         7.184887 0.6849947 0.999766      55     12 secs</span>
-<span class="co">#&gt; 3:         2         9         7.184887 0.6849947 0.999766      55     31 secs</span></code></pre></div>
+<span class="co">#&gt;    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs</span>
+<span class="co">#&gt; 1:         0         4         28.44487 0.9674808 0.9988797      61      6 secs</span>
+<span class="co">#&gt; 2:         1         4         28.44487 0.9674808 0.9988797      61     15 secs</span>
+<span class="co">#&gt; 3:         2         5         24.11644 1.0000000 0.9990043      87     27 secs</span></code></pre></div>
 </div>
 
 

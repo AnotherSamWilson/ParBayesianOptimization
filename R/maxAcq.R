@@ -52,8 +52,6 @@ maxAcq <- function(GP, TryOver, acq = "ucb", y_max, kappa, eps, parallel, ParMet
                            )
                           )
                   )
-
-
   }
 }
 utils::globalVariables(c("i"))

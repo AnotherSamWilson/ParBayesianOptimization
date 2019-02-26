@@ -20,16 +20,19 @@ applyNoise <- function( x
   B <- boundsDT[get("N") == x,]
 
   if (scaled) {
+    
     Range <- 1
     B$L <- 0
     B$U <- 1
+    
   } else {
+    
     Range <-B$U - B$L
+    
   }
 
   betas <- (rbeta(nrow(table), shape1 = 4,shape2 = 4)-0.5)
   Vec <- betas*noiseAdd*Range+table[[x]]
-
   Vec <- pmin(pmax(Vec,B$L),B$U)
 
   return(Vec)

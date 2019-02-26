@@ -76,7 +76,7 @@ export <- c('Folds','agaricus.train')
 
 We are now ready to start our parameter search. If you want to make full use of your core cluster, bulkNew should be set to be the same as the number of registered cores. Once again, we can interrogate ```ScoreResults$BestPar``` to see the best parameters as of each iteration:
 
-```{r eval = FALSE, echo=TRUE}
+```{r eval = TRUE, echo=TRUE}
 cl <- makeCluster(2)
 registerDoParallel(cl)
 ScoreResult <- BayesianOptimization(FUN = scoringFunction

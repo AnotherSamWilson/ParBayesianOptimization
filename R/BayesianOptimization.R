@@ -198,14 +198,14 @@ BayesianOptimization <- function(
                         , C = sapply(bounds, function(x) class(x))
   )
 
-
-
+  
   # Define processing function
   ParMethod <- function(x) if(x) {`%dopar%`} else {`%do%`}
   `%op%` <- ParMethod(parallel)
   Workers <- getDoParWorkers()
 
-  # Ensure environment fidelity
+  
+  # Better to quit gracefully than not
   if (sum(acq == c("ucb","ei","eips","poi")) == 0) stop("Acquisition function not recognized")
   if (sum(stopImpatient$newAcq == c("ucb","ei","eips","poi")) == 0) stop("New acquisition function not recognized")
   if (!initialize & nrow(leftOff) == 0) stop("initialize cannot be FALSE if leftOff is not provided. Set initialize to TRUE and provide either initGrid or initPoints. You can provide leftOff AND initialize if you want.\n")
@@ -224,7 +224,8 @@ BayesianOptimization <- function(
   if (verbose > 0 & bulkNew < Workers & parallel) cat("bulkNew is less than the threads registered on the parallel back end - process may not utilize all workers.\n")
 
 
-  # If an initGrid was specified, make that the initial process fit. If not, create one with initPoints combinations.
+  # If an initGrid was specified, make that the initial process fit. 
+  # If not, create one with initPoints combinations.
   # If leftOff was specified, append to the initialized table (if applicable)
   if (initialize){
 
@@ -290,9 +291,9 @@ BayesianOptimization <- function(
   scaleList <- list(score = max(abs(ScoreDT$Score)), elapsed = max(ScoreDT$Elapsed))
   GP <- NULL
   BestPars <- data.table( "Iteration" = Iter
-                       , ScoreDT[which.max(get("Score")),c(ParamNames,"Score",extraRet),with = F]
-                       , elapsedSecs = round(difftime(Time,StartT,units = "secs"),0)
-                       )
+                        , ScoreDT[which.max(get("Score")),c(ParamNames,"Score",extraRet),with = F]
+                        , elapsedSecs = round(difftime(Time,StartT,units = "secs"),0)
+                        )
 
   # Start the iterative GP udpates
   while(nrow(ScoreDT) < nIters){
@@ -318,8 +319,7 @@ BayesianOptimization <- function(
                   , X = matrix(sapply(ParamNames, MinMaxScale, newD, boundsDT), nrow = nrow(newD))
                   , Z = matrix(as.matrix(newD[,.(get("Score")/scaleList$score,Elapsed/scaleList$elapsed)]), nrow = nrow(newD))
                   , acq = acq
-                  , scaleList = scaleList
-                  , parallel = parallel)
+                  , scaleList = scaleList)
 
     # Store GP in list
     GPlist[[Iter]] <- GP

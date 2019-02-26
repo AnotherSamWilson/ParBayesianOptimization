@@ -4,7 +4,7 @@
 \alias{updateGP}
 \title{Update Gaussian Process}
 \usage{
-updateGP(GP, kern, X, Z, acq, scaleList, parallel)
+updateGP(GP, kern, X, Z, acq, scaleList)
 }
 \arguments{
 \item{GP}{an object of class gp or list}

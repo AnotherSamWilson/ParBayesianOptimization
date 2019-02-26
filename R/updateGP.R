@@ -11,7 +11,7 @@
 #' @return A data table of local optimums.
 #' @keywords internal
 
-updateGP <- function(GP, kern, X, Z, acq, scaleList, parallel) {
+updateGP <- function(GP, kern, X, Z, acq, scaleList) {
 
 
   if (is.null(GP)) {
@@ -21,13 +21,13 @@ updateGP <- function(GP, kern, X, Z, acq, scaleList, parallel) {
       GPs <- GauPro_kernel_model$new(X
                                    , Z[,1]
                                    , kernel = kern
-                                   , parallel = parallel
+                                   , parallel = FALSE
                                    , useC = FALSE)
 
       GPe <- GauPro_kernel_model$new(X
                                    , Z[,2]
                                    , kernel = kern
-                                   , parallel = parallel
+                                   , parallel = FALSE
                                    , useC = FALSE)
 
       GP <- list(GPs,GPe)
@@ -37,7 +37,7 @@ updateGP <- function(GP, kern, X, Z, acq, scaleList, parallel) {
       GP <- GauPro_kernel_model$new(X
                                   , Z[,1]
                                   , kernel = kern
-                                  , parallel = parallel
+                                  , parallel = FALSE
                                   , useC = FALSE)
 
     }

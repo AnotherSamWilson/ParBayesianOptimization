@@ -14,7 +14,11 @@
 #' @param bounds the bounds list
 #' @importFrom data.table between
 #' @return the number of values that are outside the bounds/
-CheckBounds <- function(x, Table, bounds) sum(!between(Table[[x]], lower = bounds[[x]][[1]], upper = bounds[[x]][[2]]))
+CheckBounds <- function(x, Table, bounds) {
+ 
+   sum(!between(Table[[x]], lower = bounds[[x]][[1]], upper = bounds[[x]][[2]]))
+
+}
 
 
 #' @title Generate Random Parameters
@@ -54,8 +58,10 @@ RandParams <- function(x, Rpoints, boundsDT) {
 #' @return a data.table the same length as \code{table} with scaled parameters
 #' @keywords internal
 MinMaxScale <- function(x, table, boundsDT) {
+  
   B <- boundsDT[get("N") == x,]
   (table[[x]]-B$L) / (B$U-B$L)
+  
 }
 
 
@@ -70,11 +76,15 @@ MinMaxScale <- function(x, table, boundsDT) {
 #' @return a data.table the same length as \code{table} with un-scaled parameters
 #' @keywords internal
 UnMMScale <- function(x, table, boundsDT) {
+  
   B <- boundsDT[get("N") == x,]
 
   if (B$C == "integer") {
+    
     return(round((B$U-B$L)*table[[x]]+B$L,0))
+    
   } else  return((B$U-B$L)*table[[x]]+B$L)
+  
 }
 
 
