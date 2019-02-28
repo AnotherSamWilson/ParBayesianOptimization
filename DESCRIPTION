@@ -9,11 +9,12 @@ Description: Fast, flexible framework for implementing Bayesian optimization of 
 	available to the user.
 URL: https://github.com/AnotherSamWilson/ParBayesianOptimization
 BugReports: https://github.com/AnotherSamWilson/ParBayesianOptimization/issues
-Depends: R (>= 3.4), data.table (>= 1.11.8), GauPro, stats, foreach, dbscan
+Depends: R (>= 3.4)
+Imports: data.table (>= 1.11.8), GauPro, stats, foreach, dbscan
+Suggests: knitr,rmarkdown,xgboost,doParallel,ggplot2
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
-Suggests: knitr,rmarkdown,xgboost,doParallel,ggplot2
 VignetteBuilder: knitr
 Maintainer: Samuel Wilson <samwilson303@gmail.com>
