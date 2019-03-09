@@ -102,7 +102,8 @@ If 1, progress will be printed. If 2, progress and information about new paramet
 }
 \value{
 A list containing details about the process:
-\item{GPlist}{The list of the gaussian process objects that were fit.}
+\item{GPs}{The last Gaussian Process run on the parameter-score pairs}
+\item{GPe}{If \code{acq = "eips"}, this contains the last Gaussian Process run on the parameter-elapsed time pairs}
 \item{acqMaximums}{The optimal parameters according to each gaussian process}
 \item{ScoreDT}{A list of all parameter-score pairs, as well as extra columns from FUN}
 \item{BestPars}{The best parameter set at each iteration}

@@ -4,14 +4,14 @@
 \alias{applyNoise}
 \title{Apply Noise}
 \usage{
-applyNoise(x, table, boundsDT, noiseAdd, scaled = FALSE)
+applyNoise(tabl, boundsDT, noiseAdd)
 }
 \arguments{
-\item{x}{Parameter Name}
-
-\item{table}{A data.table of parameters to add noise to}
+\item{tabl}{A data.table of parameters to add noise to}
 
 \item{noiseAdd}{Fraction of the range of the bounds that samples will be pulled from}
+
+\item{x}{Parameter Name}
 
 \item{bounds}{the original bounds list}
 }

@@ -4,37 +4,47 @@
 #' Adds noise to a list of parameter sets
 #'
 #' @param x Parameter Name
-#' @param table A data.table of parameters to add noise to
+#' @param tabl A data.table of parameters to add noise to
 #' @param bounds the original bounds list
 #' @param noiseAdd Fraction of the range of the bounds that samples will be pulled from
 #' @importFrom stats rbeta
 #' @return a data.table with the same number of rows as \code{table} with noise added
 #' @keywords internal
-#'
-applyNoise <- function( x
-                      , table
+
+applyNoise <- function( tabl
                       , boundsDT
-                      , noiseAdd
-                      , scaled = FALSE) {
+                      , noiseAdd) {
+  
+  # Try 100 times to get unique values by adding noise.
+  tries <- 1
 
-  B <- boundsDT[get("N") == x,]
+  while(tries <= 100) {
+    
+    noiseList <- lapply(boundsDT$N, function(x) {
+      
+      B <- boundsDT[get("N") == x,]
+      betas <- (rbeta(nrow(tabl), shape1 = 4,shape2 = 4)-0.5)
+      Vec <- betas*noiseAdd*B$R+tabl[[x]]
+      Vec <- pmin(pmax(Vec,B$L),B$U)
+      
+      if (B$C == "integer") Vec <- round(Vec)
+      
+      return(Vec)
+      
+    })
+    
+    setDT(noiseList)
+    
+    if (uniqueN(noiseList) == nrow(noiseList)) break
+    
+    if (tries >= 100) stop("Could not apply noise to get enough random new parameter sets. Increase noiseAdd or decerase bulkNew.")
+    
+    tries <- tries + 1
 
-  if (scaled) {
-    
-    Range <- 1
-    B$L <- 0
-    B$U <- 1
-    
-  } else {
-    
-    Range <-B$U - B$L
-    
   }
-
-  betas <- (rbeta(nrow(table), shape1 = 4,shape2 = 4)-0.5)
-  Vec <- betas*noiseAdd*Range+table[[x]]
-  Vec <- pmin(pmax(Vec,B$L),B$U)
-
-  return(Vec)
+  
+  if(!identical(names(tabl),boundsDT$N)) noiseList <- cbind(noiseList, tabl[,-boundsDT$N, with = F])
+  setnames(noiseList, names(tabl))
+  return(noiseList)
 
 }

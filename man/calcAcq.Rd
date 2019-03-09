@@ -4,12 +4,14 @@
 \alias{calcAcq}
 \title{Calculate Acquisition Function}
 \usage{
-calcAcq(Params, GP, acq, y_max, kappa, eps)
+calcAcq(par, GPs, GPe, acq, y_max, kappa, eps)
 }
 \arguments{
-\item{Params}{Parameter set to predict}
+\item{par}{Parameter set to predict}
 
-\item{GP}{an object of class gp or gp.list}
+\item{GPs}{an object of class gp}
+
+\item{GPe}{an object of class gp}
 
 \item{acq}{Acquisition function type to be used}
 

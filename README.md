@@ -50,29 +50,29 @@ in the following process:
 ## Bayesian Optimization Intuition
 
 As an example, let’s say we are only tuning 1 hyperparameter in an
-xgboost model, min\_child weight within the bounds \[0,1\]. We have
-initialized the process by randomly sampling the scoring function 6
-times, and get the following results:
+random forest model, the number of trees, within the bounds \[1,5000\].
+We have initialized the process by randomly sampling the scoring
+function 7 times, and get the following results:
 
-| min\_child\_weight | Score |
-| -----------------: | ----: |
-|              0.628 | 0.713 |
-|              0.327 | 0.865 |
-|              0.748 | 0.681 |
-|              0.242 | 1.000 |
-|              0.072 | 0.130 |
-|              0.157 | 0.573 |
+| Trees.In.Forest | Score |
+| --------------: | ----: |
+|               1 |  2.00 |
+|             700 |  2.43 |
+|            1865 |  2.71 |
+|            2281 |  2.98 |
+|            2600 |  2.54 |
+|            3000 |  1.95 |
+|            4410 |  1.29 |
 
 In this example, Score can be generalized to any error metric that we
 want to *maximize* (negative RMSE, AUC, etc.). Given these scores, how
-do we go about determining the best min\_child\_weight to try next? As
-it turns out, Gaussian processes can give us a very good definition for
-our prior distribution. Fitting a Gaussian process to the data above
-(indexed by min\_child\_weight), we can see the expected value of Score
-accross our parameter bounds, as well as the uncertainty at different
-points:
+do we go about determining the best number of trees to try next? As it
+turns out, Gaussian processes can give us a very good definition for our
+prior distribution. Fitting a Gaussian process to the data above
+(indexed by our hyperparameter), we can see the expected value of Score
+accross our parameter bounds, as well as the uncertainty bands:
 
-![](vignettes/GPpredictions.png)<!-- -->
+![](vignettes/save1.png)<!-- -->
 
 Before we can select our next candidate parameter to run the scoring
 function on, we need to determine how we define a “good” parameter
@@ -85,16 +85,23 @@ choose from:
   - Expected Improvement (ei)
   - Expected Improvement Per Second (eips)
 
-Continuing the example, we select to find the min\_child\_weight which
-maximizes the expected improvement according to the Gaussian process. As
-you can see, there are several good candidates:
+Our expected improvement in the graph above is maximized at \~2180. If
+we run our process with the new `Trees in Forest = 2180`, we can update
+our Gaussian process for a new prediction about which would be best to
+sample next:
 
-![](vignettes/expectedImprovement.png)<!-- -->
+![](vignettes/save2.png)<!-- -->
+
+As you can see, our updated gaussian process has a maximum expected
+improvement at \~ `Trees in Forest = 1250`. We can continue this process
+until we are confident that we have selected the best parameter set.
 
 An advanced feature of ParBayesianOptimization, which you can read about
 in the vignette advancedFeatures, describes how to use the
 `minClusterUtility` parameter to search over the different local
-maximums shown above. If not specified, only the global maximum would be
+maximums shown above. For example, in the first chart, we the process
+would sample all 3 optimums in the Upper Confidence Bound utility. If
+`minClusterUtility` is not specified, only the global maximum would be
 sampled.
 
 ## Practical Example
@@ -213,24 +220,24 @@ object to see the results:
 ``` r
 ScoreResult$ScoreDT
 #>     Iteration max_depth min_child_weight subsample Elapsed     Score nrounds
-#>  1:         0         2               96 0.4588379    0.25 0.9751867      12
-#>  2:         0         6               86 0.4818961    0.42 0.9772520      20
-#>  3:         0         4               90 0.7149172    0.14 0.9779723       1
-#>  4:         0         3               29 0.9639938    0.74 0.9968463      40
-#>  5:         0         8               25 0.7375800    0.24 0.9954127       2
-#>  6:         0         9               73 0.9711172    0.20 0.9871477       4
-#>  7:         0         5               43 0.7303876    0.34 0.9901100       8
-#>  8:         0         7               57 0.8553421    0.28 0.9881150       6
-#>  9:         1        10                1 1.0000000    0.20 0.9984757       1
-#> 10:         2         2                1 1.0000000    0.18 0.9871587       8
+#>  1:         0         4                5 0.8531034    1.64 0.9991763      77
+#>  2:         0         6               86 0.7771493    0.16 0.9779723       1
+#>  3:         0        10               23 0.3528825    0.22 0.9909850       5
+#>  4:         0         8               34 0.5932732    0.22 0.9892073       5
+#>  5:         0         8               62 0.3013196    0.26 0.9736060      11
+#>  6:         0         5               46 0.9575793    0.30 0.9910283       8
+#>  7:         0         2               66 0.7080866    0.12 0.9779723       1
+#>  8:         0         6               94 0.5172768    0.47 0.9772230      24
+#>  9:         1        10                1 1.0000000    0.22 0.9984757       1
+#> 10:         2         9                1 1.0000000    0.24 0.9984757       1
 ```
 
 ``` r
 ScoreResult$BestPars
 #>    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs
-#> 1:         0         3               29 0.9639938 0.9968463      40      3 secs
-#> 2:         1        10                1 1.0000000 0.9984757       1      9 secs
-#> 3:         2        10                1 1.0000000 0.9984757       1     13 secs
+#> 1:         0         4                5 0.8531034 0.9991763      77      4 secs
+#> 2:         1         4                5 0.8531034 0.9991763      77     11 secs
+#> 3:         2         4                5 0.8531034 0.9991763      77     20 secs
 ```
 
 ## Running In Parallel
@@ -251,6 +258,7 @@ use of the registered cores:
 
 ``` r
 library(doParallel)
+#> Loading required package: foreach
 #> Loading required package: iterators
 #> Loading required package: parallel
 cl <- makeCluster(2)
@@ -275,14 +283,14 @@ stopCluster(cl)
 registerDoSEQ()
 ```
 
-We managed to cut the process time in half by running the process on 2
+We managed to massively cut the process time by running the process on 2
 cores in parallel:
 
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    1.03    0.07    6.96
+#>    0.82    0.08    6.58
 tNoPar
 #>    user  system elapsed 
-#>   14.53    2.63   13.29
+#>   21.69    3.35   19.51
 ```

@@ -10,8 +10,9 @@ applyCluster(e = parent.frame())
 \item{e}{the entire parent environment is made available to this function}
 }
 \value{
-the number of values that are outside the bounds/
+The next parameter sets to try
 }
 \description{
 Applies DBSCAN algorithm to find local optimum candidate parameter sets
 }
+\keyword{internal}

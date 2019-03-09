@@ -68,7 +68,8 @@
 #' @param verbose Whether or not to print progress. If 0, nothing will be printed.
 #'   If 1, progress will be printed. If 2, progress and information about new parameter-score pairs will be printed.
 #' @return A list containing details about the process:
-#' \item{GPlist}{The list of the gaussian process objects that were fit.}
+#' \item{GPs}{The last Gaussian Process run on the parameter-score pairs}
+#' \item{GPe}{If \code{acq = "eips"}, this contains the last Gaussian Process run on the parameter-elapsed time pairs}
 #' \item{acqMaximums}{The optimal parameters according to each gaussian process}
 #' \item{ScoreDT}{A list of all parameter-score pairs, as well as extra columns from FUN}
 #' \item{BestPars}{The best parameter set at each iteration}
@@ -151,7 +152,7 @@
 #'   , parallel = FALSE
 #'   , gsPoints = 50)
 #' }
-#' @importFrom data.table data.table setDT setcolorder := as.data.table copy .I
+#' @importFrom data.table data.table setDT setcolorder := as.data.table copy .I setnames is.data.table
 #' @importFrom utils head
 #' @importFrom GauPro GauPro_kernel_model Matern52 Matern32 Exponential Gaussian
 #' @export
@@ -191,10 +192,11 @@ BayesianOptimization <- function(
   setDT(leftOff)
   Overwrites <- 0
   Iter <- 0
-  kern <- assignKern(kern,beta)
+  kerns <- assignKern(kern,beta)
   boundsDT <- data.table( N = ParamNames
                         , L = sapply(bounds, function(x) x[1])
                         , U = sapply(bounds, function(x) x[2])
+                        , R = sapply(bounds, function(x) x[2]) - sapply(bounds, function(x) x[1])
                         , C = sapply(bounds, function(x) class(x))
   )
 
@@ -215,10 +217,10 @@ BayesianOptimization <- function(
   if (parallel & (Workers == 1)) stop("parallel is set to TRUE but no back end is registered.\n")
   if (!parallel & Workers > 1 & verbose > 0) cat("parallel back end is registered, but parallel is set to false. Process will not be run in parallel.\n")
   if (nrow(initGrid)>0) {
-    if (sum(sapply(ParamNames, CheckBounds,initGrid, bounds))>0) stop("initGrid not within bounds.")
+    if (sum(sapply(ParamNames, checkBounds,initGrid, bounds))>0) stop("initGrid not within bounds.")
   }
   if (nrow(leftOff) > 0){
-    if (sum(sapply(ParamNames, CheckBounds,leftOff, bounds))>0) stop("leftOff not within bounds.")
+    if (sum(sapply(ParamNames, checkBounds,leftOff, bounds))>0) stop("leftOff not within bounds.")
   }
   if (nrow(leftOff)+initialize*(initPoints+nrow(initGrid)) >= nIters) stop("Rows in initial set will be larger than nIters")
   if (verbose > 0 & bulkNew < Workers & parallel) cat("bulkNew is less than the threads registered on the parallel back end - process may not utilize all workers.\n")
@@ -232,7 +234,7 @@ BayesianOptimization <- function(
       if (nrow(initGrid)>0){
         InitFeedParams <- initGrid
       } else{
-        InitFeedParams <- data.table(sapply(ParamNames,RandParams,initPoints, boundsDT))
+        InitFeedParams <- randParams(boundsDT, initPoints)
       }
 
       if (verbose > 0) cat("\nRunning initial scoring function",nrow(InitFeedParams),"times in",Workers,"thread(s).\n")
@@ -250,10 +252,16 @@ BayesianOptimization <- function(
 
           Params <- InitFeedParams[get("iter"),]
           Elapsed <- system.time(Result <- do.call(what = FUN, args = as.list(Params)))
+          if(sum(names(Result) == "Score") == 0) stop("FUN must return list with element 'Score' at a minimum.")
           data.table(Params,Elapsed = Elapsed[[3]],as.data.table(Result))
 
       }
       sink()
+      
+      if (!is.data.table(ScoreDT)) {
+        cat("\nFUN failed to run with error list:\n"); print(ScoreDT)
+        stop("Stopping process.")
+      }
 
       # Append leftOff if its names match ScoreDT
       if (nrow(leftOff) > 0) {
@@ -286,10 +294,10 @@ BayesianOptimization <- function(
   }
 
   # Setup for iterations
-  GPlist <- list()
   acqMaximums <- data.table()
   scaleList <- list(score = max(abs(ScoreDT$Score)), elapsed = max(ScoreDT$Elapsed))
-  GP <- NULL
+  GPs <- NULL
+  GPe <- NULL
   BestPars <- data.table( "Iteration" = Iter
                         , ScoreDT[which.max(get("Score")),c(ParamNames,"Score",extraRet),with = F]
                         , elapsedSecs = round(difftime(Time,StartT,units = "secs"),0)
@@ -311,27 +319,55 @@ BayesianOptimization <- function(
         acq <- stopImpatient$newAcq
       }
 
+      
     # Fit GP
     newD <- ScoreDT[get("Iteration") == Iter-1,]
     if (verbose > 0) cat("\n  1) Fitting Gaussian process...")
-    GP <- updateGP( GP = GP
-                  , kern = kern
-                  , X = matrix(sapply(ParamNames, MinMaxScale, newD, boundsDT), nrow = nrow(newD))
-                  , Z = matrix(as.matrix(newD[,.(get("Score")/scaleList$score,Elapsed/scaleList$elapsed)]), nrow = nrow(newD))
-                  , acq = acq
-                  , scaleList = scaleList)
+    
+    # Fitting/Updating GauPro S6 class inside seperate function scope causes memory pointer problems.
+    X = matrix(as.matrix(minMaxScale(newD, boundsDT)), nrow = nrow(newD))
+    Z = matrix(as.matrix(newD[,.(get("Score")/scaleList$score,Elapsed/scaleList$elapsed)]), nrow = nrow(newD))
+    
+    if (is.null(GPs)) {
+      
+      GPs <- GauPro_kernel_model$new( X
+                                    , matrix(Z[,1])
+                                    , kernel = kerns
+                                    , parallel = FALSE
+                                    , useC = FALSE)
+      
+      if (acq == "eips") {
+        
+        kerne <- assignKern(kern,beta)
 
-    # Store GP in list
-    GPlist[[Iter]] <- GP
+        GPe <- GauPro_kernel_model$new( X
+                                      , matrix(Z[,2])
+                                      , kernel = kerne
+                                      , parallel = FALSE
+                                      , useC = FALSE)
+        
+      }
+    } else{
+      
+      # Update Score GP
+      GPs <- GPs$update(Xnew = X, Znew = as.matrix(Z[,1]), nug.update = TRUE)
+      
+      if (acq == "eips") {
+
+        GPe <- GPe$update(Xnew = X, Znew = as.matrix(Z[,2]), nug.update = TRUE)
+
+      } else GPe <- NULL
+    }
 
     # Create random points to initialize local maximum search.
-    LocalTries <- data.table(sapply(ParamNames,RandParams,gsPoints,boundsDT))
-    LocalTryMM <- data.table(sapply(ParamNames,MinMaxScale,LocalTries,boundsDT))
+    localTries <- randParams(boundsDT, gsPoints, FAIL = FALSE)
+    localTryMM <- minMaxScale(localTries, boundsDT)
 
     # Try gsPoints starting points to find parameter set that optimizes Acq
     if (verbose > 0) cat("\n  2) Running local optimum search...")
-    LocalOptims <- maxAcq( GP = GP
-                         , TryOver = LocalTryMM
+    LocalOptims <- maxAcq( GPs = GPs
+                         , GPe = GPe
+                         , TryOver = localTryMM
                          , acq = acq
                          , y_max = max(ScoreDT$Score/scaleList$score)
                          , kappa = kappa
@@ -340,22 +376,15 @@ BayesianOptimization <- function(
                          , parallel = parallel
                          , convThresh = convThresh
                          )
-
-    if (sum(LocalOptims$gradCount > 2) == 0) cat("\n  2a) WARNING - No initial points converged.\n      Process may just be sampling random points.\n      Try decreasing convThresh.")
+    
+    if (sum(LocalOptims$gradCount > 2) == 0) cat("\n  2a) optim function only took <3 steps.\n      Process may be sampling random points.\n      Try decreasing convThresh.")
 
     fromCluster <- applyCluster()
     acqMaximums <- rbind(acqMaximums, data.table("Iteration" = Iter, fromCluster$clusterPoints))
-    newScorePars <- sapply(ParamNames, UnMMScale, fromCluster$newSet, boundsDT)
 
-    if (runNew < 2) {
-      newScorePars <- as.data.table(as.list(newScorePars))
-    } else{
-      newScorePars <- data.table(newScorePars)
-    }
-
-    if (verbose > 0) cat("\n  3) Running scoring function",nrow(newScorePars),"times in",Workers,"thread(s)...\n")
+    if (verbose > 0) cat("\n  3) Running scoring function",nrow(fromCluster$newSet),"times in",Workers,"thread(s)...\n")
     sink("NUL")
-    NewResults <- foreach( iter = 1:nrow(newScorePars)
+    NewResults <- foreach( iter = 1:nrow(fromCluster$newSet)
                          , .options.multicore = mco
                          , .combine = rbind
                          , .multicombine = TRUE
@@ -366,13 +395,18 @@ BayesianOptimization <- function(
                          , .export = export
                          ) %op% {
 
-            Params <- newScorePars[get("iter"),]
+            Params <- fromCluster$newSet[get("iter"),]
             Elapsed <- system.time(Result <- do.call(what = FUN, args = as.list(Params)))
-            data.table(newScorePars[get("iter"),], Elapsed = Elapsed[[3]], as.data.table(Result))
-
-            }
+            data.table(fromCluster$newSet[get("iter"),], Elapsed = Elapsed[[3]], as.data.table(Result))
+            
+    }
     sink()
-
+    
+    if (!is.data.table(NewResults)) {
+      cat("\nFUN failed to run with error list:\n"); print(NewResults)
+      stop("Stopping process.")
+    }
+    
     Time <- Sys.time()
 
     # Print updates on parameter-score search
@@ -417,8 +451,8 @@ BayesianOptimization <- function(
   }
 
   RetList <- list()
-  names(GPlist) <- paste0("GP_", 1:Iter)
-  RetList$GPlist <- GPlist
+  RetList$GPs <- GPs
+  if (!is.null(GPe)) RetList$GPe <- GPe
   RetList$acqMaximums <- acqMaximums
   RetList$ScoreDT <- ScoreDT
   RetList$BestPars <- BestPars

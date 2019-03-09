@@ -4,11 +4,13 @@
 \alias{maxAcq}
 \title{Maximize Acquisition Function}
 \usage{
-maxAcq(GP, TryOver, acq = "ucb", y_max, kappa, eps, parallel, ParMethod,
-  convThresh)
+maxAcq(GPs, GPe, TryOver, acq = "ucb", y_max, kappa, eps, parallel,
+  ParMethod, convThresh)
 }
 \arguments{
-\item{GP}{an object of class gp or gp.list}
+\item{GPs}{an object of class gp}
+
+\item{GPe}{an object of class gp}
 
 \item{TryOver}{A data.table of initial points to try over.}
 

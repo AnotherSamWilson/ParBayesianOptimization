@@ -3,7 +3,8 @@
 #' @description
 #' Uses optim function to find parameters that maximize Acquisition Function
 #'
-#' @param GP an object of class gp or gp.list
+#' @param GPs an object of class gp
+#' @param GPe an object of class gp
 #' @param TryOver A data.table of initial points to try over.
 #' @param acq Acquisition function type to be used
 #' @param y_max The current maximum known value of the target utility function
@@ -17,14 +18,14 @@
 #' @import foreach
 #' @keywords internal
 
-maxAcq <- function(GP, TryOver, acq = "ucb", y_max, kappa, eps, parallel, ParMethod, convThresh) {
+maxAcq <- function(GPs, GPe, TryOver, acq = "ucb", y_max, kappa, eps, parallel, ParMethod, convThresh) {
 
   `%op%` <- ParMethod(parallel)
 
   LocalOptims <- foreach( i = 1:nrow(TryOver)
                           , .combine = 'rbind'
                           , .inorder = TRUE
-                          , .errorhandling = 'remove'
+                          , .errorhandling = 'pass'
                           , .packages = c('data.table','GauPro','stats')
                           , .multicombine = TRUE
                           , .verbose = FALSE
@@ -33,14 +34,13 @@ maxAcq <- function(GP, TryOver, acq = "ucb", y_max, kappa, eps, parallel, ParMet
 
     optim_result <- optim( par = TryOver[i,]
                            , fn = calcAcq
-                           , GP = GP, acq = acq, y_max = y_max, kappa = kappa, eps = eps
+                           , GPs = GPs, GPe = GPe, acq = acq, y_max = y_max, kappa = kappa, eps = eps
                            , method = "L-BFGS-B"
                            , lower = rep(0, length(TryOver))
                            , upper = rep(1, length(TryOver))
                            , control = list( maxit = 1000
                                              , factr = convThresh
-                                             , fnscale = -1
-                           )
+                                             , fnscale = -1)
     )
 
     # Sometimes optim doesn't actually cap the bounds at 0 and 1.
@@ -53,5 +53,6 @@ maxAcq <- function(GP, TryOver, acq = "ucb", y_max, kappa, eps, parallel, ParMet
                           )
                   )
   }
+  
 }
 utils::globalVariables(c("i"))
