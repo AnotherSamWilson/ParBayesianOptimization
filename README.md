@@ -72,7 +72,7 @@ prior distribution. Fitting a Gaussian process to the data above
 (indexed by our hyperparameter), we can see the expected value of Score
 accross our parameter bounds, as well as the uncertainty bands:
 
-![](vignettes/save1.png)<!-- -->
+![](vignettes/GPround1.png)<!-- -->
 
 Before we can select our next candidate parameter to run the scoring
 function on, we need to determine how we define a “good” parameter
@@ -90,7 +90,7 @@ we run our process with the new `Trees in Forest = 2180`, we can update
 our Gaussian process for a new prediction about which would be best to
 sample next:
 
-![](vignettes/save2.png)<!-- -->
+![](vignettes/GPround2.png)<!-- -->
 
 As you can see, our updated gaussian process has a maximum expected
 improvement at \~ `Trees in Forest = 1250`. We can continue this process
@@ -220,24 +220,24 @@ object to see the results:
 ``` r
 ScoreResult$ScoreDT
 #>     Iteration max_depth min_child_weight subsample Elapsed     Score nrounds
-#>  1:         0         4                5 0.8531034    1.64 0.9991763      77
-#>  2:         0         6               86 0.7771493    0.16 0.9779723       1
-#>  3:         0        10               23 0.3528825    0.22 0.9909850       5
-#>  4:         0         8               34 0.5932732    0.22 0.9892073       5
-#>  5:         0         8               62 0.3013196    0.26 0.9736060      11
-#>  6:         0         5               46 0.9575793    0.30 0.9910283       8
-#>  7:         0         2               66 0.7080866    0.12 0.9779723       1
-#>  8:         0         6               94 0.5172768    0.47 0.9772230      24
-#>  9:         1        10                1 1.0000000    0.22 0.9984757       1
-#> 10:         2         9                1 1.0000000    0.24 0.9984757       1
+#>  1:         0         9               34 0.3296843    0.14 0.9779723       1
+#>  2:         0         4               68 0.3928681    0.23 0.9753210       8
+#>  3:         0         7               96 0.5359957    0.30 0.9770130      12
+#>  4:         0         9                7 0.4903703    0.84 0.9990490      32
+#>  5:         0         6               20 0.7854638    0.35 0.9966280       7
+#>  6:         0         4               47 0.6600376    0.32 0.9910997      11
+#>  7:         0         6               84 0.9909790    0.17 0.9796973       1
+#>  8:         0         2               56 0.8460362    0.17 0.9857990       5
+#>  9:         1         9                1 0.6513712    0.31 0.9986653       7
+#> 10:         2         8                1 0.5432635    0.35 0.9986643       8
 ```
 
 ``` r
 ScoreResult$BestPars
-#>    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs
-#> 1:         0         4                5 0.8531034 0.9991763      77      4 secs
-#> 2:         1         4                5 0.8531034 0.9991763      77     11 secs
-#> 3:         2         4                5 0.8531034 0.9991763      77     20 secs
+#>    Iteration max_depth min_child_weight subsample    Score nrounds elapsedSecs
+#> 1:         0         9                7 0.4903703 0.999049      32      3 secs
+#> 2:         1         9                7 0.4903703 0.999049      32     13 secs
+#> 3:         2         9                7 0.4903703 0.999049      32     23 secs
 ```
 
 ## Running In Parallel
@@ -289,8 +289,8 @@ cores in parallel:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    0.82    0.08    6.58
+#>    1.02    0.14    5.72
 tNoPar
 #>    user  system elapsed 
-#>   21.69    3.35   19.51
+#>   23.99    2.87   23.06
 ```
