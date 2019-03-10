@@ -12,7 +12,7 @@
 
 <meta name="author" content="Samuel Wilson" />
 
-<meta name="date" content="2019-02-25" />
+<meta name="date" content="2019-03-10" />
 
 <title>Introduction to ParBayesianOptimization</title>
 
@@ -20,46 +20,254 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
 
-<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 </head>
 
@@ -70,7 +278,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Introduction to ParBayesianOptimization</h1>
 <h4 class="author"><em>Samuel Wilson</em></h4>
-<h4 class="date"><em>2019-02-25</em></h4>
+<h4 class="date"><em>2019-03-10</em></h4>
 
 
 
@@ -94,102 +302,98 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="practical-example" class="section level2">
 <h2>Practical Example</h2>
 <p>In this example, we will be using the agaricus.train dataset provided in the XGBoost package. Here, we load the packages, data, and create a folds object to be used in the scoring function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;xgboost&quot;</span>)
-<span class="kw">library</span>(<span class="st">&quot;ParBayesianOptimization&quot;</span>)
-<span class="co">#&gt; Loading required package: data.table</span>
-<span class="co">#&gt; Loading required package: GauPro</span>
-<span class="co">#&gt; Loading required package: foreach</span>
-<span class="co">#&gt; Loading required package: dbscan</span>
-
-<span class="kw">data</span>(agaricus.train, <span class="dt">package =</span> <span class="st">&quot;xgboost&quot;</span>)
-
-Folds &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">Fold1 =</span> <span class="kw">as.integer</span>(<span class="kw">seq</span>(<span class="dv">1</span>,<span class="kw">nrow</span>(agaricus.train<span class="op">$</span>data),<span class="dt">by =</span> <span class="dv">3</span>))
-            , <span class="dt">Fold2 =</span> <span class="kw">as.integer</span>(<span class="kw">seq</span>(<span class="dv">2</span>,<span class="kw">nrow</span>(agaricus.train<span class="op">$</span>data),<span class="dt">by =</span> <span class="dv">3</span>))
-            , <span class="dt">Fold3 =</span> <span class="kw">as.integer</span>(<span class="kw">seq</span>(<span class="dv">3</span>,<span class="kw">nrow</span>(agaricus.train<span class="op">$</span>data),<span class="dt">by =</span> <span class="dv">3</span>)))</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(<span class="st">&quot;xgboost&quot;</span>)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">library</span>(<span class="st">&quot;ParBayesianOptimization&quot;</span>)</a>
+<a class="sourceLine" id="cb1-3" title="3"></a>
+<a class="sourceLine" id="cb1-4" title="4"><span class="kw">data</span>(agaricus.train, <span class="dt">package =</span> <span class="st">&quot;xgboost&quot;</span>)</a>
+<a class="sourceLine" id="cb1-5" title="5"></a>
+<a class="sourceLine" id="cb1-6" title="6">Folds &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">Fold1 =</span> <span class="kw">as.integer</span>(<span class="kw">seq</span>(<span class="dv">1</span>,<span class="kw">nrow</span>(agaricus.train<span class="op">$</span>data),<span class="dt">by =</span> <span class="dv">3</span>))</a>
+<a class="sourceLine" id="cb1-7" title="7">            , <span class="dt">Fold2 =</span> <span class="kw">as.integer</span>(<span class="kw">seq</span>(<span class="dv">2</span>,<span class="kw">nrow</span>(agaricus.train<span class="op">$</span>data),<span class="dt">by =</span> <span class="dv">3</span>))</a>
+<a class="sourceLine" id="cb1-8" title="8">            , <span class="dt">Fold3 =</span> <span class="kw">as.integer</span>(<span class="kw">seq</span>(<span class="dv">3</span>,<span class="kw">nrow</span>(agaricus.train<span class="op">$</span>data),<span class="dt">by =</span> <span class="dv">3</span>)))</a></code></pre></div>
 <p>Now we need to define the scoring function. This function should, at a minimum, return a list with a <code>Score</code> element, which is the model evaluation metric we want to maximize. We can also retain other pieces of information created by the scoring function by including them as named elements of the returned list. In this case, we want to retain the optimal number of rounds determined by the <code>xgb.cv</code>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">scoringFunction &lt;-<span class="st"> </span><span class="cf">function</span>(max_depth, min_child_weight, subsample) {
-
-  dtrain &lt;-<span class="st"> </span><span class="kw">xgb.DMatrix</span>(agaricus.train<span class="op">$</span>data,<span class="dt">label =</span> agaricus.train<span class="op">$</span>label)
-  
-  Pars &lt;-<span class="st"> </span><span class="kw">list</span>( <span class="dt">booster =</span> <span class="st">&quot;gbtree&quot;</span>
-              , <span class="dt">eta =</span> <span class="fl">0.01</span>
-              , <span class="dt">max_depth =</span> max_depth
-              , <span class="dt">min_child_weight =</span> min_child_weight
-              , <span class="dt">subsample =</span> subsample
-              , <span class="dt">objective =</span> <span class="st">&quot;binary:logistic&quot;</span>
-              , <span class="dt">eval_metric =</span> <span class="st">&quot;auc&quot;</span>)
-
-  xgbcv &lt;-<span class="st"> </span><span class="kw">xgb.cv</span>(<span class="dt">params =</span> Pars
-                , <span class="dt">data =</span> dtrain
-                , <span class="dt">nround =</span> <span class="dv">100</span>
-                , <span class="dt">folds =</span> Folds
-                , <span class="dt">prediction =</span> <span class="ot">TRUE</span>
-                , <span class="dt">showsd =</span> <span class="ot">TRUE</span>
-                , <span class="dt">early_stopping_rounds =</span> <span class="dv">5</span>
-                , <span class="dt">maximize =</span> <span class="ot">TRUE</span>
-                , <span class="dt">verbose =</span> <span class="dv">0</span>)
-
-  <span class="kw">return</span>(<span class="kw">list</span>( <span class="dt">Score =</span> <span class="kw">max</span>(xgbcv<span class="op">$</span>evaluation_log<span class="op">$</span>test_auc_mean)
-             , <span class="dt">nrounds =</span> xgbcv<span class="op">$</span>best_iteration
-             )
-         )
-}</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">scoringFunction &lt;-<span class="st"> </span><span class="cf">function</span>(max_depth, min_child_weight, subsample) {</a>
+<a class="sourceLine" id="cb2-2" title="2"></a>
+<a class="sourceLine" id="cb2-3" title="3">  dtrain &lt;-<span class="st"> </span><span class="kw">xgb.DMatrix</span>(agaricus.train<span class="op">$</span>data,<span class="dt">label =</span> agaricus.train<span class="op">$</span>label)</a>
+<a class="sourceLine" id="cb2-4" title="4">  </a>
+<a class="sourceLine" id="cb2-5" title="5">  Pars &lt;-<span class="st"> </span><span class="kw">list</span>( <span class="dt">booster =</span> <span class="st">&quot;gbtree&quot;</span></a>
+<a class="sourceLine" id="cb2-6" title="6">              , <span class="dt">eta =</span> <span class="fl">0.01</span></a>
+<a class="sourceLine" id="cb2-7" title="7">              , <span class="dt">max_depth =</span> max_depth</a>
+<a class="sourceLine" id="cb2-8" title="8">              , <span class="dt">min_child_weight =</span> min_child_weight</a>
+<a class="sourceLine" id="cb2-9" title="9">              , <span class="dt">subsample =</span> subsample</a>
+<a class="sourceLine" id="cb2-10" title="10">              , <span class="dt">objective =</span> <span class="st">&quot;binary:logistic&quot;</span></a>
+<a class="sourceLine" id="cb2-11" title="11">              , <span class="dt">eval_metric =</span> <span class="st">&quot;auc&quot;</span>)</a>
+<a class="sourceLine" id="cb2-12" title="12"></a>
+<a class="sourceLine" id="cb2-13" title="13">  xgbcv &lt;-<span class="st"> </span><span class="kw">xgb.cv</span>(<span class="dt">params =</span> Pars</a>
+<a class="sourceLine" id="cb2-14" title="14">                , <span class="dt">data =</span> dtrain</a>
+<a class="sourceLine" id="cb2-15" title="15">                , <span class="dt">nround =</span> <span class="dv">100</span></a>
+<a class="sourceLine" id="cb2-16" title="16">                , <span class="dt">folds =</span> Folds</a>
+<a class="sourceLine" id="cb2-17" title="17">                , <span class="dt">prediction =</span> <span class="ot">TRUE</span></a>
+<a class="sourceLine" id="cb2-18" title="18">                , <span class="dt">showsd =</span> <span class="ot">TRUE</span></a>
+<a class="sourceLine" id="cb2-19" title="19">                , <span class="dt">early_stopping_rounds =</span> <span class="dv">5</span></a>
+<a class="sourceLine" id="cb2-20" title="20">                , <span class="dt">maximize =</span> <span class="ot">TRUE</span></a>
+<a class="sourceLine" id="cb2-21" title="21">                , <span class="dt">verbose =</span> <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb2-22" title="22"></a>
+<a class="sourceLine" id="cb2-23" title="23">  <span class="kw">return</span>(<span class="kw">list</span>( <span class="dt">Score =</span> <span class="kw">max</span>(xgbcv<span class="op">$</span>evaluation_log<span class="op">$</span>test_auc_mean)</a>
+<a class="sourceLine" id="cb2-24" title="24">             , <span class="dt">nrounds =</span> xgbcv<span class="op">$</span>best_iteration</a>
+<a class="sourceLine" id="cb2-25" title="25">             )</a>
+<a class="sourceLine" id="cb2-26" title="26">         )</a>
+<a class="sourceLine" id="cb2-27" title="27">}</a></code></pre></div>
 <p>Some other objects we need to define are the bounds, GP kernel and acquisition function.</p>
 <ul>
 <li>The <code>bounds</code> will tell our process its search space.</li>
 <li>The kernel is passed to the <code>GauPro</code> function <code>GauPro_kernel_model</code> and defines the covariance function.</li>
 <li>The acquisition function defines the utility we get from using a certain parameter set.</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bounds &lt;-<span class="st"> </span><span class="kw">list</span>( <span class="dt">max_depth =</span> <span class="kw">c</span>(2L, 10L)
-              , <span class="dt">min_child_weight =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">100</span>)
-              , <span class="dt">subsample =</span> <span class="kw">c</span>(<span class="fl">0.25</span>, <span class="dv">1</span>))
-
-kern &lt;-<span class="st"> &quot;Matern52&quot;</span>
-
-acq &lt;-<span class="st"> &quot;ei&quot;</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">bounds &lt;-<span class="st"> </span><span class="kw">list</span>( <span class="dt">max_depth =</span> <span class="kw">c</span>(2L, 10L)</a>
+<a class="sourceLine" id="cb3-2" title="2">              , <span class="dt">min_child_weight =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb3-3" title="3">              , <span class="dt">subsample =</span> <span class="kw">c</span>(<span class="fl">0.25</span>, <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb3-4" title="4"></a>
+<a class="sourceLine" id="cb3-5" title="5">kern &lt;-<span class="st"> &quot;Matern52&quot;</span></a>
+<a class="sourceLine" id="cb3-6" title="6"></a>
+<a class="sourceLine" id="cb3-7" title="7">acq &lt;-<span class="st"> &quot;ei&quot;</span></a></code></pre></div>
 <p>We are now ready to put this all into the <code>BayesianOptimization</code> function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ScoreResult &lt;-<span class="st"> </span><span class="kw">BayesianOptimization</span>(<span class="dt">FUN =</span> scoringFunction
-                                  , <span class="dt">bounds =</span> bounds
-                                  , <span class="dt">initPoints =</span> <span class="dv">10</span>
-                                  , <span class="dt">bulkNew =</span> <span class="dv">1</span>
-                                  , <span class="dt">nIters =</span> <span class="dv">12</span>
-                                  , <span class="dt">kern =</span> kern
-                                  , <span class="dt">acq =</span> acq
-                                  , <span class="dt">kappa =</span> <span class="fl">2.576</span>
-                                  , <span class="dt">verbose =</span> <span class="dv">1</span>
-                                  , <span class="dt">parallel =</span> <span class="ot">FALSE</span>)
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Running initial scoring function 10 times in 1 thread(s).</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Starting round number 1</span>
-<span class="co">#&gt;   1) Fitting Gaussian process...</span>
-<span class="co">#&gt;   2) Running local optimum search...</span>
-<span class="co">#&gt;   3) Running scoring function 1 times in 1 thread(s)...</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Starting round number 2</span>
-<span class="co">#&gt;   1) Fitting Gaussian process...</span>
-<span class="co">#&gt;   2) Running local optimum search...</span>
-<span class="co">#&gt;   3) Running scoring function 1 times in 1 thread(s)...</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">ScoreResult &lt;-<span class="st"> </span><span class="kw">BayesianOptimization</span>(<span class="dt">FUN =</span> scoringFunction</a>
+<a class="sourceLine" id="cb4-2" title="2">                                  , <span class="dt">bounds =</span> bounds</a>
+<a class="sourceLine" id="cb4-3" title="3">                                  , <span class="dt">initPoints =</span> <span class="dv">10</span></a>
+<a class="sourceLine" id="cb4-4" title="4">                                  , <span class="dt">bulkNew =</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb4-5" title="5">                                  , <span class="dt">nIters =</span> <span class="dv">12</span></a>
+<a class="sourceLine" id="cb4-6" title="6">                                  , <span class="dt">kern =</span> kern</a>
+<a class="sourceLine" id="cb4-7" title="7">                                  , <span class="dt">acq =</span> acq</a>
+<a class="sourceLine" id="cb4-8" title="8">                                  , <span class="dt">kappa =</span> <span class="fl">2.576</span></a>
+<a class="sourceLine" id="cb4-9" title="9">                                  , <span class="dt">verbose =</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb4-10" title="10">                                  , <span class="dt">parallel =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-12" title="12"><span class="co">#&gt; Running initial scoring function 10 times in 1 thread(s).</span></a>
+<a class="sourceLine" id="cb4-13" title="13"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&gt; Starting round number 1</span></a>
+<a class="sourceLine" id="cb4-15" title="15"><span class="co">#&gt;   1) Fitting Gaussian process...</span></a>
+<a class="sourceLine" id="cb4-16" title="16"><span class="co">#&gt;   2) Running local optimum search...</span></a>
+<a class="sourceLine" id="cb4-17" title="17"><span class="co">#&gt;   3) Running scoring function 1 times in 1 thread(s)...</span></a>
+<a class="sourceLine" id="cb4-18" title="18"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-19" title="19"><span class="co">#&gt; Starting round number 2</span></a>
+<a class="sourceLine" id="cb4-20" title="20"><span class="co">#&gt;   1) Fitting Gaussian process...</span></a>
+<a class="sourceLine" id="cb4-21" title="21"><span class="co">#&gt;   2) Running local optimum search...</span></a>
+<a class="sourceLine" id="cb4-22" title="22"><span class="co">#&gt;   3) Running scoring function 1 times in 1 thread(s)...</span></a></code></pre></div>
 <p>The console informs us that the process initialized by running <code>scoringFunction</code> 10 times. It then fit a Gaussian process to the parameter-score pairs, found the global optimum of the acquisition function, and ran <code>scoringFunction</code> again. This process continued until we had 12 parameter-score pairs. You can interrogate the <code>ScoreResult</code> object to see the results:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ScoreResult<span class="op">$</span>ScoreDT
-<span class="co">#&gt;     Iteration max_depth min_child_weight subsample Elapsed     Score nrounds</span>
-<span class="co">#&gt;  1:         0         3         88.65888 0.6623601    0.26 0.9798713       7</span>
-<span class="co">#&gt;  2:         0         2         31.55358 0.7719899    0.18 0.9857990       4</span>
-<span class="co">#&gt;  3:         0         5         57.70384 0.7619098    0.23 0.9867847       5</span>
-<span class="co">#&gt;  4:         0        10         79.70718 0.6683172    0.14 0.9779723       1</span>
-<span class="co">#&gt;  5:         0         8         94.82892 0.6042736    0.42 0.9788503      20</span>
-<span class="co">#&gt;  6:         0         4         18.83014 0.3648694    0.79 0.9964300      38</span>
-<span class="co">#&gt;  7:         0         8         37.56893 0.4993864    0.48 0.9899477      18</span>
-<span class="co">#&gt;  8:         0         5         31.75624 0.7588633    0.23 0.9934477       3</span>
-<span class="co">#&gt;  9:         0         4         28.44487 0.9674808    1.69 0.9988797      61</span>
-<span class="co">#&gt; 10:         0         2         74.43830 0.6166652    0.09 0.9779723       1</span>
-<span class="co">#&gt; 11:         1         5          1.00000 1.0000000    0.18 0.9970903       1</span>
-<span class="co">#&gt; 12:         2         5         24.11644 1.0000000    1.96 0.9990043      87</span></code></pre></div>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ScoreResult<span class="op">$</span>BestPars
-<span class="co">#&gt;    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs</span>
-<span class="co">#&gt; 1:         0         4         28.44487 0.9674808 0.9988797      61      6 secs</span>
-<span class="co">#&gt; 2:         1         4         28.44487 0.9674808 0.9988797      61     15 secs</span>
-<span class="co">#&gt; 3:         2         5         24.11644 1.0000000 0.9990043      87     27 secs</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">ScoreResult<span class="op">$</span>ScoreDT</a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="co">#&gt;     Iteration max_depth min_child_weight subsample Elapsed     Score nrounds</span></a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="co">#&gt;  1:         0         7         95.69474 0.4768496    0.52 0.9788650      25</span></a>
+<a class="sourceLine" id="cb5-4" title="4"><span class="co">#&gt;  2:         0         8         36.98377 0.9208947    0.21 0.9932543       1</span></a>
+<a class="sourceLine" id="cb5-5" title="5"><span class="co">#&gt;  3:         0        10          3.32332 0.8440490    0.23 0.9984580       1</span></a>
+<a class="sourceLine" id="cb5-6" title="6"><span class="co">#&gt;  4:         0         7         87.42814 0.9824556    0.14 0.9779723       1</span></a>
+<a class="sourceLine" id="cb5-7" title="7"><span class="co">#&gt;  5:         0         9         46.63232 0.5914040    0.24 0.9847800       6</span></a>
+<a class="sourceLine" id="cb5-8" title="8"><span class="co">#&gt;  6:         0         4         58.12424 0.6309099    0.14 0.9779723       1</span></a>
+<a class="sourceLine" id="cb5-9" title="9"><span class="co">#&gt;  7:         0         6         18.80205 0.3389030    0.63 0.9954537      23</span></a>
+<a class="sourceLine" id="cb5-10" title="10"><span class="co">#&gt;  8:         0         4         78.58703 0.7492533    0.14 0.9779723       1</span></a>
+<a class="sourceLine" id="cb5-11" title="11"><span class="co">#&gt;  9:         0         3         62.37548 0.4322617    0.20 0.9778280       5</span></a>
+<a class="sourceLine" id="cb5-12" title="12"><span class="co">#&gt; 10:         0         3         20.89918 0.3136350    0.32 0.9917280      12</span></a>
+<a class="sourceLine" id="cb5-13" title="13"><span class="co">#&gt; 11:         1         9          1.00000 0.9845378    0.24 0.9984757       1</span></a>
+<a class="sourceLine" id="cb5-14" title="14"><span class="co">#&gt; 12:         2         6          1.00000 0.2500000    0.43 0.9999157      11</span></a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">ScoreResult<span class="op">$</span>BestPars</a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="co">#&gt;    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs</span></a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="co">#&gt; 1:         0        10          3.32332 0.8440490 0.9984580       1      4 secs</span></a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="co">#&gt; 2:         1         9          1.00000 0.9845378 0.9984757       1     11 secs</span></a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="co">#&gt; 3:         2         6          1.00000 0.2500000 0.9999157      11     22 secs</span></a></code></pre></div>
 </div>
 
 

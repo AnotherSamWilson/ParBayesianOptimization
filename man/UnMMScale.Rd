@@ -7,11 +7,9 @@
 unMMScale(tabl, boundsDT)
 }
 \arguments{
-\item{x}{Parameter Name}
+\item{tabl}{A data.table of scaled parameter sets}
 
-\item{table}{A data.table of scaled parameter sets}
-
-\item{bounds}{the original bounds list}
+\item{boundsDT}{the original bounds list}
 }
 \value{
 a data.table the same length as \code{table} with un-scaled parameters

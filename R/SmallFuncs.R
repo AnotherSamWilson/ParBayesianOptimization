@@ -28,7 +28,6 @@ checkBounds <- function(x, Table, bounds) {
 #' @description
 #' Generates a set of rPoints parameter sets from latin hypercube sampling.
 #'
-#' @param x Parameter Name
 #' @param boundsDT original bounds list
 #' @param rPoints number of parameter sets to create.
 #' @param FAIL Should the function fail if it cannot find enough distinct parameter sets?
@@ -68,9 +67,8 @@ randParams <- function(boundsDT, rPoints, FAIL = TRUE) {
 #'
 #' @description
 #' Scales a data.table of parameter sets to a 0-1 range
-#' @param x Parameter Name
-#' @param table A data.table of parameter sets
-#' @param bounds the original bounds list
+#' @param tabl A data.table of parameter sets
+#' @param boundsDT the original bounds list
 #' @return a data.table the same length as \code{table} with scaled parameters
 #' @keywords internal
 
@@ -92,9 +90,8 @@ minMaxScale <- function(tabl, boundsDT) {
 #' @description
 #' Un-scales a data.table of parameter sets from a 0-1 range
 #'
-#' @param x Parameter Name
-#' @param table A data.table of scaled parameter sets
-#' @param bounds the original bounds list
+#' @param tabl A data.table of scaled parameter sets
+#' @param boundsDT the original bounds list
 #' @return a data.table the same length as \code{table} with un-scaled parameters
 #' @keywords internal
 

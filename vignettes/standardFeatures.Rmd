@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 options(width = 1000)
+set.seed(1991)
 ```
 
 ********

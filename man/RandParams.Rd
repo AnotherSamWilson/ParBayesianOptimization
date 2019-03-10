@@ -12,8 +12,6 @@ randParams(boundsDT, rPoints, FAIL = TRUE)
 \item{rPoints}{number of parameter sets to create.}
 
 \item{FAIL}{Should the function fail if it cannot find enough distinct parameter sets?}
-
-\item{x}{Parameter Name}
 }
 \value{
 a data.table of random parameters
