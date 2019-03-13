@@ -73,7 +73,11 @@ prior distribution. Fitting a Gaussian process to the data above
 accross our parameter bounds, as well as the uncertainty
 bands:
 
+<center>
+
 <img src="vignettes/GPround1.png" width="648px" style="display: block; margin: auto;" />
+
+</center>
 
 Before we can select our next candidate parameter to run the scoring
 function on, we need to determine how we define a “good” parameter
@@ -87,7 +91,11 @@ our Gaussian process for a new prediction about which would be best to
 sample
 next:
 
+<center>
+
 <img src="vignettes/GPround2.png" width="648px" style="display: block; margin: auto;" />
+
+</center>
 
 As you can see, our updated gaussian process has a maximum expected
 improvement at \~ `Trees in Forest = 1250`. We can continue this process
@@ -95,7 +103,12 @@ until we are confident that we have selected the best parameter set.
 
 The utility functions that are maximized in this package are defined as
 follows:
+
+<center>
+
 <img src="vignettes/UtilityFunctions.png" style="display: block; margin: auto;" />
+
+</center>
 
 An advanced feature of ParBayesianOptimization, which you can read about
 in the vignette advancedFeatures, describes how to use the
@@ -221,24 +234,24 @@ object to see the results:
 ``` r
 ScoreResult$ScoreDT
 #>     Iteration max_depth min_child_weight subsample Elapsed     Score nrounds
-#>  1:         0         7               84 0.7575443    0.10 0.9779723       1
-#>  2:         0         2               37 0.4438604    0.09 0.9779723       1
-#>  3:         0         5               11 0.2919657    0.22 0.9972380       4
-#>  4:         0        10               48 0.3594808    0.20 0.9793660       7
-#>  5:         0         8               22 0.6516402    1.25 0.9983790      51
-#>  6:         0         4               69 0.5393491    0.13 0.9786310       2
-#>  7:         0         6               59 0.8390401    0.25 0.9892883       7
-#>  8:         0         5               92 0.9169449    0.12 0.9779723       1
-#>  9:         1         8               21 0.6577868    1.21 0.9987103      49
-#> 10:         2         7                1 0.6117771    0.17 0.9984730       1
+#>  1:         0         7              100 0.9282317    0.14 0.9779723       1
+#>  2:         0        10               51 0.5228419    0.14 0.9779723       1
+#>  3:         0         4               78 0.7700987    0.12 0.9779723       1
+#>  4:         0         3               21 0.8249264    0.63 0.9962923      31
+#>  5:         0         5                5 0.3545473    0.36 0.9989977      10
+#>  6:         0         8               31 0.3263683    0.11 0.9779723       1
+#>  7:         0         5               38 0.5578574    0.20 0.9900647       5
+#>  8:         0         8               70 0.6978447    0.11 0.9779723       1
+#>  9:         1         3                1 0.4737795    0.43 0.9983840      22
+#> 10:         2         4                1 0.4016043    0.31 0.9986553      10
 ```
 
 ``` r
 ScoreResult$BestPars
 #>    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs
-#> 1:         0         8               22 0.6516402 0.9983790      51      3 secs
-#> 2:         1         8               21 0.6577868 0.9987103      49     13 secs
-#> 3:         2         8               21 0.6577868 0.9987103      49     19 secs
+#> 1:         0         5                5 0.3545473 0.9989977      10      3 secs
+#> 2:         1         5                5 0.3545473 0.9989977      10     11 secs
+#> 3:         2         5                5 0.3545473 0.9989977      10     24 secs
 ```
 
 ## Running In Parallel
@@ -290,8 +303,8 @@ cores in parallel:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    1.47    0.04    7.62
+#>    1.05    0.06    8.47
 tNoPar
 #>    user  system elapsed 
-#>   21.14    4.30   19.37
+#>   24.88    2.50   23.51
 ```
