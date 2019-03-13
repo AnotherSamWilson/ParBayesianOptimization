@@ -127,6 +127,7 @@ folds object to be used in the scoring function.
 ``` r
 library("xgboost")
 library("ParBayesianOptimization")
+#> Warning: package 'ParBayesianOptimization' was built under R version 3.5.3
 
 data(agaricus.train, package = "xgboost")
 
@@ -234,24 +235,24 @@ object to see the results:
 ``` r
 ScoreResult$ScoreDT
 #>     Iteration max_depth min_child_weight subsample Elapsed     Score nrounds
-#>  1:         0         7              100 0.9282317    0.14 0.9779723       1
-#>  2:         0        10               51 0.5228419    0.14 0.9779723       1
-#>  3:         0         4               78 0.7700987    0.12 0.9779723       1
-#>  4:         0         3               21 0.8249264    0.63 0.9962923      31
-#>  5:         0         5                5 0.3545473    0.36 0.9989977      10
-#>  6:         0         8               31 0.3263683    0.11 0.9779723       1
-#>  7:         0         5               38 0.5578574    0.20 0.9900647       5
-#>  8:         0         8               70 0.6978447    0.11 0.9779723       1
-#>  9:         1         3                1 0.4737795    0.43 0.9983840      22
-#> 10:         2         4                1 0.4016043    0.31 0.9986553      10
+#>  1:         0         3               99 0.4210854    0.27 0.9693790      10
+#>  2:         0         3               44 0.7274344    0.17 0.9897887       4
+#>  3:         0         5               65 0.2885685    0.45 0.9749997      22
+#>  4:         0         7               78 0.5578294    0.14 0.9770927       3
+#>  5:         0         6               22 0.5302841    0.27 0.9948687       6
+#>  6:         0         8               35 0.6974692    0.32 0.9936023       9
+#>  7:         0         7               61 0.9238562    0.13 0.9870387       1
+#>  8:         0        10               12 0.8577428    0.70 0.9988247      22
+#>  9:         1         6                1 0.8603698    0.19 0.9984757       1
+#> 10:         2        10                1 0.6621128    0.19 0.9984757       2
 ```
 
 ``` r
 ScoreResult$BestPars
 #>    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs
-#> 1:         0         5                5 0.3545473 0.9989977      10      3 secs
-#> 2:         1         5                5 0.3545473 0.9989977      10     11 secs
-#> 3:         2         5                5 0.3545473 0.9989977      10     24 secs
+#> 1:         0        10               12 0.8577428 0.9988247      22      3 secs
+#> 2:         1        10               12 0.8577428 0.9988247      22      9 secs
+#> 3:         2        10               12 0.8577428 0.9988247      22     18 secs
 ```
 
 ## Running In Parallel
@@ -303,8 +304,8 @@ cores in parallel:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    1.05    0.06    8.47
+#>    0.89    0.08   11.00
 tNoPar
 #>    user  system elapsed 
-#>   24.88    2.50   23.51
+#>   19.33    2.84   18.31
 ```
