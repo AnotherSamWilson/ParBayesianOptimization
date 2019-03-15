@@ -4,6 +4,7 @@
 [![Build
 Status](https://api.travis-ci.org/AnotherSamWilson/ParBayesianOptimization.svg)](https://travis-ci.org/AnotherSamWilson/ParBayesianOptimization)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/ParBayesianOptimization)](http://cran.r-project.org/web/packages/ParBayesianOptimization)
+[![CRAN\_Downloads](https://cranlogs.r-pkg.org/badges/ParBayesianOptimization)](http://cran.r-project.org/web/packages/ParBayesianOptimization)
 
 # ParBayesianOptimization
 
@@ -145,6 +146,8 @@ optimal number of rounds determined by the `xgb.cv`:
 
 ``` r
 scoringFunction <- function(max_depth, min_child_weight, subsample) {
+  
+  set.seed(3)
 
   dtrain <- xgb.DMatrix(agaricus.train$data,label = agaricus.train$label)
   
@@ -202,9 +205,9 @@ tNoPar <- system.time(
   ScoreResult <- BayesianOptimization(
       FUN = scoringFunction
     , bounds = bounds
-    , initPoints = 8
+    , initPoints = 4
     , bulkNew = 1
-    , nIters = 10
+    , nIters = 6
     , kern = kern
     , acq = acq
     , kappa = 2.576
@@ -212,7 +215,7 @@ tNoPar <- system.time(
     , parallel = FALSE)
 )
 #> 
-#> Running initial scoring function 8 times in 1 thread(s).
+#> Running initial scoring function 4 times in 1 thread(s).
 #> 
 #> Starting round number 1
 #>   1) Fitting Gaussian process...
@@ -226,33 +229,30 @@ tNoPar <- system.time(
 ```
 
 The console informs us that the process initialized by running
-`scoringFunction` 8 times. It then fit a Gaussian process to the
+`scoringFunction` 4 times. It then fit a Gaussian process to the
 parameter-score pairs, found the global optimum of the acquisition
 function, and ran `scoringFunction` again. This process continued until
 we had 10 parameter-score pairs. You can interrogate the `ScoreResult`
-object to see the results:
+object to see the results. As you can see, the process found better
+parameters after each iteration:
 
 ``` r
 ScoreResult$ScoreDT
-#>     Iteration max_depth min_child_weight subsample Elapsed     Score nrounds
-#>  1:         0         3               99 0.4210854    0.27 0.9693790      10
-#>  2:         0         3               44 0.7274344    0.17 0.9897887       4
-#>  3:         0         5               65 0.2885685    0.45 0.9749997      22
-#>  4:         0         7               78 0.5578294    0.14 0.9770927       3
-#>  5:         0         6               22 0.5302841    0.27 0.9948687       6
-#>  6:         0         8               35 0.6974692    0.32 0.9936023       9
-#>  7:         0         7               61 0.9238562    0.13 0.9870387       1
-#>  8:         0        10               12 0.8577428    0.70 0.9988247      22
-#>  9:         1         6                1 0.8603698    0.19 0.9984757       1
-#> 10:         2        10                1 0.6621128    0.19 0.9984757       2
+#>    Iteration max_depth min_child_weight subsample Elapsed     Score nrounds
+#> 1:         0         4               70 0.7666946    0.12 0.9779723       1
+#> 2:         0         8               16 0.8835947    1.39 0.9990767      54
+#> 3:         0         6               48 0.3199902    0.29 0.9790360      13
+#> 4:         0         2               89 0.4694295    0.32 0.9779697      19
+#> 5:         1         8               13 0.8989494    1.35 0.9993013      51
+#> 6:         2         9               11 0.9174873    1.00 0.9994490      36
 ```
 
 ``` r
 ScoreResult$BestPars
 #>    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs
-#> 1:         0        10               12 0.8577428 0.9988247      22      3 secs
-#> 2:         1        10               12 0.8577428 0.9988247      22      9 secs
-#> 3:         2        10               12 0.8577428 0.9988247      22     18 secs
+#> 1:         0         8               16 0.8835947 0.9990767      54      3 secs
+#> 2:         1         8               13 0.8989494 0.9993013      51     12 secs
+#> 3:         2         9               11 0.9174873 0.9994490      36     22 secs
 ```
 
 ## Running In Parallel
@@ -304,8 +304,8 @@ cores in parallel:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    0.89    0.08   11.00
+#>    1.20    0.08    6.23
 tNoPar
 #>    user  system elapsed 
-#>   19.33    2.84   18.31
+#>   23.22    3.86   22.26
 ```
