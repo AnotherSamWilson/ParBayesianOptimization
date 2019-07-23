@@ -71,7 +71,7 @@ do we go about determining the best number of trees to try next? As it
 turns out, Gaussian processes can give us a very good definition for our
 prior distribution. Fitting a Gaussian process to the data above
 (indexed by our hyperparameter), we can see the expected value of Score
-accross our parameter bounds, as well as the uncertainty
+across our parameter bounds, as well as the uncertainty
 bands:
 
 <center>
@@ -128,7 +128,6 @@ folds object to be used in the scoring function.
 ``` r
 library("xgboost")
 library("ParBayesianOptimization")
-#> Warning: package 'ParBayesianOptimization' was built under R version 3.5.3
 
 data(agaricus.train, package = "xgboost")
 
@@ -239,20 +238,20 @@ parameters after each iteration:
 ``` r
 ScoreResult$ScoreDT
 #>    Iteration max_depth min_child_weight subsample Elapsed     Score nrounds
-#> 1:         0         4               70 0.7666946    0.12 0.9779723       1
-#> 2:         0         8               16 0.8835947    1.39 0.9990767      54
-#> 3:         0         6               48 0.3199902    0.29 0.9790360      13
-#> 4:         0         2               89 0.4694295    0.32 0.9779697      19
-#> 5:         1         8               13 0.8989494    1.35 0.9993013      51
-#> 6:         2         9               11 0.9174873    1.00 0.9994490      36
+#> 1:         0         4               70 0.7666946    0.16 0.9779723       1
+#> 2:         0         8               16 0.8835947    0.71 0.9981337      17
+#> 3:         0         6               48 0.3199902    0.26 0.9781580       7
+#> 4:         0         2               89 0.4694295    0.19 0.9686220       5
+#> 5:         1        10                1 1.0000000    0.22 0.9984757       1
+#> 6:         2         8                1 0.9641125    0.23 0.9984757       1
 ```
 
 ``` r
 ScoreResult$BestPars
 #>    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs
-#> 1:         0         8               16 0.8835947 0.9990767      54      3 secs
-#> 2:         1         8               13 0.8989494 0.9993013      51     12 secs
-#> 3:         2         9               11 0.9174873 0.9994490      36     22 secs
+#> 1:         0         8               16 0.8835947 0.9981337      17      2 secs
+#> 2:         1        10                1 1.0000000 0.9984757       1      9 secs
+#> 3:         2        10                1 1.0000000 0.9984757       1     17 secs
 ```
 
 ## Running In Parallel
@@ -304,8 +303,8 @@ cores in parallel:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    1.20    0.08    6.23
+#>    0.93    0.04    7.30
 tNoPar
 #>    user  system elapsed 
-#>   23.22    3.86   22.26
+#>   18.45    1.61   16.79
 ```

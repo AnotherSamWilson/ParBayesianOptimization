@@ -193,6 +193,7 @@ BayesianOptimization <- function(
   Overwrites <- 0
   Iter <- 0
   kerns <- assignKern(kern,beta)
+  sinkFile <- file()
   boundsDT <- data.table( N = ParamNames
                         , L = sapply(bounds, function(x) x[1])
                         , U = sapply(bounds, function(x) x[2])
@@ -200,13 +201,13 @@ BayesianOptimization <- function(
                         , C = sapply(bounds, function(x) class(x))
   )
 
-  
+
   # Define processing function
   ParMethod <- function(x) if(x) {`%dopar%`} else {`%do%`}
   `%op%` <- ParMethod(parallel)
   Workers <- getDoParWorkers()
 
-  
+
   # Better to quit gracefully than not
   if (sum(acq == c("ucb","ei","eips","poi")) == 0) stop("Acquisition function not recognized")
   if (sum(stopImpatient$newAcq == c("ucb","ei","eips","poi")) == 0) stop("New acquisition function not recognized")
@@ -226,7 +227,7 @@ BayesianOptimization <- function(
   if (verbose > 0 & bulkNew < Workers & parallel) cat("bulkNew is less than the threads registered on the parallel back end - process may not utilize all workers.\n")
 
 
-  # If an initGrid was specified, make that the initial process fit. 
+  # If an initGrid was specified, make that the initial process fit.
   # If not, create one with initPoints combinations.
   # If leftOff was specified, append to the initialized table (if applicable)
   if (initialize){
@@ -238,7 +239,7 @@ BayesianOptimization <- function(
       }
 
       if (verbose > 0) cat("\nRunning initial scoring function",nrow(InitFeedParams),"times in",Workers,"thread(s).\n")
-      sink("NUL")
+      sink(file = sinkFile)
       ScoreDT <- foreach( iter = 1:nrow(InitFeedParams)
                         , .options.multicore = mco
                         , .combine = rbind
@@ -256,8 +257,9 @@ BayesianOptimization <- function(
           data.table(Params,Elapsed = Elapsed[[3]],as.data.table(Result))
 
       }
-      sink()
-      
+      if (sink.number() > 0) sink()
+
+
       if (!is.data.table(ScoreDT)) {
         cat("\nFUN failed to run with error list:\n"); print(ScoreDT)
         stop("Stopping process.")
@@ -319,25 +321,25 @@ BayesianOptimization <- function(
         acq <- stopImpatient$newAcq
       }
 
-      
+
     # Fit GP
     newD <- ScoreDT[get("Iteration") == Iter-1,]
     if (verbose > 0) cat("\n  1) Fitting Gaussian process...")
-    
+
     # Fitting/Updating GauPro S6 class inside seperate function scope causes memory pointer problems.
     X = matrix(as.matrix(minMaxScale(newD, boundsDT)), nrow = nrow(newD))
     Z = matrix(as.matrix(newD[,.(get("Score")/scaleList$score,Elapsed/scaleList$elapsed)]), nrow = nrow(newD))
-    
+
     if (is.null(GPs)) {
-      
+
       GPs <- GauPro_kernel_model$new( X
                                     , matrix(Z[,1])
                                     , kernel = kerns
                                     , parallel = FALSE
                                     , useC = FALSE)
-      
+
       if (acq == "eips") {
-        
+
         kerne <- assignKern(kern,beta)
 
         GPe <- GauPro_kernel_model$new( X
@@ -345,13 +347,13 @@ BayesianOptimization <- function(
                                       , kernel = kerne
                                       , parallel = FALSE
                                       , useC = FALSE)
-        
+
       }
     } else{
-      
+
       # Update Score GP
       GPs <- GPs$update(Xnew = X, Znew = as.matrix(Z[,1]), nug.update = TRUE)
-      
+
       if (acq == "eips") {
 
         GPe <- GPe$update(Xnew = X, Znew = as.matrix(Z[,2]), nug.update = TRUE)
@@ -376,14 +378,14 @@ BayesianOptimization <- function(
                          , parallel = parallel
                          , convThresh = convThresh
                          )
-    
+
     if (sum(LocalOptims$gradCount > 2) == 0) cat("\n  2a) optim function only took <3 steps.\n      Process may be sampling random points.\n      Try decreasing convThresh.")
 
     fromCluster <- applyCluster()
     acqMaximums <- rbind(acqMaximums, data.table("Iteration" = Iter, fromCluster$clusterPoints))
 
     if (verbose > 0) cat("\n  3) Running scoring function",nrow(fromCluster$newSet),"times in",Workers,"thread(s)...\n")
-    sink("NUL")
+    sink(file = sinkFile)
     NewResults <- foreach( iter = 1:nrow(fromCluster$newSet)
                          , .options.multicore = mco
                          , .combine = rbind
@@ -398,15 +400,16 @@ BayesianOptimization <- function(
             Params <- fromCluster$newSet[get("iter"),]
             Elapsed <- system.time(Result <- do.call(what = FUN, args = as.list(Params)))
             data.table(fromCluster$newSet[get("iter"),], Elapsed = Elapsed[[3]], as.data.table(Result))
-            
+
     }
-    sink()
-    
+    if (sink.number() > 0) sink()
+
+
     if (!is.data.table(NewResults)) {
       cat("\nFUN failed to run with error list:\n"); print(NewResults)
       stop("Stopping process.")
     }
-    
+
     Time <- Sys.time()
 
     # Print updates on parameter-score search
@@ -456,6 +459,7 @@ BayesianOptimization <- function(
   RetList$acqMaximums <- acqMaximums
   RetList$ScoreDT <- ScoreDT
   RetList$BestPars <- BestPars
+  close(sinkFile)
 
   return(RetList)
 
