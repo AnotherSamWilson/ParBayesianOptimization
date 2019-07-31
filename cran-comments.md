@@ -15,3 +15,9 @@ There are no downstream dependencies.
 
 ## Changes
 Improved sink for cross-platform usage
+
+
+## Comments
+Re-submitting. 
+Changed CRAN link to be canonical. 
+There is a mention of this paper in the description: Snoek et al. <arXiv:1206.2944>

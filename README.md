@@ -3,8 +3,8 @@
 
 [![Build
 Status](https://api.travis-ci.org/AnotherSamWilson/ParBayesianOptimization.svg)](https://travis-ci.org/AnotherSamWilson/ParBayesianOptimization)
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/ParBayesianOptimization)](http://cran.r-project.org/web/packages/ParBayesianOptimization)
-[![CRAN\_Downloads](https://cranlogs.r-pkg.org/badges/ParBayesianOptimization)](http://cran.r-project.org/web/packages/ParBayesianOptimization)
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/ParBayesianOptimization)](https://CRAN.R-project.org/package=ParBayesianOptimization)
+[![CRAN\_Downloads](https://cranlogs.r-pkg.org/badges/ParBayesianOptimization)](https://CRAN.R-project.org/package=ParBayesianOptimization)
 
 # ParBayesianOptimization
 
@@ -238,12 +238,12 @@ parameters after each iteration:
 ``` r
 ScoreResult$ScoreDT
 #>    Iteration max_depth min_child_weight subsample Elapsed     Score nrounds
-#> 1:         0         4               70 0.7666946    0.16 0.9779723       1
-#> 2:         0         8               16 0.8835947    0.71 0.9981337      17
-#> 3:         0         6               48 0.3199902    0.26 0.9781580       7
-#> 4:         0         2               89 0.4694295    0.19 0.9686220       5
-#> 5:         1        10                1 1.0000000    0.22 0.9984757       1
-#> 6:         2         8                1 0.9641125    0.23 0.9984757       1
+#> 1:         0         4               70 0.7666946    0.19 0.9779723       1
+#> 2:         0         8               16 0.8835947    0.67 0.9981337      17
+#> 3:         0         6               48 0.3199902    0.31 0.9781580       7
+#> 4:         0         2               89 0.4694295    0.24 0.9686220       5
+#> 5:         1        10                1 1.0000000    0.28 0.9984757       1
+#> 6:         2         8                1 0.9641125    0.31 0.9984757       1
 ```
 
 ``` r
@@ -251,7 +251,7 @@ ScoreResult$BestPars
 #>    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs
 #> 1:         0         8               16 0.8835947 0.9981337      17      2 secs
 #> 2:         1        10                1 1.0000000 0.9984757       1      9 secs
-#> 3:         2        10                1 1.0000000 0.9984757       1     17 secs
+#> 3:         2        10                1 1.0000000 0.9984757       1     18 secs
 ```
 
 ## Running In Parallel
@@ -303,8 +303,8 @@ cores in parallel:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    0.93    0.04    7.30
+#>    0.98    0.00    7.36
 tNoPar
 #>    user  system elapsed 
-#>   18.45    1.61   16.79
+#>   19.28    1.69   17.59
 ```
