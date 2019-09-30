@@ -2,7 +2,7 @@
 % Please edit documentation in R/applyCluster.R
 \name{applyCluster}
 \alias{applyCluster}
-\title{Find Clusters}
+\title{Find Clusters or apply noise until}
 \usage{
 applyCluster(e = parent.frame())
 }

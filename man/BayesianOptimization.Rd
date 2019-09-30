@@ -10,7 +10,8 @@ BayesianOptimization(FUN, bounds, saveIntermediate = NULL,
   nIters = 0, kern = "Matern52", beta = 0, acq = "ucb",
   stopImpatient = list(newAcq = "ucb", rounds = Inf), kappa = 2.576,
   eps = 0, gsPoints = 100, convThresh = 1e+07,
-  minClusterUtility = NULL, noiseAdd = 0.25, verbose = 1)
+  minClusterUtility = NULL, noiseAdd = 0.25, plotProgress = FALSE,
+  verbose = 1)
 }
 \arguments{
 \item{FUN}{the function to be maximized. This function should return a named list with at least 1 component.
@@ -97,6 +98,11 @@ to obtain the other \code{bulkNew-1} candidate parameter sets. New random draws 
 a shape(4,4) beta distribution centered at the optimal candidate parameter set
 with a range equal to \code{noiseAdd*(Upper Bound - Lower Bound)}}
 
+\item{plotProgress}{Should the progress of the Bayesian optimization be printed to the display? Top graph shows
+the score(s) obtained at each iteration. The bottom graph shows the optimal value of the acquisition function
+in the last iteration. This is useful to display how much utility you are actually assuming still exists in your
+Gaussian process. If your utility is approaching 0, then you may be close to a good parameter set.}
+
 \item{verbose}{Whether or not to print progress. If 0, nothing will be printed.
 If 1, progress will be printed. If 2, progress and information about new parameter-score pairs will be printed.}
 }
@@ -104,8 +110,11 @@ If 1, progress will be printed. If 2, progress and information about new paramet
 A list containing details about the process:
 \item{GPs}{The last Gaussian Process run on the parameter-score pairs}
 \item{GPe}{If \code{acq = "eips"}, this contains the last Gaussian Process run on the parameter-elapsed time pairs}
-\item{acqMaximums}{The optimal parameters according to each gaussian process}
-\item{ScoreDT}{A list of all parameter-score pairs, as well as extra columns from FUN}
+\item{progressGrob}{a grob showing the evolution of the scores and utility discovered during the Bayesian optimization}
+\item{ScoreDT}{A list of all parameter-score pairs, as well as extra columns from FUN. gpUtility is the acquisition
+function value at the time that parameter set was tested. acqOptimum is a boolean column that tells whether the parameter
+set was an acquisition function optimum, or if it was obtained by applying noise to another optimum. Elapsed is the amount of
+time in seconds it took FUN to evaluate that parameter set.}
 \item{BestPars}{The best parameter set at each iteration}
 }
 \description{
