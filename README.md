@@ -29,7 +29,7 @@ More information can be found in the package vignettes and manual.
   - [07 - Sampling Multiple Promising Points at
     Once](https://github.com/AnotherSamWilson/ParBayesianOptimization#Sampling-Multiple-Promising-Points-at-Once)  
   - [08 - How Long Should it Run
-    For?](https://github.com/AnotherSamWilson/ParBayesianOptimization#How-Long-Should-it-Run-For?)
+    For?](https://github.com/AnotherSamWilson/ParBayesianOptimization#how-long-should-it-run-for)
 
 ## Installation
 
@@ -189,14 +189,14 @@ be found in the documentation:
 ``` r
 simpleResults$ScoreDT
 #>    Iteration         x   gpUtility acqOptimum Elapsed       Score
-#> 1:         0  0.000000 0.000000000      FALSE       0 0.097138940
-#> 2:         0  5.000000 0.000000000      FALSE       0 0.244233160
-#> 3:         0 10.000000 0.000000000      FALSE       0 0.204557501
-#> 4:         1  4.708522 0.075427586       TRUE       0 0.242643431
-#> 5:         2  7.078303 0.031507441       TRUE       0 0.503759070
-#> 6:         3  7.595789 0.034673257       TRUE       0 0.452260821
-#> 7:         4  6.754212 0.012806554       TRUE       0 0.491910012
-#> 8:         5 15.000000 0.002835998       TRUE       0 0.008764155
+#> 1:         0  0.000000 0.000000000      FALSE    0.00 0.097138940
+#> 2:         0  5.000000 0.000000000      FALSE    0.02 0.244233160
+#> 3:         0 10.000000 0.000000000      FALSE    0.00 0.204557501
+#> 4:         1  4.708522 0.075427586       TRUE    0.00 0.242643431
+#> 5:         2  7.078303 0.031507441       TRUE    0.00 0.503759070
+#> 6:         3  7.595789 0.034673257       TRUE    0.00 0.452260821
+#> 7:         4  6.754212 0.012806554       TRUE    0.00 0.491910012
+#> 8:         5 15.000000 0.002835998       TRUE    0.00 0.008764155
 ```
 
 ``` r
@@ -213,9 +213,9 @@ simpleResults$BestPars
 You also probably noticed that a chart was printed to the Viewer
 (browser if not using Rstudio). This is discussed more in depth in the
 section [How Long Should it Run
-For?](https://github.com/AnotherSamWilson/ParBayesianOptimization#How-Long-Should-it-Run-For?)
+For?](https://github.com/AnotherSamWilson/ParBayesianOptimization#how-long-should-it-run-for)
 
-## Tuning Hyperparameters
+## Hyperparameter Tuning
 
 In this example, we will be using the agaricus.train dataset provided in
 the XGBoost package. Here, we load the packages, data, and create a
@@ -321,12 +321,12 @@ parameters after each iteration:
 ``` r
 ScoreResult$ScoreDT
 #>    Iteration max_depth min_child_weight subsample  gpUtility acqOptimum Elapsed     Score nrounds
-#> 1:         0         2         1.670129 0.7880670 0.00000000      FALSE    0.19 0.9871587       6
-#> 2:         0         2        14.913213 0.8763154 0.00000000      FALSE    0.20 0.9861623       9
-#> 3:         0         4        18.833690 0.3403900 0.00000000      FALSE    0.43 0.9938563      14
-#> 4:         0         4         8.639925 0.5499186 0.00000000      FALSE    0.46 0.9983090      14
-#> 5:         1         4         1.614837 0.7384622 0.08372735       TRUE    0.22 0.9985913       5
-#> 6:         2         4        24.326559 0.6509651 0.03147079       TRUE    1.58 0.9988713      75
+#> 1:         0         2         1.670129 0.7880670 0.00000000      FALSE    0.18 0.9871587       6
+#> 2:         0         2        14.913213 0.8763154 0.00000000      FALSE    0.22 0.9861623       9
+#> 3:         0         4        18.833690 0.3403900 0.00000000      FALSE    0.39 0.9938563      14
+#> 4:         0         4         8.639925 0.5499186 0.00000000      FALSE    0.42 0.9983090      14
+#> 5:         1         4         1.614837 0.7384622 0.08372735       TRUE    0.31 0.9985913       5
+#> 6:         2         4        24.326559 0.6509651 0.03147079       TRUE    1.59 0.9988713      75
 ```
 
 ``` r
@@ -384,10 +384,10 @@ cores in parallel:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    1.03    0.17    9.61
+#>    0.98    0.05    7.35
 tNoPar
 #>    user  system elapsed 
-#>   11.25    3.27    9.93
+#>   11.17    3.12   10.21
 ```
 
 ## Sampling Multiple Promising Points at Once
@@ -423,8 +423,9 @@ plotly chart is updated at each iteration:
 <img src="vignettes/progressPlot.png" style="display: block; margin: auto;" />
 
 As you thoroughly explore the parameter space, you reduce the
-uncertainty in the unexplored areas. As you reduce uncertainty, you
-reduce utility, or the potential to find a better parameter set than the
-one you already have. Notice that the expected improvement converged to
-0 after iteration 6. If you see a similar pattern, you can be fairly
-certain that you have found an (approximately) global optimum.
+uncertainty in the unexplored areas. As you reduce uncertainty, you tend
+to reduce utility, which can be thought of as the potential to find a
+better parameter set than the one you already have. Notice that the
+expected improvement converged to 0 after iteration 6. If you see a
+similar pattern, you can be fairly certain that you have found an
+(approximately) global optimum.
