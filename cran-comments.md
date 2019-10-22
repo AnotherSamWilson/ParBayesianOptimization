@@ -1,10 +1,10 @@
 
 ## Test environments
-* local Windows 10 x64, R 3.5.2
+* local Windows 10 x64, R 3.6.1
 * Windows Server 2008 R2 SP1 32/64 bit (Rhub)
-* Ubuntu 14.04.5, R 3.5.2 (travis-ci)
 * Ubuntu Linux 16.04 LTS (Rhub)
 * Fedora Linux (Rhub)
+* Ubuntu 14.04.5, R 3.5.2 (travis-ci)
 
 
 ## R CMD check results
@@ -14,7 +14,7 @@ There were no ERRORs, WARNINGs or NOTEs
 There are no downstream dependencies.
 
 ## Changes
-Sink is removed on function exit.
+Sink is removed on function exit.  
 Gaussian Process now uses beta length = # parameters.
 
 ## Comments
