@@ -1,0 +1,66 @@
+---
+title: "How Long Should the Process Run For?"
+author: "Samuel Wilson"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{How Long Should the Process Run For?}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(width = 1000)
+set.seed(1991)
+```
+
+## Watching the Utility
+
+If ```nIters``` is high enough, this process will run forever. However, if you were to look at the utility of each iteration, you would probably notice diminishing returns. Once the parameter space is thoroughly explored, the utility tends to converge to a certain value, depending on the acquisition function used. The example below shows that as time goes on, the expected improvement converges towards 0.
+
+
+## Plotting Progress
+
+By default, the ```BayesianOptimization``` function displays the progress in the viewer (browser, if not using Rstudio).
+```{r eval = TRUE, echo=TRUE}
+require(ParBayesianOptimization)
+require(data.table)
+
+sf <- function(x) dnorm(x,3,2)*1.5 + dnorm(x,7,1) + dnorm(x,10,2)
+
+ScoringFunction <- function(x) {
+  return(list(Score = sf(x)))
+}
+
+bounds = list(x = c(0,15))
+
+Results <- BayesianOptimization(
+    FUN = ScoringFunction
+  , bounds = bounds
+  , initGrid = data.table(x=c(1,4,8,12))
+  , bulkNew = 1
+  , nIters = 12
+  , acq = "ei"
+  , gsPoints = 10
+  , minClusterUtility = 1
+  , plotProgress = TRUE
+)
+```
+  
+<br></br>
+  
+This progress plot is updated at each iteration:  
+  
+<br></br>
+  
+```{r eval = TRUE, echo=FALSE, fig.align = "center"}
+knitr::include_graphics("progressPlot.png")
+```
+  
+<br></br>
+  
+Notice how the expected improvement eventually converges to 0 (the graph shows the upper confidence bound divided by y_max). If you notice that your utility has converged, it may be a good time to stop the process manually. Keep in mind, if you stop the process manually, results will not be returned, so it is important to use the ```saveIntermediate``` field if you plan on doing this.

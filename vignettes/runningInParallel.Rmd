@@ -1,0 +1,97 @@
+---
+title: "Running Bayesian Optimization in Parallel"
+author: "Samuel Wilson"
+date: "October 31, 2018"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{runningInParallel}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(width = 1000)
+set.seed(1991)
+```
+
+### Running in Parallel
+
+Fortunately, the most time intensive part of our parameter search (running the scoring function) can easily be done in parallel. ```PayBayesianOptimization``` creates a flexible framework for setting up your parameter search as efficiently as possible. The steps are similar to a vanilla implementation of BayesianOptimization as seen in the first vignette, we just need to load a package that allows us to register a parallel backend and define a few extra variables. On a Windows machine, you can use ```doParallel```:
+
+```{r eval = TRUE, results='hide', echo=TRUE, message=FALSE}
+library("xgboost")
+library("ParBayesianOptimization")
+library("doParallel")
+
+data(agaricus.train, package = "xgboost")
+
+Folds <- list(
+    Fold1 = as.integer(seq(1,nrow(agaricus.train$data),by = 3))
+  , Fold2 = as.integer(seq(2,nrow(agaricus.train$data),by = 3))
+  , Fold3 = as.integer(seq(3,nrow(agaricus.train$data),by = 3))
+)
+
+scoringFunction <- function(max_depth, min_child_weight, subsample) {
+
+  dtrain <- xgb.DMatrix(agaricus.train$data,label = agaricus.train$label)
+  
+  Pars <- list( 
+      booster = "gbtree"
+    , eta = 0.01
+    , max_depth = max_depth
+    , min_child_weight = min_child_weight
+    , subsample = subsample
+    , objective = "binary:logistic"
+    , eval_metric = "auc"
+  )
+
+  xgbcv <- xgb.cv(
+      params = Pars
+    , data = dtrain
+    , nround = 100
+    , folds = Folds
+    , prediction = TRUE
+    , showsd = TRUE
+    , early_stopping_rounds = 5
+    , maximize = TRUE
+    , verbose = 0
+  )
+
+  return(list(Score = max(xgbcv$evaluation_log$test_auc_mean)
+            , nrounds = xgbcv$best_iteration
+             )
+         )
+}
+
+bounds <- list( 
+    max_depth = c(2L, 10L)
+  , min_child_weight = c(1, 100)
+  , subsample = c(0.25, 1)
+)
+```
+
+From here, we need to define two important function parameters, ```export``` and ```packages```. These tell the foreach loop which packages/variables need to be loaded into each parallel instance:
+
+```{r eval = TRUE, results='hide', echo=TRUE}
+pkgs <- 'xgboost'
+
+xprt <- c('Folds','agaricus.train')
+```
+
+We are now ready to start our parameter search. If you want to make full use of your core cluster, bulkNew should be set to be the same as the number of registered cores:
+
+```{r eval = TRUE, echo=TRUE}
+cl <- makeCluster(2)
+registerDoParallel(cl)
+ScoreResult <- BayesianOptimization(
+    FUN = scoringFunction
+  , bounds = bounds
+  , initPoints = 10
+  , bulkNew = 2
+  , nIters = 14
+  , parallel = TRUE
+  , packages = pkgs
+  , export = xprt
+)
+```

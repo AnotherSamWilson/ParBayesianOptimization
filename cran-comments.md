@@ -14,10 +14,10 @@ There were no ERRORs, WARNINGs or NOTEs
 There are no downstream dependencies.
 
 ## Changes
-Improved sink for cross-platform usage
-
+Sink is removed on function exit.
+Gaussian Process now uses beta length = # parameters.
 
 ## Comments
-Re-submitting. 
-Changed CRAN link to be canonical. 
-There is a mention of this paper in the description: Snoek et al. <arXiv:1206.2944>
+Provided option to plot progress.  
+Depreciated beta parameter.  
+Improved documentation (vignettes and function documentation)

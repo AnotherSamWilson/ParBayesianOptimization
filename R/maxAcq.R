@@ -22,25 +22,30 @@ maxAcq <- function(GPs, GPe, TryOver, acq = "ucb", y_max, kappa, eps, parallel, 
 
   `%op%` <- ParMethod(parallel)
 
-  LocalOptims <- foreach( i = 1:nrow(TryOver)
-                          , .combine = 'rbind'
-                          , .inorder = TRUE
-                          , .errorhandling = 'pass'
-                          , .packages = c('data.table','GauPro','stats')
-                          , .multicombine = TRUE
-                          , .verbose = FALSE
-                          , .export = c('calcAcq')
+  LocalOptims <- foreach(
+      i = 1:nrow(TryOver)
+    , .combine = 'rbind'
+    , .inorder = TRUE
+    , .errorhandling = 'pass'
+    , .packages = c('data.table','GauPro','stats')
+    , .multicombine = TRUE
+    , .verbose = FALSE
+    , .export = c('calcAcq')
   ) %op% {
 
-    optim_result <- optim( par = TryOver[i,]
-                           , fn = calcAcq
-                           , GPs = GPs, GPe = GPe, acq = acq, y_max = y_max, kappa = kappa, eps = eps
-                           , method = "L-BFGS-B"
-                           , lower = rep(0, length(TryOver))
-                           , upper = rep(1, length(TryOver))
-                           , control = list( maxit = 1000
-                                             , factr = convThresh
-                                             , fnscale = -1)
+    optim_result <- optim(
+        par = TryOver[i,]
+      , fn = calcAcq
+      , GPs = GPs, GPe = GPe, acq = acq, y_max = y_max, kappa = kappa, eps = eps
+      , method = "L-BFGS-B"
+      , lower = rep(0, length(TryOver))
+      , upper = rep(1, length(TryOver))
+      , control = list(
+          maxit = 1000
+        , factr = convThresh
+        , fnscale = -1
+        , pgtol = .Machine$double.eps
+        )
     )
 
     # Sometimes optim doesn't actually cap the bounds at 0 and 1.

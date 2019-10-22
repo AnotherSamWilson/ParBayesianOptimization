@@ -13,7 +13,7 @@ checkDup(tab1, tab2)
 }
 \value{
 A vector of booleans of length \code{nrow(tab1)} representing whether each row
-of tab1 already exists in tab2 or in proceeding rows or tab1.
+of tab1 already exists in tab2 or in proceeding rows of tab1.
 }
 \description{
 Check if rows from tab1 exist in tab2.

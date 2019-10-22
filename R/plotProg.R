@@ -5,43 +5,91 @@
 #'
 #' @param dt ScoreDT
 #' @param acq acq
-#' @importFrom gridExtra arrangeGrob
-#' @importFrom ggplot2 ggplot geom_dotplot ggtitle xlab ylab theme aes_string
+#' @importFrom plotly plot_ly subplot layout toRGB %>%
 #' @return Nothing. Prints plot to display.
 #' @keywords internal
 plotProg <- function(dt,acq) {
 
-  # dt <- ScoreDT
-  dt$Iteration <- factor(dt$Iteration)
-  acqDT <- data.table(
-      a = c("ei","ucb","poi","eips")
-    , n = c("Expected Improvement"
-          , "Upper Confidence Bound"
-          , "Probability of Improvement"
-          , "Expected Improvement / Second")
+  dt$desc <- ifelse(dt$acqOptimum,"Acquisition Optimum","Generated From Noise")
+  scheme <- "Set1"
+  acqN <- data.table(
+    nam = c("ei","eips","poi","ucb")
+    , disp = c("Expected Improvement","Expct. Imprvmt./Second", "Prob. of Improvement","Upper Conf. Bound")
   )
-  acqN <- acqDT[acqDT$a == acq,]$n
 
-  sBW <- (max(dt$Score) - min(dt$Score))/50
-  uBW <- (max(dt$gpUtility) - min(dt$gpUtility))/50
+  axisFont <- list(
+    size = 15
+  )
+  axisX <- list(
+    title = "Iteration"
+    , titlefont = axisFont
+    , autotick = FALSE
+    , ticks = "outside"
+    , tick0 = 0
+    , dtick = 1
+    , ticklen = 5
+    , tickwidth = 1
+    , tickcolor = toRGB("blue")
 
-  s <- ggplot(dt,aes_string(x="Iteration",y="Score",fill="acqOptimum")) +
-    geom_dotplot(binaxis = "y",dotsize = 1,stackratio = 1,stackdir="centerwhole",binwidth = sBW) +
-    ggtitle("Scores Obtained in Each Iteration") +
-    xlab("Iteration") +
-    ylab("Score (Returned From FUN)") +
-    theme(legend.title.align=0.5)
-  s$labels$fill <- "Acquisition\nOptimum"
+  )
+  axisYs <- list(
+    title = "Result from FUN"
+    , titlefont = axisFont
+  )
+  axisYu <- list(
+    title = acqN[acqN$nam == acq,]$disp
+    , titlefont = axisFont
+  )
+  titleFont <-
 
+    s <- plot_ly(
+      data = dt
+      , x = ~Iteration
+      , y = ~Score
+      , type = 'scatter'
+      , color = ~desc
+      , colors = scheme
+      , mode = "markers"
+      , showlegend = TRUE
+      , width = 500
+      , height = 500
+    ) %>%
+    layout(
+      xaxis = axisX
+      , yaxis = axisYs
+      , legend = list(orientation = 'h',x = 0.095,y = -0.16)
+    )
+  u <- plot_ly(
+    data = dt
+    , x = ~Iteration
+    , y = ~gpUtility
+    , type = 'scatter'
+    , color = ~desc
+    , colors = scheme
+    , mode = "markers"
+    , showlegend = FALSE
+    , width = 500
+    , height = 600
+  ) %>%
+    layout(
+      xaxis = axisX
+      , yaxis = axisYu
+    )
 
-  u <- ggplot(dt,aes_string(x="Iteration",y="gpUtility",fill="acqOptimum")) +
-    geom_dotplot(binaxis = "y",dotsize = 1,stackratio = 1,stackdir="centerwhole",binwidth = uBW) +
-    ggtitle(paste0("Scaled Acquisition Function at Each Iteration")) +
-    xlab("Iteration") +
-    ylab(acqN) +
-    theme(legend.title.align=0.5)
-  u$labels$fill <- "Acquisition\nOptimum"
-
-  return(arrangeGrob(s,u))
+  return(
+    subplot(s,u
+            , nrows = 2
+            , shareX = TRUE
+            , shareY = FALSE
+            , titleY = TRUE
+            , margin = 0.03
+    ) %>%
+      layout(
+        title = "Bayesian Optimization Progress"
+        #, showlegend=FALSE
+        #, showlegend2=TRUE
+        , plot_bgcolor='rgb(240, 240, 240)'
+      )
+  )
 
 }

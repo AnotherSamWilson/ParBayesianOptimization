@@ -17,7 +17,7 @@
 #' @keywords internal
 checkBounds <- function(x, Table, bounds) {
 
-   sum(!between(Table[[x]], lower = bounds[[x]][[1]], upper = bounds[[x]][[2]]))
+  sum(!between(Table[[x]], lower = bounds[[x]][[1]], upper = bounds[[x]][[2]]))
 
 }
 
@@ -95,13 +95,13 @@ unMMScale <- function(tabl, boundsDT) {
 
   umms <- lapply(boundsDT$N, function(x) {
 
-     B <- boundsDT[get("N")==x,]
+    B <- boundsDT[get("N")==x,]
 
-     n <- tabl[[x]]*B$R+B$L
+    n <- tabl[[x]]*B$R+B$L
 
-     if (B$C == "integer") n <- round(n)
+    if (B$C == "integer") n <- round(n)
 
-     return(n)
+    return(n)
 
   })
 
@@ -138,15 +138,14 @@ zeroOneScale <- function(vec) {
 #' @param tab1 The table to check
 #' @param tab2 The table to compare.
 #' @return A vector of booleans of length \code{nrow(tab1)} representing whether each row
-#' of tab1 already exists in tab2 or in proceeding rows or tab1.
+#' of tab1 already exists in tab2 or in proceeding rows of tab1.
 #' @keywords internal
 checkDup <- function(tab1,tab2) {
 
   sapply(1:nrow(tab1), function(i) {
     tab2 <- rbind(tab2,tab1[0:(i-1),])
     nrow(fintersect(tab2,tab1[i,])) > 0
-    }
-  )
+  })
 
 }
 
@@ -156,41 +155,20 @@ checkDup <- function(tab1,tab2) {
 #' This function exists so GauPro doesn't have to be loaded to run BayesianOptimization
 #'
 #' @param kern a kernel
-#' @param beta the log10(theta) the lengthscale parameter
 #' @return an GauPro_kernel_beta R6 class
 #' @keywords internal
-assignKern <- function(kern,beta) {
+assignKern <- function(kern,params) {
 
-  if(kern == "Matern32"){kern <- Matern32$new(beta)
+  betas <- rep(0,params)
 
-  } else if (kern == "Matern52") { kern <- Matern52$new(beta)
+  if(kern == "Matern32"){kern <- Matern32$new(betas)
 
-  } else if (kern == "Exponential") { kern <- Exponential$new(beta)
+  } else if (kern == "Matern52") { kern <- Matern52$new(betas)
 
-  } else if (kern == "Gaussian") { kern <- Gaussian$new(beta)}
+  } else if (kern == "Exponential") { kern <- Exponential$new(betas)
+
+  } else if (kern == "Gaussian") { kern <- Gaussian$new(betas)}
 
   return(kern)
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

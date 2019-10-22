@@ -4,6 +4,9 @@
 # Major Changes
 * Added a `NEWS.md` file to track changes to the package.
 * Package was accepted by CRAN on 12/3/2018  
+* Implemented plotProgress 10/01/2019
+* Depreciated beta parameter. Automatically set to 0. 10/01/2019
+
 
 
 # Minor Changes
@@ -13,3 +16,4 @@
 * Reduced R version depencency to 3.4. 2/24/2019
 * Improved error handling 3/9/2019
 * Sink now works on Solaris 7/22/2019
+* Same kernel is now provided to GauPro. This allows re-scaling every iteration 10/01/2019

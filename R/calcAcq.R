@@ -15,7 +15,8 @@
 #' @keywords internal
 
 calcAcq <- function(par, GPs, GPe, acq, y_max, kappa, eps) {
-  # Utility Function Type
+
+  # Excellent paper showing the derivation of each utility funciton.
   # https://www.cse.wustl.edu/~garnett/cse515t/spring_2015/files/lecture_notes/12.pdf
 
   if (acq == "ucb") {

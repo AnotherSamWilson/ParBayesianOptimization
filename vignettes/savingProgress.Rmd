@@ -1,0 +1,54 @@
+---
+title: "Saving and Continuing a Process"
+author: "Samuel Wilson"
+date: "October 31, 2018"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Saving and Continuing a Process}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(width = 1000)
+set.seed(1991)
+```
+
+
+### Re-using Intermediary Results in Later Experiment
+
+Unfortunately, our experiments do not always give us the results we want. Maybe we didn't let it run long enough, or maybe we used the wrong kernel. It could be very time intensive and aggravating to re-initialize the process. Fortunately, the ```BayesianOptimization``` function allows us to, at every update, save our parameter-score pairs as an RDS and re-use them as our initial set in the future. This ensures that the time intensive process of running the scoring function is not wasted.  
+
+All we need to do is specify the path/filename in the ```saveIntermediary``` parameter (this code is not meant to be run):
+```{r eval = FALSE, results='hide', echo=TRUE}
+ScoreResults <- BayesianOptimization(
+      FUN = scoringFunction
+    , bounds = bounds
+    ...
+    , saveIntermediary = "../Intermediary Results/Experiment1.RDS"
+    ...
+  )
+```
+
+If a file currently exists, it **WILL** be overwritten. After this process has run, this file can be recalled and passed to the ```BayesianOptimization``` function in the ```leftoff``` parameter:  
+```{r eval = FALSE, results='hide', echo=TRUE}
+
+priorRuns <- readRDS("../Intermediary Results/Experiment1.RDS") 
+
+ScoreResults <- BayesianOptimization(
+      FUN = scoringFunction
+    , bounds = bounds
+    ...
+    , saveIntermediary = "../Intermediary Results/Experiment2.RDS"
+    , leftOff = priorRuns
+    ...
+  )
+```
+
+When a leftOff table is provided, depending on how the experiment is set up, one of two things will happen:  
+
+  1. If ```initialize``` is TRUE, the process will initialize normally and append the leftOff table when it fits the Gaussian Process  
+  2. If ```initialize``` is FALSE, the process will treat leftOff as the only initial parameter-score pairs. We can start optimizing our Gaussian Process without having to run the scoring function at all!  
+  
+Keep in mind, if you change your bounds, any parameter sets in ```priorRuns``` that fell outside the new bounds would be deleted.

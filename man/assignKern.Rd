@@ -4,12 +4,10 @@
 \alias{assignKern}
 \title{Assign Kernel}
 \usage{
-assignKern(kern, beta)
+assignKern(kern, params)
 }
 \arguments{
 \item{kern}{a kernel}
-
-\item{beta}{the log10(theta) the lengthscale parameter}
 }
 \value{
 an GauPro_kernel_beta R6 class

@@ -4,7 +4,7 @@ author: "Samuel Wilson"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{standardFeatures}
+  %\VignetteIndexEntry{Introduction to ParBayesianOptimization}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -53,23 +53,26 @@ scoringFunction <- function(max_depth, min_child_weight, subsample) {
 
   dtrain <- xgb.DMatrix(agaricus.train$data,label = agaricus.train$label)
   
-  Pars <- list( booster = "gbtree"
-              , eta = 0.01
-              , max_depth = max_depth
-              , min_child_weight = min_child_weight
-              , subsample = subsample
-              , objective = "binary:logistic"
-              , eval_metric = "auc")
+  Pars <- list( 
+      booster = "gbtree"
+    , eta = 0.01
+    , max_depth = max_depth
+    , min_child_weight = min_child_weight
+    , subsample = subsample
+    , objective = "binary:logistic"
+    , eval_metric = "auc"
+  )
 
-  xgbcv <- xgb.cv(params = Pars
-                , data = dtrain
-                , nround = 100
-                , folds = Folds
-                , prediction = TRUE
-                , showsd = TRUE
-                , early_stopping_rounds = 5
-                , maximize = TRUE
-                , verbose = 0)
+  xgbcv <- xgb.cv(
+      params = Pars
+    , data = dtrain
+    , nround = 100
+    , folds = Folds
+    , prediction = TRUE
+    , showsd = TRUE
+    , early_stopping_rounds = 5
+    , maximize = TRUE
+            , verbose = 0)
 
   return(list( Score = max(xgbcv$evaluation_log$test_auc_mean)
              , nrounds = xgbcv$best_iteration
@@ -79,35 +82,30 @@ scoringFunction <- function(max_depth, min_child_weight, subsample) {
 ```
 
 
-Some other objects we need to define are the bounds, GP kernel and acquisition function. 
+Some other objects we need to define are the bounds, GP kernel and acquisition function. In this example, the kernel and acquisition function are left as the default.
 
   + The ```bounds``` will tell our process its search space.
   + The kernel is passed to the ```GauPro``` function ```GauPro_kernel_model``` and defines the covariance function.
   + The acquisition function defines the utility we get from using a certain parameter set.
 
 ```{r eval = TRUE}
-bounds <- list( max_depth = c(2L, 10L)
-              , min_child_weight = c(1, 100)
-              , subsample = c(0.25, 1))
-
-kern <- "Matern52"
-
-acq <- "ei"
+bounds <- list( 
+    max_depth = c(2L, 10L)
+  , min_child_weight = c(1, 25)
+  , subsample = c(0.25, 1)
+)
 ```
 
 We are now ready to put this all into the ```BayesianOptimization``` function. 
 
 ```{r eval = TRUE}
-ScoreResult <- BayesianOptimization(FUN = scoringFunction
-                                  , bounds = bounds
-                                  , initPoints = 10
-                                  , bulkNew = 1
-                                  , nIters = 12
-                                  , kern = kern
-                                  , acq = acq
-                                  , kappa = 2.576
-                                  , verbose = 1
-                                  , parallel = FALSE)
+set.seed(1234)
+ScoreResult <- BayesianOptimization(
+    FUN = scoringFunction
+  , bounds = bounds
+  , initPoints = 4
+  , nIters = 6
+)
 ```
 
 The console informs us that the process initialized by running ```scoringFunction``` 10 times. It then fit a Gaussian process to the parameter-score pairs, found the global optimum of the acquisition function, and ran ```scoringFunction``` again. This process continued until we had 12 parameter-score pairs. You can interrogate the ```ScoreResult``` object to see the results:
