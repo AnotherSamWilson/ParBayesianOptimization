@@ -163,14 +163,6 @@ around x \~ 7:
 
 <img src="vignettes/simpleFunction.png" width="600px" style="display: block; margin: auto;" />
 
-We also need to define the bounds that our process will search in. The
-bounds should be a list, with names equal to the scoring function
-arguments:
-
-``` r
-bounds = list(x = c(0,15))
-```
-
 We are now ready to find the global optimum of our function\!
 
 ``` r
@@ -213,7 +205,7 @@ simpleResults$BestPars
 #> 1:         0 5.000000 0.2442332      0 secs
 #> 2:         1 5.000000 0.2442332      1 secs
 #> 3:         2 7.078303 0.5037591      2 secs
-#> 4:         3 7.078303 0.5037591      3 secs
+#> 4:         3 7.078303 0.5037591      2 secs
 #> 5:         4 7.078303 0.5037591      3 secs
 #> 6:         5 7.078303 0.5037591      4 secs
 ```
@@ -329,12 +321,12 @@ parameters after each iteration:
 ``` r
 ScoreResult$ScoreDT
 #>    Iteration max_depth min_child_weight subsample  gpUtility acqOptimum Elapsed     Score nrounds
-#> 1:         0         2         1.670129 0.7880670 0.00000000      FALSE    0.16 0.9871587       6
+#> 1:         0         2         1.670129 0.7880670 0.00000000      FALSE    0.19 0.9871587       6
 #> 2:         0         2        14.913213 0.8763154 0.00000000      FALSE    0.20 0.9861623       9
-#> 3:         0         4        18.833690 0.3403900 0.00000000      FALSE    0.39 0.9938563      14
-#> 4:         0         4         8.639925 0.5499186 0.00000000      FALSE    0.42 0.9983090      14
-#> 5:         1         4         1.614837 0.7384622 0.08372735       TRUE    0.24 0.9985913       5
-#> 6:         2         4        24.326559 0.6509651 0.03147079       TRUE    1.55 0.9988713      75
+#> 3:         0         4        18.833690 0.3403900 0.00000000      FALSE    0.43 0.9938563      14
+#> 4:         0         4         8.639925 0.5499186 0.00000000      FALSE    0.46 0.9983090      14
+#> 5:         1         4         1.614837 0.7384622 0.08372735       TRUE    0.22 0.9985913       5
+#> 6:         2         4        24.326559 0.6509651 0.03147079       TRUE    1.58 0.9988713      75
 ```
 
 ``` r
@@ -392,10 +384,10 @@ cores in parallel:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    0.69    0.07    7.86
+#>    1.03    0.17    9.61
 tNoPar
 #>    user  system elapsed 
-#>   11.31    2.78   10.07
+#>   11.25    3.27    9.93
 ```
 
 ## Sampling Multiple Promising Points at Once
