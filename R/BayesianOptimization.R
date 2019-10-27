@@ -197,7 +197,7 @@
 #' @import plotly
 #' @export
 BayesianOptimization <- function(
-  FUN
+    FUN
   , bounds
   , saveIntermediate = NULL
   , leftOff = NULL
@@ -249,7 +249,7 @@ BayesianOptimization <- function(
 
   # Make bounds data easily accessible
   boundsDT <- data.table(
-    N = names(bounds)
+      N = names(bounds)
     , L = sapply(bounds, function(x) x[1])
     , U = sapply(bounds, function(x) x[2])
     , R = sapply(bounds, function(x) x[2]) - sapply(bounds, function(x) x[1])
@@ -307,15 +307,16 @@ BayesianOptimization <- function(
 
     if (verbose > 0) cat("\nRunning initial scoring function",nrow(InitFeedParams),"times in",Workers,"thread(s).\n")
     sink(file = sinkFile)
-    ScoreDT <- foreach( iter = 1:nrow(InitFeedParams)
-                        , .options.multicore = mco
-                        , .combine = rbind
-                        , .multicombine = TRUE
-                        , .inorder = FALSE
-                        , .errorhandling = 'pass'
-                        , .packages = unique(c('data.table',packages))
-                        , .verbose = FALSE
-                        , .export = export
+    ScoreDT <- foreach(
+        iter = 1:nrow(InitFeedParams)
+      , .options.multicore = mco
+      , .combine = rbind
+      , .multicombine = TRUE
+      , .inorder = FALSE
+      , .errorhandling = 'pass'
+      , .packages = unique(c('data.table',packages))
+      , .verbose = FALSE
+                  , .export = export
     ) %op% {
 
       Params <- InitFeedParams[get("iter"),]
@@ -328,8 +329,9 @@ BayesianOptimization <- function(
 
 
     if (!is.data.table(ScoreDT)) {
-      cat("\nFUN failed to run with error list:\n"); print(ScoreDT)
-      stop("Stopping process.")
+      cat(returnEarly("\nFUN failed to run, returned error:\n<<")); cat(returnEarly(ScoreDT[[1]]))
+      cat(returnEarly(">>\nThis was the first iteration, so no results will be returned.\n"))
+      stop()
     }
 
     ScoreDT[,("gpUtility") := rep(acqBase,nrow(ScoreDT))]
@@ -456,31 +458,49 @@ BayesianOptimization <- function(
       return(RetList)
     }
 
+    # Try to run the scoring function. If not all (but at least 1) new runs fail,
+    # then foreach cannot call rbind correctly, and an error is thrown.
     if (verbose > 0) cat("\n  3) Running scoring function",nrow(fromCluster),"times in",Workers,"thread(s)...\n")
     sink(file = sinkFile)
-    NewResults <- foreach(
-      iter = 1:nrow(fromCluster)
-      , .options.multicore = mco
-      , .combine = rbind
-      , .multicombine = TRUE
-      , .inorder = FALSE
-      , .errorhandling = 'pass'
-      , .packages = packages
-      , .verbose = FALSE
-      , .export = export
-    ) %op% {
+    NewResults <- tryCatch({
+      foreach(
+        iter = 1:nrow(fromCluster)
+        , .options.multicore = mco
+        , .combine = rbind
+        , .multicombine = TRUE
+        , .inorder = FALSE
+        , .errorhandling = 'pass'
+        , .packages = packages
+        , .verbose = FALSE
+        , .export = export
+      ) %op% {
 
-      Params <- fromCluster[get("iter"),boundsDT$N,with=FALSE]
-      Elapsed <- system.time(Result <- do.call(what = FUN, args = as.list(Params)))
-      data.table(fromCluster[get("iter"),], Elapsed = Elapsed[[3]], as.data.table(Result))
+        Params <- fromCluster[get("iter"),boundsDT$N,with=FALSE]
+        Elapsed <- system.time(Result <- do.call(what = FUN, args = as.list(Params)))
+        data.table(fromCluster[get("iter"),], Elapsed = Elapsed[[3]], as.data.table(Result))
 
+      }
     }
+    , error = function(e) {
+        return("exitWithError")
+      }
+    )
+
     while (sink.number() > 0) sink()
 
-
     if (!is.data.table(NewResults)) {
-      cat("\nFUN failed to run with error list:\n"); print(NewResults)
-      stop("Stopping process.")
+
+      # If the scoring function encountered a mixture of errors and successful runs.
+      if(any(NewResults == "exitWithError")) {
+        cat(returnEarly("\nScoring function resulted in an error that could not be displayed. Stopping process and returning results so far."))
+        return(RetList)
+      }
+
+      # Otherwise, it encountered all errors, and the list can be returned.
+      cat(returnEarly("\nFUN failed to run, returned error:\n<<")); cat(returnEarly(NewResults[[1]]))
+      cat(returnEarly(">>\nStopping process and returning results obtained so far."))
+      return(RetList)
+
     }
 
     Time <- Sys.time()

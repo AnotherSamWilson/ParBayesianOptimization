@@ -65,42 +65,48 @@ is iteratively updated based on our best guess of where the best
 parameters are. The `ParBayesianOptimization` package does exactly this
 in the following process:
 
-1.  Initial parameter-score pairs are found  
-2.  Gaussian Process is fit/updated
-3.  Numerical methods are used to estimate the best parameter set  
-4.  New parameter-score pairs are found  
+1.  Initial parameters are scored
+2.  Gaussian Process is fit/updated  
+3.  Parameter is found which maximizes an acquisition function  
+4.  This parameter is scored  
 5.  Repeat steps 2-4 until some stopping criteria is met
+
+<center>
+
+<img src="vignettes/gpParBayesAnimationSmall.gif" style="display: block; margin: auto;" />
+
+</center>
 
 ## Bayesian Optimization Intuition
 
 As an example, let’s say we are only tuning 1 hyperparameter in an
-random forest model, the number of trees, within the bounds \[1,5000\].
+random forest model, the number of trees, within the bounds \[1,15000\].
 We have initialized the process by randomly sampling the scoring
 function 7 times, and get the following results:
 
 | Trees.In.Forest | Score |
 | --------------: | ----: |
-|               1 |  2.00 |
-|             700 |  2.43 |
-|            1865 |  2.71 |
-|            2281 |  2.98 |
-|            2600 |  2.54 |
-|            3000 |  1.95 |
-|            4410 |  1.29 |
+|            1000 |  0.30 |
+|            3000 |  0.31 |
+|            5000 |  0.14 |
+|            9000 |  0.40 |
+|           11000 |  0.40 |
+|           15000 |  0.16 |
 
 In this example, Score can be generalized to any error metric that we
 want to *maximize* (negative RMSE, AUC, etc.). *Keep in mind, Bayesian
 optimization can be used to maximize* any *black box function,
 hyperparameter tuning is just a common use case*. Given these scores,
 how do we go about determining the best number of trees to try next? As
-it turns out, Gaussian processes can give us a very good definition for
-our prior distribution. Fitting a Gaussian process to the data above
-(indexed by our hyperparameter), we can see the expected value of Score
-across our parameter bounds, as well as the uncertainty bands:
+it turns out, Gaussian processes can give us a very good definition of
+our assumption about how the Score (model performance) is distributed
+over the hyperparameters. Fitting a Gaussian process to the data above,
+we can see the expected value of Score across our parameter bounds, as
+well as the uncertainty bands:
 
 <center>
 
-<img src="vignettes/GPround1.png" width="648px" style="display: block; margin: auto;" />
+<img src="vignettes/round1.png" width="648px" style="display: block; margin: auto;" />
 
 </center>
 
@@ -109,22 +115,13 @@ function on, we need to determine how we define a “good” parameter
 inside this prior distribution. This is done by maximizing different
 ***acquisition functions*** within the Gaussian process. The acquisition
 function tells is how much ***utility*** there is at a certain
-unexplored space.
+unexplored space. In the chart above, the lower 3 graphs show examples
+different acquisition functions.
 
-Our expected improvement in the graph above is maximized at \~2180. If
-we run our process with the new `Trees in Forest = 2180`, we can update
+Our expected improvement in the graph above is maximized at \~10000. If
+we run our process with the new `Trees in Forest = 10000`, we can update
 our Gaussian process for a new prediction about which would be best to
-sample next:
-
-<center>
-
-<img src="vignettes/GPround2.png" width="648px" style="display: block; margin: auto;" />
-
-</center>
-
-As you can see, our updated gaussian process has a maximum expected
-improvement at \~ `Trees in Forest = 1250`. We can continue this process
-until we are confident that we have selected the best parameter set.
+sample next.
 
 The utility functions that are maximized in this package are defined as
 follows:
@@ -161,7 +158,7 @@ bounds = list(x = c(0,15))
 Let’s take a look at this function. We can see that it is maximized
 around x \~ 7:
 
-<img src="vignettes/simpleFunction.png" width="600px" style="display: block; margin: auto;" />
+<img src="vignettes/simpleFunc.png" width="600px" style="display: block; margin: auto;" />
 
 We are now ready to find the global optimum of our function\!
 
@@ -189,14 +186,14 @@ be found in the documentation:
 ``` r
 simpleResults$ScoreDT
 #>    Iteration         x   gpUtility acqOptimum Elapsed       Score
-#> 1:         0  0.000000 0.000000000      FALSE    0.00 0.097138940
-#> 2:         0  5.000000 0.000000000      FALSE    0.02 0.244233160
-#> 3:         0 10.000000 0.000000000      FALSE    0.00 0.204557501
-#> 4:         1  4.708522 0.075427586       TRUE    0.00 0.242643431
-#> 5:         2  7.078303 0.031507441       TRUE    0.00 0.503759070
-#> 6:         3  7.595789 0.034673257       TRUE    0.00 0.452260821
-#> 7:         4  6.754212 0.012806554       TRUE    0.00 0.491910012
-#> 8:         5 15.000000 0.002835998       TRUE    0.00 0.008764155
+#> 1:         0  0.000000 0.000000000      FALSE       0 0.097138940
+#> 2:         0  5.000000 0.000000000      FALSE       0 0.244233160
+#> 3:         0 10.000000 0.000000000      FALSE       0 0.204557501
+#> 4:         1  4.708522 0.075427586       TRUE       0 0.242643431
+#> 5:         2  7.078303 0.031507441       TRUE       0 0.503759070
+#> 6:         3  7.595789 0.034673257       TRUE       0 0.452260821
+#> 7:         4  6.754212 0.012806554       TRUE       0 0.491910012
+#> 8:         5 15.000000 0.002835998       TRUE       0 0.008764155
 ```
 
 ``` r
@@ -245,23 +242,25 @@ scoringFunction <- function(max_depth, min_child_weight, subsample) {
 
   dtrain <- xgb.DMatrix(agaricus.train$data,label = agaricus.train$label)
   
-  Pars <- list( booster = "gbtree"
-              , eta = 0.01
-              , max_depth = max_depth
-              , min_child_weight = min_child_weight
-              , subsample = subsample
-              , objective = "binary:logistic"
-              , eval_metric = "auc")
+  Pars <- list( 
+      booster = "gbtree"
+    , eta = 0.001
+    , max_depth = max_depth
+    , min_child_weight = min_child_weight
+    , subsample = subsample
+    , objective = "binary:logistic"
+    , eval_metric = "auc"
+  )
 
-  xgbcv <- xgb.cv(params = Pars
-                , data = dtrain
-                , nround = 100
-                , folds = Folds
-                , prediction = TRUE
-                , showsd = TRUE
-                , early_stopping_rounds = 5
-                , maximize = TRUE
-                , verbose = 0)
+  xgbcv <- xgb.cv(
+      params = Pars
+    , data = dtrain
+    , nround = 100
+    , folds = Folds
+    , early_stopping_rounds = 5
+    , maximize = TRUE
+    , verbose = 0
+  )
 
   return(list(Score = max(xgbcv$evaluation_log$test_auc_mean)
              , nrounds = xgbcv$best_iteration
@@ -282,9 +281,11 @@ acquisition function.
 <!-- end list -->
 
 ``` r
-bounds <- list( max_depth = c(1L, 5L)
-              , min_child_weight = c(0, 25)
-              , subsample = c(0.25, 1))
+bounds <- list( 
+    max_depth = c(1L, 5L)
+  , min_child_weight = c(0, 25)
+  , subsample = c(0.25, 1)
+)
 
 kern <- "Matern52"
 
@@ -321,20 +322,20 @@ parameters after each iteration:
 ``` r
 ScoreResult$ScoreDT
 #>    Iteration max_depth min_child_weight subsample  gpUtility acqOptimum Elapsed     Score nrounds
-#> 1:         0         2         1.670129 0.7880670 0.00000000      FALSE    0.18 0.9871587       6
-#> 2:         0         2        14.913213 0.8763154 0.00000000      FALSE    0.22 0.9861623       9
-#> 3:         0         4        18.833690 0.3403900 0.00000000      FALSE    0.39 0.9938563      14
-#> 4:         0         4         8.639925 0.5499186 0.00000000      FALSE    0.42 0.9983090      14
-#> 5:         1         4         1.614837 0.7384622 0.08372735       TRUE    0.31 0.9985913       5
-#> 6:         2         4        24.326559 0.6509651 0.03147079       TRUE    1.59 0.9988713      75
+#> 1:         0         2         1.670129 0.7880670 0.00000000      FALSE    0.13 0.9777163       2
+#> 2:         0         2        14.913213 0.8763154 0.00000000      FALSE    0.30 0.9763760      15
+#> 3:         0         4        18.833690 0.3403900 0.00000000      FALSE    0.46 0.9931657      18
+#> 4:         0         4         8.639925 0.5499186 0.00000000      FALSE    0.26 0.9981437       7
+#> 5:         1         4         2.213941 0.8805782 0.10689063       TRUE    0.31 0.9983017      10
+#> 6:         2         4         3.640406 0.7092950 0.05240333       TRUE    0.44 0.9990290      16
 ```
 
 ``` r
 ScoreResult$BestPars
 #>    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs
-#> 1:         0         4         8.639925 0.5499186 0.9983090      14      2 secs
-#> 2:         1         4         1.614837 0.7384622 0.9985913       5      5 secs
-#> 3:         2         4        24.326559 0.6509651 0.9988713      75     10 secs
+#> 1:         0         4         8.639925 0.5499186 0.9981437       7      2 secs
+#> 2:         1         4         2.213941 0.8805782 0.9983017      10      4 secs
+#> 3:         2         4         3.640406 0.7092950 0.9990290      16      7 secs
 ```
 
 ## Running In Parallel
@@ -363,12 +364,11 @@ tWithPar <- system.time(
   ScoreResult <- BayesianOptimization(
       FUN = scoringFunction
     , bounds = bounds
-    , initPoints = 8
+    , initPoints = 4
     , bulkNew = 2
-    , nIters = 10
+    , nIters = 6
     , kern = kern
     , acq = acq
-    , kappa = 2.576
     , parallel = TRUE
     , export = exp
     , packages = pac
@@ -384,10 +384,10 @@ cores in parallel:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    0.98    0.05    7.35
+#>    0.47    0.08    4.88
 tNoPar
 #>    user  system elapsed 
-#>   11.17    3.12   10.21
+#>    7.78    2.14    7.09
 ```
 
 ## Sampling Multiple Promising Points at Once

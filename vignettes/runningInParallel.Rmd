@@ -4,7 +4,7 @@ author: "Samuel Wilson"
 date: "October 31, 2018"
 output: html_document
 vignette: >
-  %\VignetteIndexEntry{runningInParallel}
+  %\VignetteIndexEntry{Running In Parallel}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

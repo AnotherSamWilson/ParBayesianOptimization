@@ -2,7 +2,7 @@
 % Please edit documentation in R/applyCluster.R
 \name{applyCluster}
 \alias{applyCluster}
-\title{Find Clusters or apply noise until}
+\title{Find required number of points to sample next.}
 \usage{
 applyCluster(e = parent.frame())
 }
@@ -13,6 +13,7 @@ applyCluster(e = parent.frame())
 The next parameter sets to try
 }
 \description{
-Applies DBSCAN algorithm to find local optimum candidate parameter sets
+Applies DBSCAN algorithm to find local optimum candidate parameter sets, or adds
+noise to local optimums to obtain required number of sets to sample.
 }
 \keyword{internal}

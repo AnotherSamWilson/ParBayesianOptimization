@@ -1,7 +1,8 @@
-#' @title Find Clusters or apply noise until
+#' @title Find required number of points to sample next.
 #'
 #' @description
-#' Applies DBSCAN algorithm to find local optimum candidate parameter sets
+#' Applies DBSCAN algorithm to find local optimum candidate parameter sets, or adds
+#' noise to local optimums to obtain required number of sets to sample.
 #'
 #' @param e the entire parent environment is made available to this function
 #' @importFrom dbscan dbscan
