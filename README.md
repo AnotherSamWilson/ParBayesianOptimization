@@ -4,15 +4,18 @@
 [![Build
 Status](https://api.travis-ci.org/AnotherSamWilson/ParBayesianOptimization.svg)](https://travis-ci.org/AnotherSamWilson/ParBayesianOptimization)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/ParBayesianOptimization)](https://CRAN.R-project.org/package=ParBayesianOptimization)
+[![DEV\_Version\_Badge](https://img.shields.io/badge/Dev-1.0.0-blue.svg)](https://CRAN.R-project.org/package=ParBayesianOptimization)
 [![CRAN\_Downloads](https://cranlogs.r-pkg.org/badges/ParBayesianOptimization)](https://CRAN.R-project.org/package=ParBayesianOptimization)
 
-# Parallel Bayesian Optimization
+# Parallelizable Bayesian Optimization
 
-## Table of Contents
+<a href='https://github.com/AnotherSamWilson/ParBayesianOptimization'><img src='icon.png' align = 'right' height="300" /></a>
 
 This README contains a thorough walkthrough of Bayesian optimization and
 the syntax needed to use this package, with simple and complex examples.
 More information can be found in the package vignettes and manual.
+
+## Table of Contents
 
   - [01 -
     Installation](https://github.com/AnotherSamWilson/ParBayesianOptimization#Instalation)  
@@ -144,73 +147,72 @@ Tuning](https://github.com/AnotherSamWilson/ParBayesianOptimization#Hyperparamet
 
 ``` r
 simpleFunction <- function(x) dnorm(x,3,2)*1.5 + dnorm(x,7,1) + dnorm(x,10,2)
-ScoringFunction <- function(x) list(Score = simpleFunction(x))
+
+# Find the x that maximizes our simpleFunction
+xmax <- optim(8,simpleFunction,method = "L-BFGS-B",lower = 0, upper = 15,control = list(fnscale = -1))$par
+
+# Get a visual
+library(ggplot2)
+ggplot(data = data.frame(x=c(0,15)),aes(x=x)) + 
+  stat_function(fun = simpleFunction) +
+  geom_vline(xintercept = xmax,linetype="dashed")
 ```
 
-We also need to define the bounds that our process will search in. The
-bounds should be a list, with names equal to the scoring function
-arguments:
+![](README-unnamed-chunk-6-1.png)<!-- -->
+
+We can see that this function is maximized around x\~7.023. We can use
+`bayesOpt` to find the global maximum of this function. We just need to
+define the bounds, and the initial parameters we want to sample:
 
 ``` r
-bounds = list(x = c(0,15))
+bounds <- list(x=c(0,15))
+initGrid <- data.frame(x=c(0,5,10))
 ```
 
-Let’s take a look at this function. We can see that it is maximized
-around x \~ 7:
-
-<img src="vignettes/simpleFunc.png" width="600px" style="display: block; margin: auto;" />
-
-We are now ready to find the global optimum of our function\!
+Here, we run `bayesOpt`. The function begins by running `simpleFunction`
+3 times, and then fits a Gaussian process to the results in a process
+called [Kriging](https://en.wikipedia.org/wiki/Kriging). We then
+calculate the `x` which maximizes our expected improvement, and run
+`simpleFunction` at this x. We then go through 1 more iteration of this:
 
 ``` r
-library("ParBayesianOptimization")
-
-# Using initPoints instead of initGrid will use Latin hypercube 
-# sampling to choose 3 random initial starting points.
-simpleResults <- BayesianOptimization(
-    FUN = ScoringFunction
+FUN <- function(x) list(Score = simpleFunction(x))
+library(ParBayesianOptimization)
+optObjSimp <- bayesOpt(
+  FUN = FUN
   , bounds = bounds
-  #, initPoints = 3
-  , initGrid = data.frame(x=c(0,5,10))
-  , nIters = 8
+  , initGrid = initGrid
   , acq = "ei"
-  , gsPoints = 10
+  , iters.n = 2
+  , gsPoints = 25
 )
 ```
 
-You can check the results to see where the process searched. The
-`ScoreDT` table can be used as the `leftOff` parameter to start a new
-process where this one left off. More information on these results can
-be found in the documentation:
+Let’s see how close the algorithm got to the global maximum:
 
 ``` r
-simpleResults$ScoreDT
-#>    Iteration         x   gpUtility acqOptimum Elapsed       Score
-#> 1:         0  0.000000 0.000000000      FALSE       0 0.097138940
-#> 2:         0  5.000000 0.000000000      FALSE       0 0.244233160
-#> 3:         0 10.000000 0.000000000      FALSE       0 0.204557501
-#> 4:         1  4.708522 0.075427586       TRUE       0 0.242643431
-#> 5:         2  7.078303 0.031507441       TRUE       0 0.503759070
-#> 6:         3  7.595789 0.034673257       TRUE       0 0.452260821
-#> 7:         4  6.754212 0.012806554       TRUE       0 0.491910012
-#> 8:         5 15.000000 0.002835998       TRUE       0 0.008764155
+getBestPars(optObjSimp)
+#> $x
+#> [1] 6.466367
 ```
+
+The process is getting pretty close\! We were only about 12% shy of the
+global optimum:
 
 ``` r
-simpleResults$BestPars
-#>    Iteration        x     Score elapsedSecs
-#> 1:         0 5.000000 0.2442332      0 secs
-#> 2:         1 5.000000 0.2442332      1 secs
-#> 3:         2 7.078303 0.5037591      2 secs
-#> 4:         3 7.078303 0.5037591      2 secs
-#> 5:         4 7.078303 0.5037591      3 secs
-#> 6:         5 7.078303 0.5037591      4 secs
+simpleFunction(7.023)/simpleFunction(getBestPars(optObjSimp)$x)
+#> [1] 1.109516
 ```
 
-You also probably noticed that a chart was printed to the Viewer
-(browser if not using Rstudio). This is discussed more in depth in the
-section [How Long Should it Run
-For?](https://github.com/AnotherSamWilson/ParBayesianOptimization#how-long-should-it-run-for)
+Let’s run the process for a little longer:
+
+``` r
+optObjSimp <- addIterations(optObjSimp,iters.n=2,verbose=0)
+simpleFunction(7.023)/simpleFunction(getBestPars(optObjSimp)$x)
+#> [1] 1.000998
+```
+
+We have now found an `x` very close to the global optimum.
 
 ## Hyperparameter Tuning
 
@@ -269,16 +271,8 @@ scoringFunction <- function(max_depth, min_child_weight, subsample) {
 }
 ```
 
-Some other objects we need to define are the bounds, GP kernel and
-acquisition function.
-
-  - The `bounds` will tell our process its search space.
-  - The kernel is passed to the `GauPro` function `GauPro_kernel_model`
-    and defines the covariance function.
-  - The acquisition function defines the utility we get from using a
-    certain parameter set.
-
-<!-- end list -->
+We also need to tell our process the bounds it is allowed to search
+within:
 
 ``` r
 bounds <- list( 
@@ -286,27 +280,20 @@ bounds <- list(
   , min_child_weight = c(0, 25)
   , subsample = c(0.25, 1)
 )
-
-kern <- "Matern52"
-
-acq <- "ei"
 ```
 
-We are now ready to put this all into the `BayesianOptimization`
-function.
+We are now ready to put this all into the `bayesOpt` function.
 
 ``` r
 set.seed(0)
 
 tNoPar <- system.time(
-  ScoreResult <- BayesianOptimization(
+  optObj <- bayesOpt(
       FUN = scoringFunction
     , bounds = bounds
     , initPoints = 4
-    , bulkNew = 1
-    , nIters = 6
-    , kern = kern
-    , acq = acq
+    , iters.n = 2
+    , iters.k = 1
   )
 )
 ```
@@ -315,65 +302,82 @@ The console informs us that the process initialized by running
 `scoringFunction` 4 times. It then fit a Gaussian process to the
 parameter-score pairs, found the global optimum of the acquisition
 function, and ran `scoringFunction` again. This process continued until
-we had 6 parameter-score pairs. You can interrogate the `ScoreResult`
-object to see the results. As you can see, the process found better
-parameters after each iteration:
+we had 6 parameter-score pairs. You can interrogate the `optObj` object
+to see the results:
 
 ``` r
-ScoreResult$ScoreDT
-#>    Iteration max_depth min_child_weight subsample  gpUtility acqOptimum Elapsed     Score nrounds
-#> 1:         0         2         1.670129 0.7880670 0.00000000      FALSE    0.13 0.9777163       2
-#> 2:         0         2        14.913213 0.8763154 0.00000000      FALSE    0.30 0.9763760      15
-#> 3:         0         4        18.833690 0.3403900 0.00000000      FALSE    0.46 0.9931657      18
-#> 4:         0         4         8.639925 0.5499186 0.00000000      FALSE    0.26 0.9981437       7
-#> 5:         1         4         2.213941 0.8805782 0.10689063       TRUE    0.31 0.9983017      10
-#> 6:         2         4         3.640406 0.7092950 0.05240333       TRUE    0.44 0.9990290      16
+optObj$scoreSummary
+#>    Epoch Iteration max_depth min_child_weight subsample gpUtility acqOptimum inBounds Elapsed     Score nrounds
+#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.11 0.9777163       2
+#> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.28 0.9763760      15
+#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.47 0.9931657      18
+#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.27 0.9981437       7
+#> 5:     1         5         4        25.000000 1.0000000 0.7097168       TRUE     TRUE    0.14 0.9895677       1
+#> 6:     2         6         3        14.239730 0.5391045 0.3254058       TRUE     TRUE    0.24 0.9954590       8
 ```
 
 ``` r
-ScoreResult$BestPars
-#>    Iteration max_depth min_child_weight subsample     Score nrounds elapsedSecs
-#> 1:         0         4         8.639925 0.5499186 0.9981437       7      2 secs
-#> 2:         1         4         2.213941 0.8805782 0.9983017      10      4 secs
-#> 3:         2         4         3.640406 0.7092950 0.9990290      16      7 secs
+getBestPars(optObj)
+#> $max_depth
+#> [1] 4
+#> 
+#> $min_child_weight
+#> [1] 8.639925
+#> 
+#> $subsample
+#> [1] 0.5499186
 ```
 
 ## Running In Parallel
 
 The process that the package uses to run in parallel is explained above.
 Actually setting the process up to run in parallel is relatively simple,
-we only need to define two additional parameters in the
-`BayesianOptimization` function, `export` and `packages`:
-
-``` r
-exp <- c('agaricus.train','Folds')
-pac <- c('xgboost')
-```
-
-We also must register a parallel backend, which we do using the
-`doParallel` package. It is heavily advised to set the `bulkNew`
-parameter equal to some multiple of the registered cores, so you can
-take full advantage of your cluster setup:
+we just need to take two extra steps. We need to load any packages and
+objects required by `FUN` into the back ends, after registering our
+cluster:
 
 ``` r
 library(doParallel)
 cl <- makeCluster(2)
 registerDoParallel(cl)
+clusterExport(cl,c('Folds','agaricus.train'))
+clusterEvalQ(cl,expr= {
+  library(xgboost)
+})
+#> [[1]]
+#> [1] "xgboost"   "stats"     "graphics"  "grDevices" "utils"     "datasets"  "methods"   "base"     
+#> 
+#> [[2]]
+#> [1] "xgboost"   "stats"     "graphics"  "grDevices" "utils"     "datasets"  "methods"   "base"
+```
 
+We can now run our process in paralel\! Make sure you set iters.k to
+some sensible value to take advantage of the parallelization setup.
+Since we have registered 2 cores, we set `iters.k` to 2:
+
+``` r
 tWithPar <- system.time(
-  ScoreResult <- BayesianOptimization(
+  optObj <- bayesOpt(
       FUN = scoringFunction
     , bounds = bounds
     , initPoints = 4
-    , bulkNew = 2
-    , nIters = 6
-    , kern = kern
-    , acq = acq
+    , iters.n = 4
+    , iters.k = 2
     , parallel = TRUE
-    , export = exp
-    , packages = pac
-    , verbose = 0)
+  )
 )
+#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
+#>   non-finite value supplied by optim
+#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
+#>   non-finite value supplied by optim
+#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
+#>   non-finite value supplied by optim
+#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
+#>   non-finite value supplied by optim
+#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
+#>   non-finite value supplied by optim
+#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
+#>   non-finite value supplied by optim
 stopCluster(cl)
 registerDoSEQ()
 ```
@@ -384,24 +388,23 @@ cores in parallel:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    0.47    0.08    4.88
+#>    0.92    0.09    9.25
 tNoPar
 #>    user  system elapsed 
-#>    7.78    2.14    7.09
+#>   10.92    1.37   10.17
 ```
 
 ## Sampling Multiple Promising Points at Once
 
 Sometimes we may want to sample multiple promising parameter sets at the
 same time. This is especially effective if the process is being run in
-parallel. The `BayesianOptimization` function always samples the global
-optimum of the acquisition function, however it is also possible to tell
-it to sample local optimums of the acquisition function at the same
-time.
+parallel. The `bayesOpt` function always samples the global optimum of
+the acquisition function, however it is also possible to tell it to
+sample local optimums of the acquisition function at the same time.
 
-Using the `minClusterUtility` parameter, you can specify the minimum
-percentage utility of the global optimum required for a different local
-optimum to be considered. As an example, let’s say we are optimizing 1
+Using the `acqThresh` parameter, you can specify the minimum percentage
+utility of the global optimum required for a different local optimum to
+be considered. As an example, let’s say we are optimizing 1
 hyperparameter `min_child_weight`, which is bounded between \[0,5\]. Our
 acquisition function may look like the following:
 
@@ -409,23 +412,27 @@ acquisition function may look like the following:
 
 In this case, there are 3 promising candidate parameters. We may want to
 run our scoring function on several of the local maximums. If
-`minClusterUtility` is set to be below \~0.95, and `bulkNew` is set to
-at least 3, the process would use all 3 of the local maximums as
-candidate parameter sets in the next round of scoring function runs.
+`acqThresh` is set to be below \~0.95, and `iters.k` is set to at least
+3, the process would use all 3 of the local maximums as candidate
+parameter sets in the next round of scoring function runs.
 
 ## How Long Should it Run For?
 
 Going back to the example in [Simple
 Example](https://github.com/AnotherSamWilson/ParBayesianOptimization#Simple-Example),
 (if you let this run for a few more iterations) you will notice this
-plotly chart is updated at each iteration:
+chart is updated at each iteration:
 
-<img src="vignettes/progressPlot.png" style="display: block; margin: auto;" />
+``` r
+plot(optObjSimp)
+```
+
+<img src="README-unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
 
 As you thoroughly explore the parameter space, you reduce the
 uncertainty in the unexplored areas. As you reduce uncertainty, you tend
 to reduce utility, which can be thought of as the potential to find a
 better parameter set than the one you already have. Notice that the
-expected improvement converged to 0 after iteration 6. If you see a
+expected improvement converged to 0 after iteration 5. If you see a
 similar pattern, you can be fairly certain that you have found an
 (approximately) global optimum.

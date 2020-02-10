@@ -1,6 +1,6 @@
 Package: ParBayesianOptimization
 Title: Parallel Bayesian Optimization of Hyperparameters
-Version: 0.2.0
+Version: 1.0.0
 Authors@R: person("Samuel", "Wilson", email = "samwilson303@gmail.com", role = c("aut", "cre"))
 Description: Fast, flexible framework for implementing Bayesian optimization of model 
 	hyperparameters according to the methods described in Snoek et al. <arXiv:1206.2944>.
@@ -10,7 +10,7 @@ Description: Fast, flexible framework for implementing Bayesian optimization of 
 URL: https://github.com/AnotherSamWilson/ParBayesianOptimization
 BugReports: https://github.com/AnotherSamWilson/ParBayesianOptimization/issues
 Depends: R (>= 3.4)
-Imports: data.table (>= 1.11.8), GauPro, stats, foreach, dbscan, lhs, plotly, crayon
+Imports: data.table (>= 1.11.8), GauPro, stats, foreach, dbscan, lhs, plotly, crayon, ggplot2, ggpubr
 Suggests: knitr, rmarkdown, xgboost, doParallel
 License: GPL-2
 Encoding: UTF-8

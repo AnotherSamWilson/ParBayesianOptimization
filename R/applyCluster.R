@@ -72,7 +72,7 @@ applyCluster <- function(e = parent.frame()) {
     }
 
     # Only replace custers that are not duplicates.
-    fromNoise <- applyNoise(clusterPoints[clusterPoints$Duplicate,], e$boundsDT, e$noiseAdd)
+    fromNoise <- applyNoise(clusterPoints[clusterPoints$Duplicate,], e$boundsDT)
     if(any(class(fromNoise) == "character")) return(fromNoise)
     clusterPoints[clusterPoints$Duplicate,] <- fromNoise
     clusterPoints[clusterPoints$Duplicate,]$acqOptimum <- FALSE
@@ -105,7 +105,7 @@ applyCluster <- function(e = parent.frame()) {
 
     # Pull clusters, one at a time (repeating if necessary), most promising first. We add noise to these.
     newP <- clusterPoints[rep(1:nrow(clusterPoints),length.out = drawPoints),e$boundsDT$N, with = FALSE]
-    noisyP <- applyNoise(newP, e$boundsDT, e$noiseAdd)
+    noisyP <- applyNoise(newP, e$boundsDT)
     if(any(class(noisyP) == "character")) return(noisyP)
 
     # Getting fancy. Check to see if noisyP parameters already exist in noisyP,newSet, or ScoreDT.

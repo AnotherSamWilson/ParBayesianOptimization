@@ -4,14 +4,10 @@
 \alias{calcAcq}
 \title{Calculate Acquisition Function}
 \usage{
-calcAcq(par, GPs, GPe, acq, y_max, kappa, eps)
+calcAcq(par, scoreGP, timeGP, acq, y_max, kappa, eps)
 }
 \arguments{
 \item{par}{Parameter set to predict}
-
-\item{GPs}{an object of class gp}
-
-\item{GPe}{an object of class gp}
 
 \item{acq}{Acquisition function type to be used}
 
@@ -20,6 +16,10 @@ calcAcq(par, GPs, GPe, acq, y_max, kappa, eps)
 \item{kappa}{tunable parameter kappa to balance exploitation against exploration}
 
 \item{eps}{tunable parameter epsilon to balance exploitation against exploration}
+
+\item{GPs}{an object of class gp}
+
+\item{GPe}{an object of class gp}
 }
 \value{
 The acquisition function value.

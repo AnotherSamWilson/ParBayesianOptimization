@@ -1,38 +1,14 @@
-
-
-# Helper Functions
-
-
-
-#' @title Check Bounds
-#'
-#' @description
-#' Checks if a list of parameters is within the supplied bounds
-#'
-#' @param x Parameter Name
-#' @param Table A data.table of parameter values to check
-#' @param bounds the bounds list
-#' @importFrom data.table between
-#' @return the number of values that are outside the bounds/
-#' @keywords internal
-checkBounds <- function(x, Table, bounds) {
-
-  sum(!between(Table[[x]], lower = bounds[[x]][[1]], upper = bounds[[x]][[2]]))
-
+checkBounds <- function(tab, bounds) {
+  return(
+      sapply(
+        names(bounds)
+      , function(paramName) {
+        tab[[paramName]] >= bounds[[paramName]][[1]] & tab[[paramName]] <= bounds[[paramName]][[2]]
+      }
+    )
+  )
 }
 
-
-#' @title Generate Random Parameters
-#'
-#' @description
-#' Generates a set of rPoints parameter sets from latin hypercube sampling.
-#'
-#' @param boundsDT original bounds list
-#' @param rPoints number of parameter sets to create.
-#' @param FAIL Should the function fail if it cannot find enough distinct parameter sets?
-#' @importFrom stats runif
-#' @return a data.table of random parameters
-#' @keywords internal
 randParams <- function(boundsDT, rPoints, FAIL = TRUE) {
 
   # Attempt to procure rPoints unique parameter sets by lhs.
@@ -61,14 +37,6 @@ randParams <- function(boundsDT, rPoints, FAIL = TRUE) {
 
 }
 
-#' @title Min-Max Scale
-#'
-#' @description
-#' Scales a data.table of parameter sets to a 0-1 range
-#' @param tabl A data.table of parameter sets
-#' @param boundsDT the original bounds list
-#' @return a data.table the same length as \code{table} with scaled parameters
-#' @keywords internal
 minMaxScale <- function(tabl, boundsDT) {
 
   # tabl <- newD
@@ -81,16 +49,6 @@ minMaxScale <- function(tabl, boundsDT) {
 
 }
 
-
-#' @title Undo Min-Max Scale
-#'
-#' @description
-#' Un-scales a data.table of parameter sets from a 0-1 range
-#'
-#' @param tabl A data.table of scaled parameter sets
-#' @param boundsDT the original bounds list
-#' @return a data.table the same length as \code{table} with un-scaled parameters
-#' @keywords internal
 unMMScale <- function(tabl, boundsDT) {
 
   umms <- lapply(boundsDT$N, function(x) {
@@ -112,14 +70,6 @@ unMMScale <- function(tabl, boundsDT) {
 
 }
 
-#' @title ZeroOneScale
-#'
-#' @description
-#' Scales a vector to be between 0 and 1 without supplied bounds.
-#'
-#' @param vec a vector of numbers
-#' @return the vector re-scaled between 0 and 1.
-#' @keywords internal
 zeroOneScale <- function(vec) {
 
   r <- max(vec) - min(vec)
@@ -130,16 +80,6 @@ zeroOneScale <- function(vec) {
 
 }
 
-#' @title Check for Pre-Existing Parameters
-#'
-#' @description
-#' Check if rows from tab1 exist in tab2.
-#'
-#' @param tab1 The table to check
-#' @param tab2 The table to compare.
-#' @return A vector of booleans of length \code{nrow(tab1)} representing whether each row
-#' of tab1 already exists in tab2 or in proceeding rows of tab1.
-#' @keywords internal
 checkDup <- function(tab1,tab2) {
 
   sapply(1:nrow(tab1), function(i) {
@@ -149,14 +89,6 @@ checkDup <- function(tab1,tab2) {
 
 }
 
-#' @title Assign Kernel
-#'
-#' @description
-#' This function exists so GauPro doesn't have to be loaded to run BayesianOptimization
-#'
-#' @param kern a kernel
-#' @return an GauPro_kernel_beta R6 class
-#' @keywords internal
 assignKern <- function(kern,params) {
 
   betas <- rep(0,params)
@@ -172,3 +104,59 @@ assignKern <- function(kern,params) {
   return(kern)
 
 }
+
+boundsToDT <- function(bounds) {
+  data.table(
+    N = names(bounds)
+    , L = sapply(bounds, function(x) x[1])
+    , U = sapply(bounds, function(x) x[2])
+    , R = sapply(bounds, function(x) x[2]) - sapply(bounds, function(x) x[1])
+    , C = sapply(bounds, function(x) class(x))
+  )
+}
+
+saveSoFar <- function(optObj,verbose) {
+  if (!is.null(optObj$saveFile)) {
+    tryCatch(
+      {
+        suppressWarnings(saveRDS(optObj, file = optObj$saveFile))
+        if (verbose > 0) cat("\n   Saving Intermediary Results with ",nrow(optObj$scoreSummary)," rows to:  \n   ",optObj$saveFile,"\n")
+      }
+      , error = function(e) {
+        if (verbose > 0) cat(red("\n === Failed to save intermediary results. Please check file path. === \n"))
+      }
+    )
+  }
+}
+
+ParMethod <- function(x) if(x) {`%dopar%`} else {`%do%`}
+
+getAcqInfo <- function(acq) {
+  return(
+    data.table(
+      nam = c("ei","eips","poi","ucb")
+      , disp = c("Expected Improvement","Expct. Imprvmt./Second", "Prob. of Improvement","Upper Conf. Bound")
+      , base = c(0,0,0,1)
+    )[get("nam")==acq,]
+  )
+}
+
+checkParameters <- function(
+    bounds
+  , iters.n
+  , iters.k
+  , kern
+  , acq
+  , acqThresh
+  , plotProgress
+) {
+  if (iters.n < iters.k) stop("iters.n cannot be less than iters.k. See ?bayesOpt for parameter definitions.")
+  if (iters.n %% 1 != 0 | iters.k %% 1 != 0) stop("iters.n and iters.k must be integers.")
+  if (!kern %in% c("Gaussian","Exponential","Matern52","Matern32")) stop("kern not recognized")
+  if (class(bounds) != "list") stop("bounds must be a list of parameter bounds with the same arguments as FUN.")
+  if (any(lengths(bounds) != 2)) stop("Not all elements in bounds are length 2.")
+  if (acqThresh > 1 | acqThresh < 0) stop("acqThresh must be in [0,1]")
+  if (!acq %in% c("ei","eips","ucb","poi")) stop("acq not recognized")
+  if (!is.logical(plotProgress)) stop("plotProgress must be logical")
+}
+

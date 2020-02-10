@@ -1,10 +1,10 @@
 ---
-title: "Introduction to ParBayesianOptimization"
+title: "Tuning Hyperparameters"
 author: "Samuel Wilson"
-date: "`r Sys.Date()`"
+date: "February 9, 2020"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to ParBayesianOptimization}
+  %\VignetteIndexEntry{Tuning Hyperparameters}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -41,9 +41,11 @@ library("ParBayesianOptimization")
 
 data(agaricus.train, package = "xgboost")
 
-Folds <- list(Fold1 = as.integer(seq(1,nrow(agaricus.train$data),by = 3))
-            , Fold2 = as.integer(seq(2,nrow(agaricus.train$data),by = 3))
-            , Fold3 = as.integer(seq(3,nrow(agaricus.train$data),by = 3)))
+Folds <- list(
+    Fold1 = as.integer(seq(1,nrow(agaricus.train$data),by = 3))
+  , Fold2 = as.integer(seq(2,nrow(agaricus.train$data),by = 3))
+  , Fold3 = as.integer(seq(3,nrow(agaricus.train$data),by = 3))
+)
 ```
 
 Now we need to define the scoring function. This function should, at a minimum, return a list with a ```Score``` element, which is the model evaluation metric we want to maximize. We can also retain other pieces of information created by the scoring function by including them as named elements of the returned list. In this case, we want to retain the optimal number of rounds determined by the ```xgb.cv```:
@@ -74,10 +76,12 @@ scoringFunction <- function(max_depth, min_child_weight, subsample) {
     , maximize = TRUE
             , verbose = 0)
 
-  return(list( Score = max(xgbcv$evaluation_log$test_auc_mean)
-             , nrounds = xgbcv$best_iteration
-             )
-         )
+  return(
+    list( 
+        Score = max(xgbcv$evaluation_log$test_auc_mean)
+      , nrounds = xgbcv$best_iteration
+    )
+  )
 }
 ```
 
@@ -100,19 +104,19 @@ We are now ready to put this all into the ```BayesianOptimization``` function.
 
 ```{r eval = TRUE}
 set.seed(1234)
-ScoreResult <- BayesianOptimization(
+optObj <- bayesOpt(
     FUN = scoringFunction
   , bounds = bounds
   , initPoints = 4
-  , nIters = 6
+  , iters.n = 3
 )
 ```
 
-The console informs us that the process initialized by running ```scoringFunction``` 10 times. It then fit a Gaussian process to the parameter-score pairs, found the global optimum of the acquisition function, and ran ```scoringFunction``` again. This process continued until we had 12 parameter-score pairs. You can interrogate the ```ScoreResult``` object to see the results:
+The console informs us that the process initialized by running ```scoringFunction``` 4 times. It then fit a Gaussian process to the parameter-score pairs, found the global optimum of the acquisition function, and ran ```scoringFunction``` again. This process continued until we had 7 parameter-score pairs. You can interrogate the ```bayesOpt``` object to see the results:
 
 ```{r eval = TRUE}
-ScoreResult$ScoreDT
+optObj$scoreSummary
 ```
 ```{r eval = TRUE}
-ScoreResult$BestPars
+getBestPars(optObj)
 ```

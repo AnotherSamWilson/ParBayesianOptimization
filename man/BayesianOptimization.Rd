@@ -2,7 +2,7 @@
 % Please edit documentation in R/BayesianOptimization.R
 \name{BayesianOptimization}
 \alias{BayesianOptimization}
-\title{Bayesian Optimization}
+\title{Bayesian Optimization with Gaussian Processes}
 \usage{
 BayesianOptimization(FUN, bounds, saveIntermediate = NULL,
   leftOff = NULL, parallel = FALSE, packages = NULL, export = NULL,
@@ -115,10 +115,8 @@ If \code{NULL}, only the global optimum will be used as a candidate
 parameter set. If 0.5, only local optimums with 50 percent of the global
 optimum will be used.}
 
-\item{noiseAdd}{specifies how much noise to add to acquisition optimums
-to obtain new parameter sets, if needed. New random draws are pulled
-from a shape(4,4) beta distribution centered at the optimal candidate
-parameter set with a range equal to \code{noiseAdd*(Upper Bound - Lower Bound)}}
+\item{noiseAdd}{Depreciated. Noise is added in increasing amounts until
+unique parameter sets are found.}
 
 \item{plotProgress}{Should the progress of the Bayesian optimization be
 printed? Top graph shows the score(s) obtained at each iteration.
@@ -147,88 +145,7 @@ evaluate that parameter set.}
 \item{BestPars}{The best parameter set at each iteration}
 }
 \description{
-Flexible Bayesian optimization of model hyperparameters.
-}
-\examples{
-# Example 1 - Optimization of a continuous single parameter function
-scoringFunction <- function(x) {
-  a <- exp(-(2-x)^2)*1.5
-  b <- exp(-(4-x)^2)*2
-  c <- exp(-(6-x)^2)*1
-  return(list(Score = a+b+c))
-}
-
-bounds <- list(x = c(0,8))
-
-Results <- BayesianOptimization(
-    FUN = scoringFunction
-  , bounds = bounds
-  , initPoints = 5
-  , nIters = 8
-  , gsPoints = 10
-)
-
-\dontrun{
-# Example 2 - Hyperparameter Tuning in xgboost
-library("xgboost")
-
-data(agaricus.train, package = "xgboost")
-
-Folds <- list( Fold1 = as.integer(seq(1,nrow(agaricus.train$data),by = 3))
-             , Fold2 = as.integer(seq(2,nrow(agaricus.train$data),by = 3))
-             , Fold3 = as.integer(seq(3,nrow(agaricus.train$data),by = 3)))
-
-scoringFunction <- function(max_depth, min_child_weight, subsample) {
-
-  dtrain <- xgb.DMatrix(agaricus.train$data,label = agaricus.train$label)
-
-  Pars <- list(
-      booster = "gbtree"
-    , eta = 0.01
-    , max_depth = max_depth
-    , min_child_weight = min_child_weight
-    , subsample = subsample
-    , objective = "binary:logistic"
-    , eval_metric = "auc"
-  )
-
-  xgbcv <- xgb.cv(
-       params = Pars
-     , data = dtrain
-     , nround = 100
-     , folds = Folds
-     , prediction = TRUE
-     , showsd = TRUE
-     , early_stopping_rounds = 5
-     , maximize = TRUE
-     , verbose = 0
-  )
-
-  return(list( Score = max(xgbcv$evaluation_log$test_auc_mean)
-             , nrounds = xgbcv$best_iteration
-  )
-  )
-}
-
-bounds <- list(
-    max_depth = c(2L, 10L)
-  , min_child_weight = c(1, 100)
-  , subsample = c(0.25, 1)
-)
-
-ScoreResult <- BayesianOptimization(
-    FUN = scoringFunction
-  , bounds = bounds
-  , initPoints = 5
-  , bulkNew = 1
-  , nIters = 7
-  , kern = "Matern52"
-  , acq = "ei"
-  , verbose = 1
-  , parallel = FALSE
-  , gsPoints = 50
-)
-}
+This function is depreciated. Please use \code{bayesOpt} instead.
 }
 \references{
 Jasper Snoek, Hugo Larochelle, Ryan P. Adams (2012) \emph{Practical Bayesian Optimization of Machine Learning Algorithms}
