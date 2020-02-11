@@ -6,6 +6,8 @@ Status](https://api.travis-ci.org/AnotherSamWilson/ParBayesianOptimization.svg)]
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/ParBayesianOptimization)](https://CRAN.R-project.org/package=ParBayesianOptimization)
 [![DEV\_Version\_Badge](https://img.shields.io/badge/Dev-1.0.0-blue.svg)](https://CRAN.R-project.org/package=ParBayesianOptimization)
 [![CRAN\_Downloads](https://cranlogs.r-pkg.org/badges/ParBayesianOptimization)](https://CRAN.R-project.org/package=ParBayesianOptimization)
+[![Coverage
+Status](https://codecov.io/gh/AnotherSamWilson/ParBayesianOptimization/branch/master/graph/badge.svg)](https://codecov.io/gh/AnotherSamWilson/ParBayesianOptimization/branch/master)
 
 # Parallelizable Bayesian Optimization
 
@@ -158,7 +160,7 @@ ggplot(data = data.frame(x=c(0,15)),aes(x=x)) +
   geom_vline(xintercept = xmax,linetype="dashed")
 ```
 
-![](README_files/figure-gfm/simpleFunction-1.png)<!-- -->
+![](man/figures/README-simpleFunction-1.png)<!-- -->
 
 We can see that this function is maximized around x\~7.023. We can use
 `bayesOpt` to find the global maximum of this function. We just need to
@@ -307,14 +309,14 @@ to see the results:
 ``` r
 optObj$scoreSummary
 #>    Epoch Iteration max_depth min_child_weight subsample gpUtility acqOptimum inBounds Elapsed     Score nrounds
-#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.10 0.9777163       2
+#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.13 0.9777163       2
 #> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.28 0.9763760      15
 #> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.45 0.9931657      18
-#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.27 0.9981437       7
-#> 5:     1         5         4        25.000000 1.0000000 0.7097168       TRUE     TRUE    0.12 0.9895677       1
+#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.26 0.9981437       7
+#> 5:     1         5         4        25.000000 1.0000000 0.7097168       TRUE     TRUE    0.14 0.9895677       1
 #> 6:     2         6         3        14.239730 0.5391045 0.3254058       TRUE     TRUE    0.23 0.9954590       8
-#> 7:     3         7         3         0.000000 1.0000000 0.5013235       TRUE     TRUE    0.11 0.9871203       1
-#> 8:     4         8         3         0.000000 0.2500000 0.4050999       TRUE     TRUE    0.29 0.9982603      12
+#> 7:     3         7         3         0.000000 1.0000000 0.5013235       TRUE     TRUE    0.13 0.9871203       1
+#> 8:     4         8         3         0.000000 0.2500000 0.4050999       TRUE     TRUE    0.33 0.9982603      12
 ```
 
 ``` r
@@ -373,10 +375,10 @@ optimization steps, versus the 4 performed in the sequential example:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    1.33    0.04   11.51
+#>    1.98    0.04   11.17
 tNoPar
 #>    user  system elapsed 
-#>   23.14    1.63   22.05
+#>   24.93    1.85   23.97
 ```
 
 ## Sampling Multiple Promising Points at Once
@@ -412,7 +414,7 @@ chart is updated at each iteration:
 plot(optObjSimp)
 ```
 
-<img src="README_files/figure-gfm/plotObj-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-plotObj-1.png" style="display: block; margin: auto;" />
 
 As you thoroughly explore the parameter space, you reduce the
 uncertainty in the unexplored areas. As you reduce uncertainty, you tend
