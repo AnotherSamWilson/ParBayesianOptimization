@@ -4,14 +4,32 @@
 \alias{BayesianOptimization}
 \title{Bayesian Optimization with Gaussian Processes}
 \usage{
-BayesianOptimization(FUN, bounds, saveIntermediate = NULL,
-  leftOff = NULL, parallel = FALSE, packages = NULL, export = NULL,
-  initialize = TRUE, initGrid = NULL, initPoints = 0, bulkNew = 1,
-  nIters = 0, kern = "Matern52", beta, acq = "ucb",
-  stopImpatient = list(newAcq = "ucb", rounds = Inf), kappa = 2.576,
-  eps = 0, gsPoints = 100, convThresh = 1e+07,
-  minClusterUtility = NULL, noiseAdd = 0.25, plotProgress = TRUE,
-  verbose = 1)
+BayesianOptimization(
+  FUN,
+  bounds,
+  saveIntermediate = NULL,
+  leftOff = NULL,
+  parallel = FALSE,
+  packages = NULL,
+  export = NULL,
+  initialize = TRUE,
+  initGrid = NULL,
+  initPoints = 0,
+  bulkNew = 1,
+  nIters = 0,
+  kern = "Matern52",
+  beta,
+  acq = "ucb",
+  stopImpatient = list(newAcq = "ucb", rounds = Inf),
+  kappa = 2.576,
+  eps = 0,
+  gsPoints = 100,
+  convThresh = 1e+07,
+  minClusterUtility = NULL,
+  noiseAdd = 0.25,
+  plotProgress = TRUE,
+  verbose = 1
+)
 }
 \arguments{
 \item{FUN}{the function to be maximized. This function should return a

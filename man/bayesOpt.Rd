@@ -4,11 +4,25 @@
 \alias{bayesOpt}
 \title{Bayesian Optimization with Gaussian Processes}
 \usage{
-bayesOpt(FUN, bounds, saveFile = NULL, initGrid, initPoints = 4,
-  iters.n = 3, iters.k = 1, kern = "Matern52", acq = "ucb",
-  kappa = 2.576, eps = 0, parallel = FALSE, gsPoints = pmax(100,
-  length(bounds)^3), convThresh = 1e+08, acqThresh = 1,
-  plotProgress = TRUE, verbose = 1)
+bayesOpt(
+  FUN,
+  bounds,
+  saveFile = NULL,
+  initGrid,
+  initPoints = 4,
+  iters.n = 3,
+  iters.k = 1,
+  kern = "Matern52",
+  acq = "ucb",
+  kappa = 2.576,
+  eps = 0,
+  parallel = FALSE,
+  gsPoints = pmax(100, length(bounds)^3),
+  convThresh = 1e+08,
+  acqThresh = 1,
+  plotProgress = TRUE,
+  verbose = 1
+)
 }
 \arguments{
 \item{FUN}{the function to be maximized. This function should return a
@@ -110,6 +124,13 @@ the results. An acquisition function is then maximized to determine the most
 likely location of the global maximum of the user defined function.  This
 process is repeated for a set number of iterations.
 }
+\section{Vignettes}{
+
+
+It is highly recommended to read the \href{https://github.com/AnotherSamWilson/ParBayesianOptimization}{GitHub} for examples.
+There are also several vignettes available from the official \href{https://CRAN.R-project.org/package=ParBayesianOptimization}{CRAN Listing}.
+}
+
 \examples{
 # Example 1 - Optimization of a continuous single parameter function
 scoringFunction <- function(x) {

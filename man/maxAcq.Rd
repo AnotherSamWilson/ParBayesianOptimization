@@ -4,8 +4,18 @@
 \alias{maxAcq}
 \title{Maximize Acquisition Function}
 \usage{
-maxAcq(GPs, GPe, TryOver, acq = "ucb", y_max, kappa, eps, parallel,
-  ParMethod, convThresh)
+maxAcq(
+  GPs,
+  GPe,
+  TryOver,
+  acq = "ucb",
+  y_max,
+  kappa,
+  eps,
+  parallel,
+  ParMethod,
+  convThresh
+)
 }
 \arguments{
 \item{GPs}{an object of class gp}

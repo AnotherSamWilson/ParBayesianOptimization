@@ -4,13 +4,23 @@
 \alias{addIterations}
 \title{Run Additional Optimization Iterations}
 \usage{
-addIterations(optObj, iters.n = 1, iters.k = 1,
-  bounds = optObj$bounds, kern = optObj$optPars$kern,
-  acq = optObj$optPars$acq, kappa = optObj$optPars$kappa,
-  eps = optObj$optPars$eps, gsPoints = optObj$optPars$gsPoints,
+addIterations(
+  optObj,
+  iters.n = 1,
+  iters.k = 1,
+  bounds = optObj$bounds,
+  kern = optObj$optPars$kern,
+  acq = optObj$optPars$acq,
+  kappa = optObj$optPars$kappa,
+  eps = optObj$optPars$eps,
+  gsPoints = optObj$optPars$gsPoints,
   convThresh = optObj$optPars$convThresh,
-  acqThresh = optObj$optPars$acqThresh, saveFile = optObj$saveFile,
-  parallel = FALSE, plotProgress = TRUE, verbose = 1)
+  acqThresh = optObj$optPars$acqThresh,
+  saveFile = optObj$saveFile,
+  parallel = FALSE,
+  plotProgress = TRUE,
+  verbose = 1
+)
 }
 \arguments{
 \item{optObj}{an object of class \code{bayesOpt}.}

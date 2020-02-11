@@ -11,10 +11,17 @@ the L-BFGS-B method is used to find the closest local optimum to each point.
 dbscan is then used to cluster points together which converged to the same
 optimum - only unique optimums are returned.}
 \usage{
-getLocalOptimums(optObj, bounds = optObj$bounds,
-  acq = optObj$optPars$acq, kappa = optObj$optPars$kappa,
-  eps = optObj$optPars$eps, convThresh = optObj$optPars$convThresh,
-  gsPoints = optObj$optPars$gsPoints, parallel = FALSE, verbose = 1)
+getLocalOptimums(
+  optObj,
+  bounds = optObj$bounds,
+  acq = optObj$optPars$acq,
+  kappa = optObj$optPars$kappa,
+  eps = optObj$optPars$eps,
+  convThresh = optObj$optPars$convThresh,
+  gsPoints = optObj$optPars$gsPoints,
+  parallel = FALSE,
+  verbose = 1
+)
 }
 \arguments{
 \item{optObj}{an object of class bayesOpt. The following parameters are all defaulted to
