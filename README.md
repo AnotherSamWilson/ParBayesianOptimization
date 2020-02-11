@@ -158,7 +158,7 @@ ggplot(data = data.frame(x=c(0,15)),aes(x=x)) +
   geom_vline(xintercept = xmax,linetype="dashed")
 ```
 
-![](README-unnamed-chunk-6-1.png)<!-- -->
+![](README_files/figure-gfm/simpleFunction-1.png)<!-- -->
 
 We can see that this function is maximized around x\~7.023. We can use
 `bayesOpt` to find the global maximum of this function. We just need to
@@ -307,14 +307,14 @@ to see the results:
 ``` r
 optObj$scoreSummary
 #>    Epoch Iteration max_depth min_child_weight subsample gpUtility acqOptimum inBounds Elapsed     Score nrounds
-#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.16 0.9777163       2
-#> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.39 0.9763760      15
-#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.66 0.9931657      18
-#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.39 0.9981437       7
-#> 5:     1         5         4        25.000000 1.0000000 0.7097168       TRUE     TRUE    0.17 0.9895677       1
-#> 6:     2         6         3        14.239730 0.5391045 0.3254058       TRUE     TRUE    0.33 0.9954590       8
-#> 7:     3         7         3         0.000000 1.0000000 0.5013235       TRUE     TRUE    0.17 0.9871203       1
-#> 8:     4         8         3         0.000000 0.2500000 0.4050999       TRUE     TRUE    0.37 0.9982603      12
+#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.10 0.9777163       2
+#> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.28 0.9763760      15
+#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.45 0.9931657      18
+#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.27 0.9981437       7
+#> 5:     1         5         4        25.000000 1.0000000 0.7097168       TRUE     TRUE    0.12 0.9895677       1
+#> 6:     2         6         3        14.239730 0.5391045 0.3254058       TRUE     TRUE    0.23 0.9954590       8
+#> 7:     3         7         3         0.000000 1.0000000 0.5013235       TRUE     TRUE    0.11 0.9871203       1
+#> 8:     4         8         3         0.000000 0.2500000 0.4050999       TRUE     TRUE    0.29 0.9982603      12
 ```
 
 ``` r
@@ -373,10 +373,10 @@ optimization steps, versus the 4 performed in the sequential example:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    1.55    0.06   10.79
+#>    1.33    0.04   11.51
 tNoPar
 #>    user  system elapsed 
-#>   23.89    1.90   22.53
+#>   23.14    1.63   22.05
 ```
 
 ## Sampling Multiple Promising Points at Once
@@ -412,7 +412,7 @@ chart is updated at each iteration:
 plot(optObjSimp)
 ```
 
-<img src="README-unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-gfm/plotObj-1.png" style="display: block; margin: auto;" />
 
 As you thoroughly explore the parameter space, you reduce the
 uncertainty in the unexplored areas. As you reduce uncertainty, you tend
