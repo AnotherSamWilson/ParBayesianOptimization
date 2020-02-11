@@ -262,26 +262,29 @@ bayesOpt <- function(
   if (verbose > 0 & iters.k < getDoParWorkers() & parallel) cat("iters.k is less than the threads registered on the parallel back end - process may not utilize all workers.\n")
 
   # Run initialization
-  if (verbose > 0) cat("\nRunning initial scoring function",nrow(initGrid),"times in",Workers,"thread(s).\n")
+  if (verbose > 0) cat("\nRunning initial scoring function",nrow(initGrid),"times in",Workers,"thread(s)...")
   sink(file = sinkFile)
-  scoreSummary <- foreach(
-      iter = 1:nrow(initGrid)
-    , .options.multicore = list(preschedule=FALSE)
-    , .combine = rbind
-    , .multicombine = TRUE
-    , .inorder = FALSE
-    , .errorhandling = 'pass'
-    , .packages ='data.table'
-    , .verbose = FALSE
-  ) %op% {
+  tm <- system.time(
+    scoreSummary <- foreach(
+        iter = 1:nrow(initGrid)
+      , .options.multicore = list(preschedule=FALSE)
+      , .combine = rbind
+      , .multicombine = TRUE
+      , .inorder = FALSE
+      , .errorhandling = 'pass'
+      #, .packages ='data.table'
+      , .verbose = FALSE
+    ) %op% {
 
-    Params <- initGrid[get("iter"),]
-    Elapsed <- system.time(Result <- do.call(what = FUN, args = as.list(Params)))
-    if(!any(names(Result) == "Score")) stop("FUN must return list with element 'Score' at a minimum.")
-    data.table(Params,Elapsed = Elapsed[[3]],as.data.table(Result))
+      Params <- initGrid[get("iter"),]
+      Elapsed <- system.time(Result <- do.call(what = FUN, args = as.list(Params)))
+      if(!any(names(Result) == "Score")) stop("FUN must return list with element 'Score' at a minimum.")
+      data.table(Params,Elapsed = Elapsed[[3]],as.data.table(Result))
 
-  }
+    }
+  )[[3]]
   while (sink.number() > 0) sink()
+  if (verbose > 0) cat(" ",tm,"seconds\n")
 
   # foreach passes errors as a vector.
   if (!is.data.table(scoreSummary)) {

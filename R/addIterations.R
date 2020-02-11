@@ -49,20 +49,6 @@ addIterations <- function(
     , verbose = 1
 ) {
 
-
-# iters.n = 4
-# iters.k = 3
-# kern = optObj$optPars$kern
-# acq = optObj$optPars$acq
-# kappa = optObj$optPars$kappa
-# eps = optObj$optPars$eps
-# gsPoints = optObj$optPars$gsPoints
-# convThresh = optObj$optPars$convThresh
-# acqThresh = optObj$optPars$acqThresh
-# parallel = FALSE
-# plotProgress = TRUE
-# verbose = 1
-
   if(class(optObj) != "bayesOpt") stop("optObj must be of class bayesOpt")
 
   # Check the parameters
@@ -133,19 +119,18 @@ addIterations <- function(
 
     # Fit GP
     if (verbose > 0) cat("\n  1) Fitting Gaussian Process...")
-    optObj$GauProList$scoreGP
-    optObj$GauProList$scoreKernel
-    optObj$GauProList$gpUpToDate
     optObj <- updateGP(optObj,bounds = bounds, verbose = FALSE)
-    optObj$GauProList$scoreGP
 
     # Try gsPoints starting points to find parameter set that optimizes Acq
     if (verbose > 0) cat("\n  2) Running local optimum search...")
-    LocalOptims <- getLocalOptimums(
-        optObj
-      , parallel=parallel
-      , verbose=verbose
-    )
+    tm <- system.time(
+      LocalOptims <- getLocalOptimums(
+          optObj
+        , parallel=parallel
+        , verbose=verbose
+      )
+    )[[3]]
+    if (verbose > 0) cat("       ",tm,"seconds")
 
     nextPars <- getNextParameters(
         LocalOptims
@@ -168,31 +153,35 @@ addIterations <- function(
 
     # Try to run the scoring function. If not all (but at least 1) new runs fail,
     # then foreach cannot call rbind correctly, and an error is thrown.
-    if (verbose > 0) cat("\n  3) Running scoring function",nrow(nextPars),"times in",Workers,"thread(s)...\n")
+    if (verbose > 0) cat("\n  3) Running FUN",nrow(nextPars),"times in",Workers,"thread(s)...")
     sink(file = sinkFile)
-    NewResults <- tryCatch(
-      {
-        foreach(
-          iter = 1:nrow(nextPars)
-          , .options.multicore = list(preschedule=FALSE)
-          , .combine = rbind
-          , .multicombine = TRUE
-          , .inorder = FALSE
-          , .errorhandling = 'pass'
-          #, .packages = packages
-          , .verbose = FALSE
-          #, .export = export
-        ) %op% {
+    tm <- system.time(
+      NewResults <- tryCatch(
+        {
+          foreach(
+            iter = 1:nrow(nextPars)
+            , .options.multicore = list(preschedule=FALSE)
+            , .combine = rbind
+            , .multicombine = TRUE
+            , .inorder = FALSE
+            , .errorhandling = 'pass'
+            #, .packages = packages
+            , .verbose = FALSE
+            #, .export = export
+          ) %op% {
 
-          Params <- nextPars[get("iter"),boundsDT$N,with=FALSE]
-          Elapsed <- system.time(Result <- do.call(what = FUN, args = as.list(Params)))
-          return(data.table(nextPars[get("iter"),], Elapsed = Elapsed[[3]], as.data.table(Result)))
+            Params <- nextPars[get("iter"),boundsDT$N,with=FALSE]
+            Elapsed <- system.time(Result <- do.call(what = FUN, args = as.list(Params)))
+            return(data.table(nextPars[get("iter"),], Elapsed = Elapsed[[3]], as.data.table(Result)))
 
+          }
         }
-      }
-      , error = function(e) e
-    )
+        , error = function(e) e
+      )
+    )[[3]]
     while (sink.number() > 0) sink()
+
+    if (verbose > 0) cat(" ",tm,"seconds\n")
 
     # Check for errors.
     if (!is.data.table(NewResults)) {

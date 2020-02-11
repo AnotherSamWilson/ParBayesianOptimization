@@ -8,10 +8,10 @@
 #' @param verbose Should the user be warned if the GP is already up to date?
 #' @return a \code{bayesOpt} object with updated Gaussian Processes.
 #' @export
-updateGP <- function(optObj,bounds = optObj$bounds,verbose = TRUE) {
+updateGP <- function(optObj,bounds = optObj$bounds,verbose = 1) {
 
   if (optObj$GauProList$gpUpToDate) {
-    if (verbose) message("Gaussian Processes are already up to date.")
+    if (verbose > 0) message("Gaussian Processes are already up to date.")
     return(optObj)
   } else {
 

@@ -24,7 +24,6 @@
 #' @importFrom data.table as.data.table
 #' @import foreach
 #' @export
-
 getLocalOptimums <- function(
     optObj
   , bounds = optObj$bounds
@@ -45,7 +44,6 @@ getLocalOptimums <- function(
   acqN <- getAcqInfo(acq)
   continue <- TRUE
 
-
   while(continue) {
 
     # Create random points to initialize local maximum search.
@@ -57,7 +55,7 @@ getLocalOptimums <- function(
       , .combine = 'rbind'
       , .inorder = TRUE
       , .errorhandling = 'pass'
-      , .packages = c('data.table','GauPro','stats')
+      , .packages = c('GauPro','stats')
       , .multicombine = TRUE
       , .verbose = FALSE
       , .export = c('calcAcq')

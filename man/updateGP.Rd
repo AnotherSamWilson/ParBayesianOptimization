@@ -4,7 +4,7 @@
 \alias{updateGP}
 \title{Update Gaussian Processes in a bayesOpt Object}
 \usage{
-updateGP(optObj, bounds = optObj$bounds, verbose = TRUE)
+updateGP(optObj, bounds = optObj$bounds, verbose = 1)
 }
 \arguments{
 \item{optObj}{an object of class bayesOpt}

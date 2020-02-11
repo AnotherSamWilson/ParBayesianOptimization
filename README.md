@@ -9,7 +9,7 @@ Status](https://api.travis-ci.org/AnotherSamWilson/ParBayesianOptimization.svg)]
 
 # Parallelizable Bayesian Optimization
 
-<a href='https://github.com/AnotherSamWilson/ParBayesianOptimization'><img src='icon.png' align = 'right' height="300" /></a>
+<a href='https://github.com/AnotherSamWilson/ParBayesianOptimization'><img src='icon.png' align = 'right' height="400" /></a>
 
 This README contains a thorough walkthrough of Bayesian optimization and
 the syntax needed to use this package, with simple and complex examples.
@@ -18,7 +18,7 @@ More information can be found in the package vignettes and manual.
 ## Table of Contents
 
   - [01 -
-    Installation](https://github.com/AnotherSamWilson/ParBayesianOptimization#Instalation)  
+    Installation](https://github.com/AnotherSamWilson/ParBayesianOptimization#Installation)  
   - [02 - Package
     Process](https://github.com/AnotherSamWilson/ParBayesianOptimization#Package-Process)  
   - [03 - Bayesian Optimization
@@ -182,7 +182,6 @@ optObjSimp <- bayesOpt(
   FUN = FUN
   , bounds = bounds
   , initGrid = initGrid
-  , acq = "ei"
   , iters.n = 2
   , gsPoints = 25
 )
@@ -193,23 +192,23 @@ Let’s see how close the algorithm got to the global maximum:
 ``` r
 getBestPars(optObjSimp)
 #> $x
-#> [1] 6.466367
+#> [1] 6.750829
 ```
 
-The process is getting pretty close\! We were only about 12% shy of the
+The process is getting pretty close\! We were only about 2% shy of the
 global optimum:
 
 ``` r
 simpleFunction(7.023)/simpleFunction(getBestPars(optObjSimp)$x)
-#> [1] 1.109516
+#> [1] 1.025804
 ```
 
 Let’s run the process for a little longer:
 
 ``` r
-optObjSimp <- addIterations(optObjSimp,iters.n=2,verbose=0)
+optObjSimp <- addIterations(optObjSimp,iters.n=3,verbose=0)
 simpleFunction(7.023)/simpleFunction(getBestPars(optObjSimp)$x)
-#> [1] 1.000998
+#> [1] 1.005606
 ```
 
 We have now found an `x` very close to the global optimum.
@@ -292,7 +291,7 @@ tNoPar <- system.time(
       FUN = scoringFunction
     , bounds = bounds
     , initPoints = 4
-    , iters.n = 2
+    , iters.n = 4
     , iters.k = 1
   )
 )
@@ -308,24 +307,26 @@ to see the results:
 ``` r
 optObj$scoreSummary
 #>    Epoch Iteration max_depth min_child_weight subsample gpUtility acqOptimum inBounds Elapsed     Score nrounds
-#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.11 0.9777163       2
-#> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.28 0.9763760      15
-#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.47 0.9931657      18
-#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.27 0.9981437       7
-#> 5:     1         5         4        25.000000 1.0000000 0.7097168       TRUE     TRUE    0.14 0.9895677       1
-#> 6:     2         6         3        14.239730 0.5391045 0.3254058       TRUE     TRUE    0.24 0.9954590       8
+#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.16 0.9777163       2
+#> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.39 0.9763760      15
+#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.66 0.9931657      18
+#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.39 0.9981437       7
+#> 5:     1         5         4        25.000000 1.0000000 0.7097168       TRUE     TRUE    0.17 0.9895677       1
+#> 6:     2         6         3        14.239730 0.5391045 0.3254058       TRUE     TRUE    0.33 0.9954590       8
+#> 7:     3         7         3         0.000000 1.0000000 0.5013235       TRUE     TRUE    0.17 0.9871203       1
+#> 8:     4         8         3         0.000000 0.2500000 0.4050999       TRUE     TRUE    0.37 0.9982603      12
 ```
 
 ``` r
 getBestPars(optObj)
 #> $max_depth
-#> [1] 4
+#> [1] 3
 #> 
 #> $min_child_weight
-#> [1] 8.639925
+#> [1] 0
 #> 
 #> $subsample
-#> [1] 0.5499186
+#> [1] 0.25
 ```
 
 ## Running In Parallel
@@ -344,11 +345,6 @@ clusterExport(cl,c('Folds','agaricus.train'))
 clusterEvalQ(cl,expr= {
   library(xgboost)
 })
-#> [[1]]
-#> [1] "xgboost"   "stats"     "graphics"  "grDevices" "utils"     "datasets"  "methods"   "base"     
-#> 
-#> [[2]]
-#> [1] "xgboost"   "stats"     "graphics"  "grDevices" "utils"     "datasets"  "methods"   "base"
 ```
 
 We can now run our process in paralel\! Make sure you set iters.k to
@@ -366,32 +362,21 @@ tWithPar <- system.time(
     , parallel = TRUE
   )
 )
-#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
-#>   non-finite value supplied by optim
-#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
-#>   non-finite value supplied by optim
-#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
-#>   non-finite value supplied by optim
-#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
-#>   non-finite value supplied by optim
-#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
-#>   non-finite value supplied by optim
-#> Error in optim(par = par, fn = env$fn, gr = env$gr, ...) : 
-#>   non-finite value supplied by optim
 stopCluster(cl)
 registerDoSEQ()
 ```
 
 We managed to massively cut the process time by running the process on 2
-cores in parallel:
+cores in parallel. However, keep in mind we only performed 2
+optimization steps, versus the 4 performed in the sequential example:
 
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    0.92    0.09    9.25
+#>    1.55    0.06   10.79
 tNoPar
 #>    user  system elapsed 
-#>   10.92    1.37   10.17
+#>   23.89    1.90   22.53
 ```
 
 ## Sampling Multiple Promising Points at Once

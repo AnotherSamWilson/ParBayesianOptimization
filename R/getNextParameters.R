@@ -59,7 +59,7 @@ getNextParameters <- function(
 
       # Only replace custers that are not duplicates.
       fromNoise <- applyNoise(
-          candidateParameters
+            candidateParameters
           , boundsDT
         )
 
@@ -84,7 +84,9 @@ getNextParameters <- function(
       # See if any of these have already been run
       fromNoise$Duplicate <- checkDup(
         fromNoise[,boundsDT$N,with=FALSE]
-        , scoreSummary[,boundsDT$N,with=FALSE]
+        , rbind(
+            scoreSummary[,boundsDT$N,with=FALSE]
+          , returnParameters[,boundsDT$N,with=FALSE])
       )
 
       # If we obtained any unique parameter sets:
