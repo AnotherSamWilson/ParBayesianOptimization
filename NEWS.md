@@ -1,7 +1,8 @@
-## ParBayesianOptimization 0.0.2
+## ParBayesianOptimization 1.0.0
 
 
 # Major Changes
+* Depreciated BayesianOptimization(). New package structure uses bayesOpt() 2020-02-10
 * Added a `NEWS.md` file to track changes to the package.
 * Package was accepted by CRAN on 12/3/2018  
 * Implemented plotProgress 10/01/2019
