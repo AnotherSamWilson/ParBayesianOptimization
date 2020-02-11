@@ -80,7 +80,8 @@
 #'   If 2, progress and information about new parameter-score pairs will be printed.
 #' @return A \code{bayesOpt} object, containing information about the process.
 #' @references Jasper Snoek, Hugo Larochelle, Ryan P. Adams (2012) \emph{Practical Bayesian Optimization of Machine Learning Algorithms}
-#' @section Vignettes
+#'
+#' @section Vignettes:
 #'
 #' It is highly recommended to read the \href{https://github.com/AnotherSamWilson/ParBayesianOptimization}{GitHub} for examples.
 #' There are also several vignettes available from the official \href{https://CRAN.R-project.org/package=ParBayesianOptimization}{CRAN Listing}.
