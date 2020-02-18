@@ -4,7 +4,7 @@
 [![Build
 Status](https://api.travis-ci.org/AnotherSamWilson/ParBayesianOptimization.svg)](https://travis-ci.org/AnotherSamWilson/ParBayesianOptimization)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/ParBayesianOptimization)](https://CRAN.R-project.org/package=ParBayesianOptimization)
-[![DEV\_Version\_Badge](https://img.shields.io/badge/Dev-1.0.0-blue.svg)](https://CRAN.R-project.org/package=ParBayesianOptimization)
+[![DEV\_Version\_Badge](https://img.shields.io/badge/Dev-1.1.0-blue.svg)](https://CRAN.R-project.org/package=ParBayesianOptimization)
 [![CRAN\_Downloads](https://cranlogs.r-pkg.org/badges/ParBayesianOptimization)](https://CRAN.R-project.org/package=ParBayesianOptimization)
 [![Coverage
 Status](https://codecov.io/gh/AnotherSamWilson/ParBayesianOptimization/branch/master/graph/badge.svg)](https://codecov.io/gh/AnotherSamWilson/ParBayesianOptimization/branch/master)
@@ -178,8 +178,11 @@ calculate the `x` which maximizes our expected improvement, and run
 `simpleFunction` at this x. We then go through 1 more iteration of this:
 
 ``` r
-FUN <- function(x) list(Score = simpleFunction(x))
 library(ParBayesianOptimization)
+
+FUN <- function(x) list(Score = simpleFunction(x))
+
+set.seed(0)
 optObjSimp <- bayesOpt(
   FUN = FUN
   , bounds = bounds
@@ -187,6 +190,7 @@ optObjSimp <- bayesOpt(
   , iters.n = 2
   , gsPoints = 25
 )
+#> Warning: package 'DiceKriging' was built under R version 3.6.2
 ```
 
 Let’s see how close the algorithm got to the global maximum:
@@ -194,15 +198,15 @@ Let’s see how close the algorithm got to the global maximum:
 ``` r
 getBestPars(optObjSimp)
 #> $x
-#> [1] 6.750829
+#> [1] 6.448408
 ```
 
-The process is getting pretty close\! We were only about 2% shy of the
+The process is getting pretty close\! We were only about 11% shy of the
 global optimum:
 
 ``` r
 simpleFunction(7.023)/simpleFunction(getBestPars(optObjSimp)$x)
-#> [1] 1.025804
+#> [1] 1.116824
 ```
 
 Let’s run the process for a little longer:
@@ -210,7 +214,7 @@ Let’s run the process for a little longer:
 ``` r
 optObjSimp <- addIterations(optObjSimp,iters.n=3,verbose=0)
 simpleFunction(7.023)/simpleFunction(getBestPars(optObjSimp)$x)
-#> [1] 1.005606
+#> [1] 1.00002
 ```
 
 We have now found an `x` very close to the global optimum.
@@ -309,26 +313,26 @@ to see the results:
 ``` r
 optObj$scoreSummary
 #>    Epoch Iteration max_depth min_child_weight subsample gpUtility acqOptimum inBounds Elapsed     Score nrounds
-#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.13 0.9777163       2
+#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.10 0.9777163       2
 #> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.28 0.9763760      15
-#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.45 0.9931657      18
-#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.26 0.9981437       7
-#> 5:     1         5         4        25.000000 1.0000000 0.7097168       TRUE     TRUE    0.14 0.9895677       1
-#> 6:     2         6         3        14.239730 0.5391045 0.3254058       TRUE     TRUE    0.23 0.9954590       8
-#> 7:     3         7         3         0.000000 1.0000000 0.5013235       TRUE     TRUE    0.13 0.9871203       1
-#> 8:     4         8         3         0.000000 0.2500000 0.4050999       TRUE     TRUE    0.33 0.9982603      12
+#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.44 0.9931657      18
+#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.25 0.9981437       7
+#> 5:     1         5         4        21.871937 1.0000000 0.5857961       TRUE     TRUE    0.14 0.9945933       1
+#> 6:     2         6         5         2.051363 0.7528395 0.4650739       TRUE     TRUE    0.38 0.9984613      11
+#> 7:     3         7         4         0.000000 1.0000000 0.4653549       TRUE     TRUE    0.23 0.9941097       6
+#> 8:     4         8         5        25.000000 0.6339013 0.3995827       TRUE     TRUE    0.18 0.9943380       3
 ```
 
 ``` r
 getBestPars(optObj)
 #> $max_depth
-#> [1] 3
+#> [1] 5
 #> 
 #> $min_child_weight
-#> [1] 0
+#> [1] 2.051363
 #> 
 #> $subsample
-#> [1] 0.25
+#> [1] 0.7528395
 ```
 
 ## Running In Parallel
@@ -375,10 +379,10 @@ optimization steps, versus the 4 performed in the sequential example:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    1.98    0.04   11.17
+#>    1.59    0.25    6.03
 tNoPar
 #>    user  system elapsed 
-#>   24.93    1.85   23.97
+#>   16.74    2.02   16.44
 ```
 
 ## Sampling Multiple Promising Points at Once
@@ -411,6 +415,7 @@ Example](https://github.com/AnotherSamWilson/ParBayesianOptimization#Simple-Exam
 chart is updated at each iteration:
 
 ``` r
+optObjSimp <- addIterations(optObjSimp,2,verbose=FALSE)
 plot(optObjSimp)
 ```
 
