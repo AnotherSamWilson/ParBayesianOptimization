@@ -32,10 +32,10 @@ optObj <- addIterations(
 
 optObj <- addIterations(
     optObj
-  , iters.n = 2
+  , iters.n = 4
   , iters.k = 2
   , verbose = 0
   , gsPoints = 10
 )
 
-expect_true(nrow(optObj$scoreSummary) == 10)
+expect_true(nrow(optObj$scoreSummary) == 12)
