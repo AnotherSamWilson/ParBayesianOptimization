@@ -26,13 +26,12 @@
 #'   at each Epoch (optimization step). If running in parallel, good practice
 #'   is to set \code{iters.k} to some multiple of the number of cores you have designated
 #'   for this process. Must belower than, and preferrably some multiple of \code{iters.n}.
-#' @param kern A character string representing one of \code{GauPro_kernel_beta}
-#'   S6 classes. Determines the covariance function used in the gaussian process. Can be one of:
+#' @param otherHalting A list of other halting specifications. The process will stop if any of
+#'   the following is true. These checks are only performed in between optimization steps:
 #' \itemize{
-#'   \item \code{"Gaussian"}
-#'   \item \code{"Exponential"}
-#'   \item \code{"Matern52"}
-#'   \item \code{"Matern32"}
+#'   \item The elapsed seconds is greater than the list element \code{timeLimit}.
+#'   \item The utility expected from the Gaussian process is less than the list element
+#'   \code{minUtility}.
 #' }
 #' @param acq acquisition function type to be used. Can be "ucb", "ei", "eips" or "poi".
 #' \itemize{
@@ -78,6 +77,9 @@
 #' @param verbose Whether or not to print progress to the console.
 #'   If 0, nothing will be printed. If 1, progress will be printed.
 #'   If 2, progress and information about new parameter-score pairs will be printed.
+#' @param ... Other parameters passed to \code{DiceKriging::km()}. All FUN inputs and scores
+#' are scaled from 0-1 before being passed to km. FUN inputs are scaled within \code{bounds},
+#' and scores are scaled by 0 = min(scores), 1 = max(scores).
 #' @return A \code{bayesOpt} object, containing information about the process.
 #' @references Jasper Snoek, Hugo Larochelle, Ryan P. Adams (2012) \emph{Practical Bayesian Optimization of Machine Learning Algorithms}
 #'
@@ -111,9 +113,11 @@
 #'
 #' data(agaricus.train, package = "xgboost")
 #'
-#' Folds <- list( Fold1 = as.integer(seq(1,nrow(agaricus.train$data),by = 3))
-#'              , Fold2 = as.integer(seq(2,nrow(agaricus.train$data),by = 3))
-#'              , Fold3 = as.integer(seq(3,nrow(agaricus.train$data),by = 3)))
+#' Folds <- list(
+#'     Fold1 = as.integer(seq(1,nrow(agaricus.train$data),by = 3))
+#'   , Fold2 = as.integer(seq(2,nrow(agaricus.train$data),by = 3))
+#'   , Fold3 = as.integer(seq(3,nrow(agaricus.train$data),by = 3))
+#' )
 #'
 #' scoringFunction <- function(max_depth, min_child_weight, subsample) {
 #'
@@ -141,9 +145,11 @@
 #'      , verbose = 0
 #'   )
 #'
-#'   return(list( Score = max(xgbcv$evaluation_log$test_auc_mean)
-#'              , nrounds = xgbcv$best_iteration
-#'   )
+#'   return(
+#'     list(
+#'         Score = max(xgbcv$evaluation_log$test_auc_mean)
+#'       , nrounds = xgbcv$best_iteration
+#'     )
 #'   )
 #' }
 #'
@@ -159,7 +165,6 @@
 #'   , initPoints = 3
 #'   , iters.n = 2
 #'   , iters.k = 1
-#'   , kern = "Matern52"
 #'   , acq = "ei"
 #'   , gsPoints = 10
 #'   , parallel = FALSE
@@ -177,7 +182,7 @@ bayesOpt <- function(
   , initPoints = 4
   , iters.n = 3
   , iters.k = 1
-  , kern = "Matern52"
+  , otherHalting = list(timeLimit = Inf,minUtility = 0)
   , acq = "ucb"
   , kappa = 2.576
   , eps = 0.0
@@ -187,7 +192,10 @@ bayesOpt <- function(
   , acqThresh = 1.000
   , plotProgress = TRUE
   , verbose = 1
+  , ...
 ) {
+
+  startT <- Sys.time()
 
   # Construct bayesOpt list
   optObj <- list()
@@ -207,17 +215,21 @@ bayesOpt <- function(
       bounds
     , iters.n
     , iters.k
-    , kern
+    , otherHalting
     , acq
     , acqThresh
     , plotProgress
+    , parallel
+    , verbose
   )
 
-  # Make bounds data easily accessible
+  # Formatting
   boundsDT <- boundsToDT(bounds)
+  otherHalting <- formatOtherHalting(otherHalting)
 
   # Initialization Setup
   if (missing(initGrid) + missing(initPoints) != 1) stop("Please provide 1 of initGrid or initPoints, but not both.")
+  if (initPoints <= length(bounds)) stop("initPoints must be greater than the number of FUN inputs.")
   if (!missing(initGrid)) {
     setDT(initGrid)
     inBounds <- checkBounds(initGrid,bounds)
@@ -241,26 +253,9 @@ bayesOpt <- function(
     }
   )
 
-  # The same kernel is used throughout the entire process.
-  # The kernel is updated at every iteration when the GP is recreated
-  # with new 0-1 scaled Scores. This method allows for cleaner code
-  # and much, MUCH faster update of the GP.
-  optObj$GauProList$scoreKernel <- assignKern(kern,nrow(boundsDT))
-  if (acq == "eips") optObj$GauProList$timeKernel <- assignKern(kern,nrow(boundsDT))
-
-
   # Define processing function
   `%op%` <- ParMethod(parallel)
   if(parallel) Workers <- getDoParWorkers() else Workers <- 1
-
-
-  # Better to quit gracefully than not.
-  # Try to halt as early as possible, since this function can be very time intensive.
-  while (sink.number() > 0) sink()
-  if (!any(acq == c("ucb","ei","eips","poi"))) stop("Acquisition function not recognized")
-  if (parallel & (getDoParWorkers() == 1)) stop("parallel is set to TRUE but no back end is registered.\n")
-  if (!parallel & getDoParWorkers() > 1 & verbose > 0) cat("parallel back end is registered, but parallel is set to false. Process will not be run in parallel.\n")
-  if (verbose > 0 & iters.k < getDoParWorkers() & parallel) cat("iters.k is less than the threads registered on the parallel back end - process may not utilize all workers.\n")
 
   # Run initialization
   if (verbose > 0) cat("\nRunning initial scoring function",nrow(initGrid),"times in",Workers,"thread(s)...")
@@ -309,7 +304,6 @@ bayesOpt <- function(
 
   # This is the final list returned. It is updated whenever possible.
   # If an error occurs, it is returned in its latest configuration.
-  optObj$optPars$kern <- kern
   optObj$optPars$acq <- acq
   optObj$optPars$kappa <- kappa
   optObj$optPars$eps <- eps
@@ -320,18 +314,21 @@ bayesOpt <- function(
   optObj$scoreSummary <- scoreSummary
   optObj$GauProList$gpUpToDate <- FALSE
   optObj$iters <- nrow(scoreSummary)
+  optObj$elapsedTime <- as.numeric(difftime(Sys.time(),startT,units = "secs"))
 
   # Save Intermediary Output
   saveSoFar(optObj,verbose)
 
   optObj <- addIterations(
       optObj
+    , otherHalting = otherHalting
     , iters.n = iters.n
     , iters.k = iters.k
     , parallel = parallel
     , plotProgress = plotProgress
     , saveFile = saveFile
     , verbose = verbose
+    , ...
   )
 
   return(optObj)

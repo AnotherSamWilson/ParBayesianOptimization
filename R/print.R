@@ -15,7 +15,10 @@ print.bayesOpt <- function(x,...) {
   cat(rep(" ",spac-10),"Iterations: ",max(x$scoreSummary$Iteration),"\n",sep="")
   cat(rep(" ",spac-19),"Average FUN Seconds: ",round(mean(x$scoreSummary$Elapsed),2),"\n",sep="")
   cat(rep(" ",spac-19),"Highest FUN Seconds: ",round(max(x$scoreSummary$Elapsed),2),"\n",sep="")
-  cat("Final ",acqN$disp,": ",tail(x$scoreSummary$gpUtility,1),"\n",sep="")
+
+  gpUtil <- max(x$scoreSummary[get("Epoch") == max(get("Epoch"))]$gpUtility)
+
+  cat("Final ",acqN$disp,": ",gpUtil,"\n",sep="")
   cat(rep(" ",spac-10),"GP Updated: ",x$GauProList$gpUpToDate,"\n",sep="")
   invisible(x)
 }

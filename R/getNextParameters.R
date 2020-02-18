@@ -68,7 +68,7 @@ getNextParameters <- function(
 
       # Calculate the utility at these spots.
       fromNoise$gpUtility <- calcAcq(
-          as.matrix(fromNoise[,boundsDT$N,with=FALSE])
+          fromNoise[,boundsDT$N,with=FALSE]
         , scoreGP
         , timeGP
         , acq

@@ -15,8 +15,8 @@
 #'   at each Epoch (optimization step). If running in parallel, good practice
 #'   is to set \code{iters.k} to some multiple of the number of cores you have designated
 #'   for this process. Must belower than, and preferrably some multiple of \code{iters.n}.
+#' @param otherHalting Same as bayesOpt()
 #' @param bounds Same as bayesOpt()
-#' @param kern Same as bayesOpt()
 #' @param acq Same as bayesOpt()
 #' @param kappa Same as bayesOpt()
 #' @param eps Same as bayesOpt()
@@ -27,7 +27,7 @@
 #' @param parallel Same as bayesOpt()
 #' @param plotProgress Same as bayesOpt()
 #' @param verbose Same as bayesOpt()
-#' @importFrom GauPro GauPro_kernel_model Matern52 Matern32 Exponential Gaussian
+#' @param ... Same as bayesOpt()
 #' @importFrom crayon make_style red
 #' @return A \code{bayesOpt} object.
 #' @export
@@ -35,8 +35,8 @@ addIterations <- function(
       optObj
     , iters.n = 1
     , iters.k = 1
+    , otherHalting = list(timeLimit = Inf,minUtility = 0)
     , bounds = optObj$bounds
-    , kern = optObj$optPars$kern
     , acq = optObj$optPars$acq
     , kappa = optObj$optPars$kappa
     , eps = optObj$optPars$eps
@@ -47,8 +47,10 @@ addIterations <- function(
     , parallel = FALSE
     , plotProgress = TRUE
     , verbose = 1
+    , ...
 ) {
 
+  startT <- Sys.time()
   if(class(optObj) != "bayesOpt") stop("optObj must be of class bayesOpt")
 
   # Check the parameters
@@ -56,13 +58,16 @@ addIterations <- function(
       bounds
     , iters.n
     , iters.k
-    , kern
+    , otherHalting
     , acq
     , acqThresh
     , plotProgress
+    , parallel
+    , verbose
   )
 
   optObj <- changeSaveFile(optObj,saveFile)
+  otherHalting <- formatOtherHalting(otherHalting)
 
   # Set up for iterations
   FUN <- optObj$FUN
@@ -119,9 +124,9 @@ addIterations <- function(
 
     # Fit GP
     if (verbose > 0) cat("\n  1) Fitting Gaussian Process...")
-    optObj <- updateGP(optObj,bounds = bounds, verbose = FALSE)
+    optObj <- updateGP(optObj,bounds = bounds, verbose = 0, ...)
 
-    # Try gsPoints starting points to find parameter set that optimizes Acq
+    # Find local optimums of the acquisition function
     if (verbose > 0) cat("\n  2) Running local optimum search...")
     tm <- system.time(
       LocalOptims <- getLocalOptimums(
@@ -132,6 +137,19 @@ addIterations <- function(
     )[[3]]
     if (verbose > 0) cat("       ",tm,"seconds")
 
+    # Should we continue?
+    if (otherHalting$minUtility > max(LocalOptims$gpUtility)) {
+      optObj$stopStatus <- paste0("Could not meet minimum required (",otherHalting$minUtility,") utility.")
+      optObj$elapsedTime <- totalTime(optObj,startT)
+      return(optObj)
+    } else if (otherHalting$timeLimit < totalTime(optObj,startT)) {
+      optObj$stopStatus <- paste0("Time Limit - ",otherHalting$timeLimit," seconds.")
+      optObj$elapsedTime <- totalTime(optObj,startT)
+      return(optObj)
+    }
+
+    # Filter out local optimums to our specifications
+    # Obtain new candidates if we don't have enough
     nextPars <- getNextParameters(
         LocalOptims
       , boundsDT
@@ -148,6 +166,7 @@ addIterations <- function(
     if(any(class(nextPars) == "stopEarlyMsg")) {
       cat(returnEarly(nextPars))
       optObj$stopStatus <- paste0("Error in getNextParameters: ",nextPars)
+      optObj$elapsedTime <- totalTime(optObj,startT)
       return(optObj)
     }
 
@@ -195,11 +214,13 @@ addIterations <- function(
           cat(returnEarly(" Returning results so far."))
         }
         optObj$stopStatus <- paste0("Error in FUN: ",er)
+        optObj$elapsedTime <- totalTime(optObj,startT)
         return(optObj)
       } else if(class(NewResults) == "matrix") {
         # foreach returns a matrix of errors if running FUN >1 times.
         cat(returnEarly("\nFUN returned all errors: ",NewResults[1,]$message,"."),sep = "")
         optObj$stopStatus <- paste0("Error in FUN: ",NewResults[1,]$message)
+        optObj$elapsedTime <- totalTime(optObj,startT)
         return(optObj)
       }
 

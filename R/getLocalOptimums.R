@@ -55,7 +55,7 @@ getLocalOptimums <- function(
       , .combine = 'rbind'
       , .inorder = TRUE
       , .errorhandling = 'pass'
-      , .packages = c('GauPro','stats')
+      , .packages = c('DiceKriging','stats')
       , .multicombine = TRUE
       , .verbose = FALSE
       , .export = c('calcAcq')

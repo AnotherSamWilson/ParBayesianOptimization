@@ -89,22 +89,6 @@ checkDup <- function(tab1,tab2) {
 
 }
 
-assignKern <- function(kern,params) {
-
-  betas <- rep(0,params)
-
-  if(kern == "Matern32"){kern <- Matern32$new(betas)
-
-  } else if (kern == "Matern52") { kern <- Matern52$new(betas)
-
-  } else if (kern == "Exponential") { kern <- Exponential$new(betas)
-
-  } else if (kern == "Gaussian") { kern <- Gaussian$new(betas)}
-
-  return(kern)
-
-}
-
 boundsToDT <- function(bounds) {
   data.table(
     N = names(bounds)
@@ -145,18 +129,31 @@ checkParameters <- function(
     bounds
   , iters.n
   , iters.k
-  , kern
+  , otherHalting
   , acq
   , acqThresh
   , plotProgress
+  , parallel
+  , verbose
 ) {
   if (iters.n < iters.k) stop("iters.n cannot be less than iters.k. See ?bayesOpt for parameter definitions.")
   if (iters.n %% 1 != 0 | iters.k %% 1 != 0) stop("iters.n and iters.k must be integers.")
-  if (!kern %in% c("Gaussian","Exponential","Matern52","Matern32")) stop("kern not recognized")
+  if (!any(acq == c("ucb","ei","eips","poi"))) stop("Acquisition function not recognized")
+  if (parallel & (getDoParWorkers() == 1)) stop("parallel is set to TRUE but no back end is registered.\n")
+  if (!parallel & getDoParWorkers() > 1 & verbose > 0) message("parallel back end is registered, but parallel is set to false. Process will not be run in parallel.")
+  if (any(!names(otherHalting) %in% c("timeLimit","minUtility"))) stop("otherHalting element not recognized. Must be one of timeLimit and minUtility.")
   if (class(bounds) != "list") stop("bounds must be a list of parameter bounds with the same arguments as FUN.")
   if (any(lengths(bounds) != 2)) stop("Not all elements in bounds are length 2.")
   if (acqThresh > 1 | acqThresh < 0) stop("acqThresh must be in [0,1]")
-  if (!acq %in% c("ei","eips","ucb","poi")) stop("acq not recognized")
   if (!is.logical(plotProgress)) stop("plotProgress must be logical")
 }
 
+totalTime <- function(optObj,startT) {
+  optObj$elapsedTime + as.numeric(difftime(Sys.time(),startT,units = "secs"))
+}
+
+formatOtherHalting <- function(otherHalting) {
+  if (is.null(otherHalting$timeLimit)) otherHalting$timeLimit <- Inf
+  if (is.null(otherHalting$minUtility)) otherHalting$minUtility <- 0
+  return(otherHalting)
+}

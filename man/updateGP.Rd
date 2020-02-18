@@ -4,7 +4,7 @@
 \alias{updateGP}
 \title{Update Gaussian Processes in a bayesOpt Object}
 \usage{
-updateGP(optObj, bounds = optObj$bounds, verbose = 1)
+updateGP(optObj, bounds = optObj$bounds, verbose = 1, ...)
 }
 \arguments{
 \item{optObj}{an object of class bayesOpt}
@@ -12,6 +12,8 @@ updateGP(optObj, bounds = optObj$bounds, verbose = 1)
 \item{bounds}{The bounds to scale the parameters within.}
 
 \item{verbose}{Should the user be warned if the GP is already up to date?}
+
+\item{...}{passed to \code{DiceKriging::km()}}
 }
 \value{
 a \code{bayesOpt} object with updated Gaussian Processes.
