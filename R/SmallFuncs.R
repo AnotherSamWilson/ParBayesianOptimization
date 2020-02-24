@@ -74,6 +74,10 @@ zeroOneScale <- function(vec) {
 
   r <- max(vec) - min(vec)
 
+  # If the scoring function returned the same results
+  # this results in the function a vector of 1s.
+  if(r==0) stop("Results from FUN have 0 variance, cannot build GP.")
+
   vec <- (vec - min(vec))/r
 
   return(vec)
@@ -104,10 +108,10 @@ saveSoFar <- function(optObj,verbose) {
     tryCatch(
       {
         suppressWarnings(saveRDS(optObj, file = optObj$saveFile))
-        if (verbose > 0) cat("\n   Saving Intermediary Results with ",nrow(optObj$scoreSummary)," rows to:  \n   ",optObj$saveFile,"\n")
+        if (verbose > 0) cat("  4) Saving Intermediary Results to:  \n    ",optObj$saveFile,"\n")
       }
       , error = function(e) {
-        if (verbose > 0) cat(red("\n === Failed to save intermediary results. Please check file path. === \n"))
+        if (verbose > 0) cat(red("  4) Failed to save intermediary results. Please check file path.\n"))
       }
     )
   }
@@ -132,6 +136,7 @@ checkParameters <- function(
   , otherHalting
   , acq
   , acqThresh
+  , errorHandling
   , plotProgress
   , parallel
   , verbose
@@ -146,6 +151,7 @@ checkParameters <- function(
   if (any(lengths(bounds) != 2)) stop("Not all elements in bounds are length 2.")
   if (acqThresh > 1 | acqThresh < 0) stop("acqThresh must be in [0,1]")
   if (!is.logical(plotProgress)) stop("plotProgress must be logical")
+  if (!errorHandling %in% c("stop","continue") & !is.numeric(errorHandling)) stop("errorHandling is malformed: Must be one of 'stop', 'continue', or an integer.")
 }
 
 totalTime <- function(optObj,startT) {
@@ -157,3 +163,46 @@ formatOtherHalting <- function(otherHalting) {
   if (is.null(otherHalting$minUtility)) otherHalting$minUtility <- 0
   return(otherHalting)
 }
+
+#' @importFrom crayon make_style red
+returnEarly <- crayon::make_style("#FF6200")
+
+makeStopEarlyMessage <- function(msg) {
+  class(msg) <- "stopEarlyMsg"
+  return(msg)
+}
+
+printStopStatus <- function(optObj,verbose) {
+  if (verbose > 0) cat(returnEarly("\n",optObj$stopStatus,"\n"))
+}
+
+# Combining function for foreach. Allows the return of message without scores.
+rbindFE <- function(...) rbind(...,fill=TRUE)
+
+# What to do if FUN produced errors?
+getEarlyStoppingErrorStatus <- function(NewResults,scoreSummary,errorHandling,verbose) {
+  newErrors <- sum(!is.na(NewResults$errorMessage))
+  allErrors <- newErrors + sum(!is.na(scoreSummary$errorMessage))
+  if (errorHandling == "stop" & allErrors > 0) {
+    return(makeStopEarlyMessage("Errors encountered in FUN"))
+  } else if (errorHandling == "continue") {
+    return("OK")
+  } else if (errorHandling <= allErrors) {
+    return(makeStopEarlyMessage("Errors from FUN exceeded errorHandling limit"))
+  } else {
+    return("OK")
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
