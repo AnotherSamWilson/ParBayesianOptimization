@@ -20,7 +20,8 @@ bayesOpt(
   gsPoints = pmax(100, length(bounds)^3),
   convThresh = 1e+08,
   acqThresh = 1,
-  plotProgress = TRUE,
+  errorHandling = "stop",
+  plotProgress = FALSE,
   verbose = 1,
   ...
 )
@@ -102,6 +103,12 @@ be included as a candidate parameter set in the next scoring function.
 If 1.0, only the global optimum will be used as a candidate
 parameter set. If 0.5, only local optimums with 50 percent of the utility
 of the global optimum will be used.}
+
+\item{errorHandling}{If FUN returns an error, how to proceed. All errors are
+stored in \code{scoreSummary}. Can be one of 3 options: "stop" stops the
+function running and returns results. "continue" keeps the process running.
+Passing an integer will allow the process to continue until that many errors
+have occured, after which the results will be returned.}
 
 \item{plotProgress}{Should the progress of the Bayesian optimization be
 printed? Top graph shows the score(s) obtained at each iteration.

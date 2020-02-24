@@ -10,7 +10,7 @@
 #' @importFrom DiceKriging km
 #' @return a \code{bayesOpt} object with updated Gaussian Processes.
 #' @export
-updateGP <- function(optObj,bounds = optObj$bounds,verbose = 1,...) {
+updateGP <- function(optObj,bounds = optObj$bounds,verbose = 1, ...) {
 
   if (optObj$GauProList$gpUpToDate) {
     if (verbose > 0) message("Gaussian Processes are already up to date.")
@@ -18,18 +18,58 @@ updateGP <- function(optObj,bounds = optObj$bounds,verbose = 1,...) {
   } else {
 
     boundsDT <- boundsToDT(bounds)
-    scoreSummary <- optObj$scoreSummary[get("inBounds"),]
+    scoreSummary <- optObj$scoreSummary[get("inBounds") & is.na(get("errorMessage")),]
+    tries <- 1
+
+    # We would like to set the trace to 0 by default in km.
+    # The user can change this if they wish.
 
     # Parameters are 0-1 scaled, as are the scores.
     X <- minMaxScale(scoreSummary[,boundsDT$N,with=FALSE], boundsDT)
     Z <- zeroOneScale(scoreSummary$Score)
 
-    optObj$GauProList$scoreGP <- km(
-        design = X
-      , response = Z
-      , control = list(trace = 0)
-      , ...
-    )
+    # Attempt to get a GP with nonzero lengthscale parameters
+
+    while(TRUE) {
+
+      sgp <- tryCatch(
+        {
+          km(
+            design = X
+            , response = Z
+            , control = list(trace = 0)
+            , ...
+          )
+        }
+        , error = function(e) {
+          msg <- makeStopEarlyMessage(
+            paste0(
+                "Returning results so far. Error encountered while training GP: <"
+              , conditionMessage(e)
+              , ">"
+            )
+          )
+          return(msg)
+        }
+      )
+
+      if (class(sgp) == "stopEarlyMsg") {
+        optObj$stopStatus <- sgp
+        return(optObj)
+      } else {
+        optObj$GauProList$scoreGP <- sgp
+      }
+
+      if (all(optObj$GauProList$scoreGP@covariance@range.val >= 1e-4)) break
+
+      if (tries >= 10) {
+        cat("     - Could not obtain meaningful lengthscales.\n")
+        break
+      }
+
+      tries <- tries + 1
+
+    }
 
     if (optObj$optPars$acq == "eips") {
       optObj$GauProList$timeGP <- km(

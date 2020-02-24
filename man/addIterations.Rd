@@ -16,9 +16,10 @@ addIterations(
   gsPoints = optObj$optPars$gsPoints,
   convThresh = optObj$optPars$convThresh,
   acqThresh = optObj$optPars$acqThresh,
+  errorHandling = "stop",
   saveFile = optObj$saveFile,
   parallel = FALSE,
-  plotProgress = TRUE,
+  plotProgress = FALSE,
   verbose = 1,
   ...
 )
@@ -48,6 +49,8 @@ for this process. Must belower than, and preferrably some multiple of \code{iter
 \item{convThresh}{Same as bayesOpt()}
 
 \item{acqThresh}{Same as bayesOpt()}
+
+\item{errorHandling}{Same as bayesOpt()}
 
 \item{saveFile}{Same as bayesOpt()}
 

@@ -9,7 +9,7 @@ applyNoise <- function(
   tries <- 1
   noiseAdd <- 0.04
 
-  while(tries <= 95) {
+  while(TRUE) {
 
     noiseAdd <- noiseAdd + 0.01
 
@@ -31,9 +31,15 @@ applyNoise <- function(
 
     # If we have tried enough times, return a message to stop the process early and return results so far.
     if (tries >= 100) {
-      msg <- "\n\nCould not apply noise to get enough random new parameter sets. Increase noiseAdd or decerase bulkNew. Stopping process and returning results so far."
-      class(msg) <- "stopEarlyMsg"
-      return(msg)
+      return(
+        makeStopEarlyMessage(
+          paste0(
+              "Stopping process and returning results so far. "
+            , "Could not apply noise to get enough random new parameter sets. "
+            , "This happens if all of your parameters are integers. Try decreasing iters.k"
+          )
+        )
+      )
     }
 
     tries <- tries + 1

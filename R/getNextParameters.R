@@ -52,29 +52,31 @@ getNextParameters <- function(
     while(procure > 0 & tries <= 1000) {
 
       if (tries >= 1000) {
-        msg <- "\n\nNoise could not be added to find unique parameter set. Stopping process and returning results so far."
-        class(msg) <- "stopEarlyMsg"
-        return(msg)
+        return(
+          makeStopEarlyMessage("Noise could not be added to find unique parameter set. Stopping process and returning results so far.")
+        )
       }
 
       # Only replace custers that are not duplicates.
       fromNoise <- applyNoise(
-            candidateParameters
-          , boundsDT
+            tabl = candidateParameters
+          , boundsDT = boundsDT
         )
 
       # Pass stopping message if that is what applyNoise returned
       if(any(class(fromNoise) == "stopEarlyMsg")) return(fromNoise)
 
       # Calculate the utility at these spots.
-      fromNoise$gpUtility <- calcAcq(
-          fromNoise[,boundsDT$N,with=FALSE]
-        , scoreGP
-        , timeGP
-        , acq
-        , 1
-        , kappa
-        , eps
+      fromNoise$gpUtility <- apply(
+        fromNoise[,boundsDT$N,with=FALSE]
+        , MARGIN = 1
+        , calcAcq
+        , scoreGP = scoreGP
+        , timeGP = timeGP
+        , acq = acq
+        , y_max = 1
+        , kappa = kappa
+        , eps = eps
       )
 
       fromNoise$gpUtility <- fromNoise$gpUtility - acqN$base

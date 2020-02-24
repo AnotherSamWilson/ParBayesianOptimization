@@ -2,18 +2,19 @@
 % Please edit documentation in R/plot.R
 \name{plot.bayesOpt}
 \alias{plot.bayesOpt}
-\title{Plot Progress}
+\title{Plot a \code{bayesOpt} object}
 \usage{
 \method{plot}{bayesOpt}(x, ...)
 }
 \arguments{
 \item{x}{An object of class bayesOpt}
 
-\item{...}{unused}
+\item{...}{Passed to \code{ggarrange()} when plots are stacked.}
 }
 \value{
 an object of class ggarrange
 }
 \description{
-This function simply creates 2 stacked ggplots.
+Returns 2 stacked plots - the top shows the results from FUN at each iteration.
+The bottom shows the utility from each point before the search took place.
 }

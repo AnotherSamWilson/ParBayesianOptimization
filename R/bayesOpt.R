@@ -68,6 +68,11 @@
 #'   If 1.0, only the global optimum will be used as a candidate
 #'   parameter set. If 0.5, only local optimums with 50 percent of the utility
 #'   of the global optimum will be used.
+#' @param errorHandling If FUN returns an error, how to proceed. All errors are
+#'   stored in \code{scoreSummary}. Can be one of 3 options: "stop" stops the
+#'   function running and returns results. "continue" keeps the process running.
+#'   Passing an integer will allow the process to continue until that many errors
+#'   have occured, after which the results will be returned.
 #' @param plotProgress Should the progress of the Bayesian optimization be
 #'   printed? Top graph shows the score(s) obtained at each iteration.
 #'   The bottom graph shows the estimated utility of each point.
@@ -190,7 +195,8 @@ bayesOpt <- function(
   , gsPoints = pmax(100,length(bounds)^3)
   , convThresh = 1e8
   , acqThresh = 1.000
-  , plotProgress = TRUE
+  , errorHandling = "stop"
+  , plotProgress = FALSE
   , verbose = 1
   , ...
 ) {
@@ -218,6 +224,7 @@ bayesOpt <- function(
     , otherHalting
     , acq
     , acqThresh
+    , errorHandling
     , plotProgress
     , parallel
     , verbose
@@ -293,6 +300,7 @@ bayesOpt <- function(
   scoreSummary[,("Epoch") := rep(0,nrow(scoreSummary))]
   scoreSummary[,("Iteration") := 1:nrow(scoreSummary)]
   scoreSummary[,("inBounds") := rep(TRUE,nrow(scoreSummary))]
+  scoreSummary[,("errorMessage") := rep(NA,nrow(scoreSummary))]
   extraRet <- setdiff(names(scoreSummary),c("Epoch","Iteration",boundsDT$N,"inBounds","Elapsed","Score","gpUtility","acqOptimum"))
   setcolorder(scoreSummary,c("Epoch","Iteration",boundsDT$N,"gpUtility","acqOptimum","inBounds","Elapsed","Score",extraRet))
 
@@ -314,10 +322,11 @@ bayesOpt <- function(
   optObj$scoreSummary <- scoreSummary
   optObj$GauProList$gpUpToDate <- FALSE
   optObj$iters <- nrow(scoreSummary)
+  optObj$stopStatus <- "OK"
   optObj$elapsedTime <- as.numeric(difftime(Sys.time(),startT,units = "secs"))
 
   # Save Intermediary Output
-  saveSoFar(optObj,verbose)
+  saveSoFar(optObj,0)
 
   optObj <- addIterations(
       optObj
@@ -326,6 +335,7 @@ bayesOpt <- function(
     , iters.k = iters.k
     , parallel = parallel
     , plotProgress = plotProgress
+    , errorHandling = errorHandling
     , saveFile = saveFile
     , verbose = verbose
     , ...
