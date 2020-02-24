@@ -1,10 +1,10 @@
-#' @title Plot Progress
+#' Plot a \code{bayesOpt} object
 #'
-#' @description
-#' This function simply creates 2 stacked ggplots.
+#' Returns 2 stacked plots - the top shows the results from FUN at each iteration.
+#' The bottom shows the utility from each point before the search took place.
 #'
 #' @param x An object of class bayesOpt
-#' @param ... unused
+#' @param ... Passed to \code{ggarrange()} when plots are stacked.
 #' @importFrom ggplot2 ggplot aes_string xlab scale_color_discrete geom_point theme guides guide_legend margin element_text unit xlim ylab
 #' @importFrom ggpubr ggarrange annotate_figure text_grob
 #' @importFrom graphics plot
@@ -12,14 +12,11 @@
 #' @export
 plot.bayesOpt <- function(x,...) {
 
-  # x <- Results
-  #
-  # plot(x)
-
   acqN <- getAcqInfo(x$optPars$acq)
+  scoreSummary <- x$scoreSummary[!is.na(get("Score")),]
 
   # Score Plot
-  sc <- ggplot(x$scoreSummary,aes_string(x="Epoch",y="Score",color="acqOptimum")) +
+  sc <- ggplot(scoreSummary,aes_string(x="Epoch",y="Score",color="acqOptimum")) +
     geom_point() +
     xlab("") +
     scale_color_discrete(drop=TRUE,limits=c(TRUE,FALSE)) +
@@ -39,9 +36,9 @@ plot.bayesOpt <- function(x,...) {
     )
 
   # Utility Plot
-  ut <- ggplot(x$scoreSummary[!is.na(get("gpUtility")),],aes_string(x="Epoch",y="gpUtility",color="acqOptimum")) +
+  ut <- ggplot(scoreSummary[!is.na(get("gpUtility")),],aes_string(x="Epoch",y="gpUtility",color="acqOptimum")) +
     geom_point() +
-    xlim(c(0,max(x$scoreSummary$Epoch))) +
+    xlim(c(0,max(scoreSummary$Epoch))) +
     ylab("Utility") +
     scale_color_discrete(drop=TRUE,limits=c(TRUE,FALSE)) +
     theme(
@@ -66,11 +63,14 @@ plot.bayesOpt <- function(x,...) {
     , ncol=1
     , common.legend = TRUE
     , legend = "bottom"
+    , ...
   )
 
-  annotate_figure(
-      gga
-    , top = text_grob(label = "Bayesian Optimization Results")
+  print(
+    annotate_figure(
+        gga
+      , top = text_grob(label = "Bayesian Optimization Results")
+    )
   )
 
 }
