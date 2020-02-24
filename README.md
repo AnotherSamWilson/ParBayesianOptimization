@@ -11,7 +11,7 @@ Status](https://codecov.io/gh/AnotherSamWilson/ParBayesianOptimization/branch/ma
 
 # Parallelizable Bayesian Optimization
 
-<a href='https://github.com/AnotherSamWilson/ParBayesianOptimization'><img src='icon.png' align = 'right' height="400" /></a>
+<img src='man/figures/icon.png' align = 'right' height="300" />
 
 This README contains a thorough walkthrough of Bayesian optimization and
 the syntax needed to use this package, with simple and complex examples.
@@ -34,7 +34,9 @@ More information can be found in the package vignettes and manual.
   - [07 - Sampling Multiple Promising Points at
     Once](https://github.com/AnotherSamWilson/ParBayesianOptimization#Sampling-Multiple-Promising-Points-at-Once)  
   - [08 - How Long Should it Run
-    For?](https://github.com/AnotherSamWilson/ParBayesianOptimization#how-long-should-it-run-for)
+    For?](https://github.com/AnotherSamWilson/ParBayesianOptimization#how-long-should-it-run-for)  
+  - [09 - Setting Stopping
+    Criteria](https://github.com/AnotherSamWilson/ParBayesianOptimization#Setting-Time-Limits-and-Other-Halting-Criteria)
 
 ## Installation
 
@@ -157,7 +159,9 @@ xmax <- optim(8,simpleFunction,method = "L-BFGS-B",lower = 0, upper = 15,control
 library(ggplot2)
 ggplot(data = data.frame(x=c(0,15)),aes(x=x)) + 
   stat_function(fun = simpleFunction) +
-  geom_vline(xintercept = xmax,linetype="dashed")
+  geom_vline(xintercept = xmax,linetype="dashed") +
+  ggtitle("simpleFunction") +
+  theme_bw()
 ```
 
 ![](man/figures/README-simpleFunction-1.png)<!-- -->
@@ -190,7 +194,6 @@ optObjSimp <- bayesOpt(
   , iters.n = 2
   , gsPoints = 25
 )
-#> Warning: package 'DiceKriging' was built under R version 3.6.2
 ```
 
 Let’s see how close the algorithm got to the global maximum:
@@ -198,7 +201,7 @@ Let’s see how close the algorithm got to the global maximum:
 ``` r
 getBestPars(optObjSimp)
 #> $x
-#> [1] 6.448408
+#> [1] 7.110515
 ```
 
 The process is getting pretty close\! We were only about 11% shy of the
@@ -206,7 +209,7 @@ global optimum:
 
 ``` r
 simpleFunction(7.023)/simpleFunction(getBestPars(optObjSimp)$x)
-#> [1] 1.116824
+#> [1] 1.002635
 ```
 
 Let’s run the process for a little longer:
@@ -214,7 +217,7 @@ Let’s run the process for a little longer:
 ``` r
 optObjSimp <- addIterations(optObjSimp,iters.n=3,verbose=0)
 simpleFunction(7.023)/simpleFunction(getBestPars(optObjSimp)$x)
-#> [1] 1.00002
+#> [1] 1.002635
 ```
 
 We have now found an `x` very close to the global optimum.
@@ -312,15 +315,15 @@ to see the results:
 
 ``` r
 optObj$scoreSummary
-#>    Epoch Iteration max_depth min_child_weight subsample gpUtility acqOptimum inBounds Elapsed     Score nrounds
-#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.10 0.9777163       2
-#> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.28 0.9763760      15
-#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.44 0.9931657      18
-#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.25 0.9981437       7
-#> 5:     1         5         4        21.871937 1.0000000 0.5857961       TRUE     TRUE    0.14 0.9945933       1
-#> 6:     2         6         5         2.051363 0.7528395 0.4650739       TRUE     TRUE    0.38 0.9984613      11
-#> 7:     3         7         4         0.000000 1.0000000 0.4653549       TRUE     TRUE    0.23 0.9941097       6
-#> 8:     4         8         5        25.000000 0.6339013 0.3995827       TRUE     TRUE    0.18 0.9943380       3
+#>    Epoch Iteration max_depth min_child_weight subsample gpUtility acqOptimum inBounds Elapsed     Score nrounds errorMessage
+#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.13 0.9777163       2           NA
+#> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.28 0.9763760      15           NA
+#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.47 0.9931657      18           NA
+#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.27 0.9981437       7           NA
+#> 5:     1         5         4        21.871937 1.0000000 0.5857961       TRUE     TRUE    0.14 0.9945933       1           NA
+#> 6:     2         6         4         0.000000 0.9439879 0.6668303       TRUE     TRUE    0.26 0.9990567       7           NA
+#> 7:     3         7         5         1.395119 0.7071802 0.2973497       TRUE     TRUE    0.23 0.9984577       4           NA
+#> 8:     4         8         5         0.000000 0.2500000 0.3221660       TRUE     TRUE    0.36 0.9994020      10           NA
 ```
 
 ``` r
@@ -329,10 +332,10 @@ getBestPars(optObj)
 #> [1] 5
 #> 
 #> $min_child_weight
-#> [1] 2.051363
+#> [1] 0
 #> 
 #> $subsample
-#> [1] 0.7528395
+#> [1] 0.25
 ```
 
 ## Running In Parallel
@@ -379,33 +382,36 @@ optimization steps, versus the 4 performed in the sequential example:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    1.59    0.25    6.03
+#>    1.37    0.05   10.00
 tNoPar
 #>    user  system elapsed 
-#>   16.74    2.02   16.44
+#>   23.17    2.47   22.56
 ```
 
 ## Sampling Multiple Promising Points at Once
 
-Sometimes we may want to sample multiple promising parameter sets at the
-same time. This is especially effective if the process is being run in
-parallel. The `bayesOpt` function always samples the global optimum of
-the acquisition function, however it is also possible to tell it to
-sample local optimums of the acquisition function at the same time.
+Sometimes we may want to sample multiple promising points at the same
+optimization step (Epoch). This is especially effective if the process
+is being run in parallel. The `bayesOpt` function always samples the
+global optimum of the acquisition function, however it is also possible
+to tell it to sample local optimums of the acquisition function at the
+same time.
 
 Using the `acqThresh` parameter, you can specify the minimum percentage
 utility of the global optimum required for a different local optimum to
-be considered. As an example, let’s say we are optimizing 1
-hyperparameter `min_child_weight`, which is bounded between \[0,5\]. Our
-acquisition function may look like the following:
+be considered. As an example, let’s say we are optimizing 1 input `x`,
+which is bounded between \[0,1\]. Our acquisition function may look like
+the following:
 
 <img src="vignettes/UCB.png" width="600px" style="display: block; margin: auto;" />
 
-In this case, there are 3 promising candidate parameters. We may want to
-run our scoring function on several of the local maximums. If
-`acqThresh` is set to be below \~0.95, and `iters.k` is set to at least
-3, the process would use all 3 of the local maximums as candidate
-parameter sets in the next round of scoring function runs.
+In this case, there are 3 promising candidate parameters: x \~
+\[0.318,0.541,0.782\] with corresponding upper confidence bounds of y \~
+\[1.195,1.304,1.029\], respectively. We may want to run our scoring
+function on several of the local maximums. If `acqThresh` is set to be
+below 1.029/1.304 \~ 0.789 and `iters.k` is set to at least 3, the
+process would use all 3 of the local maximums as candidate parameter
+sets in the next round of scoring function runs.
 
 ## How Long Should it Run For?
 
@@ -428,3 +434,33 @@ better parameter set than the one you already have. Notice that the
 expected improvement converged to 0 after iteration 5. If you see a
 similar pattern, you can be fairly certain that you have found an
 (approximately) global optimum.
+
+## Setting Time Limits and Other Halting Criteria
+
+Many times the scoring function can vary in its completion time. It may
+be difficult for the user to forecast how long a single run will take,
+let alone X sequential runs. For this reason, you can set a time limit.
+You can also set a minimum utility limit, or you can set *both*, in
+which case the process stops when either condition is met. You can see
+how the process stopped by viewing the `stopStatus` element in the
+returned object:
+
+``` r
+set.seed(0)
+
+tNoPar <- system.time(
+  optObj <- bayesOpt(
+      FUN = scoringFunction
+    , bounds = bounds
+    , initPoints = 4
+    , iters.n = 400
+    , iters.k = 1
+    , otherHalting = list(timeLimit = 5)
+  )
+)
+
+optObj$stopStatus
+#> [1] "Time Limit - 5 seconds."
+#> attr(,"class")
+#> [1] "stopEarlyMsg"
+```
