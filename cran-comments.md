@@ -14,5 +14,6 @@ There were no ERRORs, WARNINGs or NOTEs
 There are no downstream dependencies.
 
 ## Changes
-Depreciated BayesianOptimization()
-Overhauled package architecture - new function bayesOpt() and its supporting methods replaced BayesianOptimization().
+Changed Gaussian Process package to DiceKriging. predict method is much faster.
+Added errorHandling parameter - bayesOpt() and addIterations() should now return results no matter what, unless errorHandling = 'stop'
+Added otherHalting parameter.
