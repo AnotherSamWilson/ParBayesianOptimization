@@ -1,53 +1,17 @@
-context('otherHalting')
-
-set.seed(1991)
+context('errorHandling')
 
 testthat::test_that(
 
-  "timeLimit"
+  "continue"
 
   , {
 
     skip_on_cran()
+    set.seed(10)
     sf <- function(x,y) 1000 - (x-5)^2 - (y + 10)^2
 
     FUN <- function(x,y) {
-      return(list(Score = sf(x,y)))
-    }
-
-    bounds = list(
-      x = c(0,15)
-      , y = c(-20,100)
-    )
-
-    optObj <- bayesOpt(
-        FUN
-      , bounds
-      , initPoints = 3
-      , iters.n = 25
-      , otherHalting = list(timeLimit = 5)
-      , verbose = 0
-    )
-
-    expect_equal(
-        optObj$stopStatus
-      , ParBayesianOptimization:::makeStopEarlyMessage("Time Limit - 5 seconds.")
-    )
-
-  }
-
-)
-
-testthat::test_that(
-
-  "minUtility"
-
-  , {
-
-    skip_on_cran()
-    sf <- function(x,y) 1000 - (x-5)^2 - (y + 10)^2
-
-    FUN <- function(x,y) {
+      if (runif(1) > 0.5) stop("You foo'd when you should have bar'd.")
       return(list(Score = sf(x,y)))
     }
 
@@ -60,14 +24,52 @@ testthat::test_that(
       FUN
       , bounds
       , initPoints = 3
-      , iters.n = 25
-      , otherHalting = list(minUtility = 0.1)
-      , verbose = 0
+      , iters.n = 6
+      , errorHandling = "continue"
+      , verbose = 1
     )
 
     expect_equal(
-        optObj$stopStatus
-      , ParBayesianOptimization:::makeStopEarlyMessage("Returning Results. Could not meet minimum required (0.1) utility.")
+      optObj$stopStatus
+      , "OK"
+    )
+
+  }
+
+)
+
+testthat::test_that(
+
+  "Error Limit"
+
+  , {
+
+    skip_on_cran()
+    set.seed(10)
+    sf <- function(x,y) 1000 - (x-5)^2 - (y + 10)^2
+
+    FUN <- function(x,y) {
+      if (runif(1) > 0.5) stop("You foo'd when you should have bar'd.")
+      return(list(Score = sf(x,y)))
+    }
+
+    bounds = list(
+      x = c(0,15)
+      , y = c(-20,100)
+    )
+
+    optObj <- bayesOpt(
+      FUN
+      , bounds
+      , initPoints = 3
+      , iters.n = 8
+      , errorHandling = 2
+      , verbose = 1
+    )
+
+    expect_equal(
+      optObj$stopStatus
+      , ParBayesianOptimization:::makeStopEarlyMessage("Errors from FUN exceeded errorHandling limit")
     )
 
   }

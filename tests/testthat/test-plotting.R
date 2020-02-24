@@ -1,25 +1,34 @@
-context('Plotting')
+testthat::test_that(
 
-set.seed(1991)
+  "Standard Plotting"
 
-sf <- function(x,y) 1000 - (x-5)^2 - (y + 10)^2
+  , {
 
-FUN <- function(x,y) {
-  return(list(Score = sf(x,y)))
-}
+    skip_on_cran()
+    set.seed(0)
 
-bounds = list(
-  x = c(0,15)
-  , y = c(-20,100)
+    sf <- function(x,y) 1000 - (x-5)^2 - (y + 10)^2
+
+    FUN <- function(x,y) {
+      return(list(Score = sf(x,y)))
+    }
+
+    bounds = list(
+      x = c(0,15)
+      , y = c(-20,100)
+    )
+
+    optObj <- bayesOpt(
+        FUN
+      , bounds
+      , initPoints = 6
+      , iters.n = 12
+      , iters.k = 2
+      , plotProgress = TRUE
+      , verbose = 0
+    )
+
+    optObj
+    plot(optObj)
+  }
 )
-
-optObj <- bayesOpt(
-    FUN
-  , bounds
-  , initPoints = 3
-  , iters.n = 1
-  , verbose = 0
-)
-
-optObj
-plot(optObj)
