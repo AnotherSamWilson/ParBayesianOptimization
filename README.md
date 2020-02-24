@@ -11,7 +11,7 @@ Status](https://codecov.io/gh/AnotherSamWilson/ParBayesianOptimization/branch/ma
 
 # Parallelizable Bayesian Optimization
 
-<img src='man/figures/icon.png' align = 'right' height="300" />
+<img src='vignettes/icon.png' align = 'right' height="300" />
 
 This README contains a thorough walkthrough of Bayesian optimization and
 the syntax needed to use this package, with simple and complex examples.
@@ -316,14 +316,14 @@ to see the results:
 ``` r
 optObj$scoreSummary
 #>    Epoch Iteration max_depth min_child_weight subsample gpUtility acqOptimum inBounds Elapsed     Score nrounds errorMessage
-#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.13 0.9777163       2           NA
+#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.11 0.9777163       2           NA
 #> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.28 0.9763760      15           NA
-#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.47 0.9931657      18           NA
-#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.27 0.9981437       7           NA
+#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.45 0.9931657      18           NA
+#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.26 0.9981437       7           NA
 #> 5:     1         5         4        21.871937 1.0000000 0.5857961       TRUE     TRUE    0.14 0.9945933       1           NA
 #> 6:     2         6         4         0.000000 0.9439879 0.6668303       TRUE     TRUE    0.26 0.9990567       7           NA
 #> 7:     3         7         5         1.395119 0.7071802 0.2973497       TRUE     TRUE    0.23 0.9984577       4           NA
-#> 8:     4         8         5         0.000000 0.2500000 0.3221660       TRUE     TRUE    0.36 0.9994020      10           NA
+#> 8:     4         8         5         0.000000 0.2500000 0.3221660       TRUE     TRUE    0.39 0.9994020      10           NA
 ```
 
 ``` r
@@ -382,10 +382,10 @@ optimization steps, versus the 4 performed in the sequential example:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    1.37    0.05   10.00
+#>    0.92    0.05    6.61
 tNoPar
 #>    user  system elapsed 
-#>   23.17    2.47   22.56
+#>   22.75    2.04   21.78
 ```
 
 ## Sampling Multiple Promising Points at Once
@@ -417,8 +417,8 @@ sets in the next round of scoring function runs.
 
 Going back to the example in [Simple
 Example](https://github.com/AnotherSamWilson/ParBayesianOptimization#Simple-Example),
-(if you let this run for a few more iterations) you will notice this
-chart is updated at each iteration:
+(if you let this run for a few more iterations and set `plotProgress =
+TRUE`) you will notice this chart is updated at each iteration:
 
 ``` r
 optObjSimp <- addIterations(optObjSimp,2,verbose=FALSE)
