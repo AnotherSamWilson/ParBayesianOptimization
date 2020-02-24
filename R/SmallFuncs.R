@@ -1,3 +1,6 @@
+# The functions in this file are all internal.
+
+# Determine if a set of parameters is within the bounds.
 checkBounds <- function(tab, bounds) {
   return(
       sapply(
@@ -9,6 +12,7 @@ checkBounds <- function(tab, bounds) {
   )
 }
 
+# Draw random parameters with LHS
 randParams <- function(boundsDT, rPoints, FAIL = TRUE) {
 
   # Attempt to procure rPoints unique parameter sets by lhs.
@@ -37,6 +41,7 @@ randParams <- function(boundsDT, rPoints, FAIL = TRUE) {
 
 }
 
+# Scale parameters to 0-1 between their bounds.
 minMaxScale <- function(tabl, boundsDT) {
 
   # tabl <- newD
@@ -49,6 +54,7 @@ minMaxScale <- function(tabl, boundsDT) {
 
 }
 
+# Do the reverse of minMaxScale
 unMMScale <- function(tabl, boundsDT) {
 
   umms <- lapply(boundsDT$N, function(x) {
@@ -70,6 +76,7 @@ unMMScale <- function(tabl, boundsDT) {
 
 }
 
+# Scale a vector between 0-1
 zeroOneScale <- function(vec) {
 
   r <- max(vec) - min(vec)
@@ -84,6 +91,7 @@ zeroOneScale <- function(vec) {
 
 }
 
+# Check to see if any rows from tab1 are exact duplicates of rows in tab2.
 checkDup <- function(tab1,tab2) {
 
   sapply(1:nrow(tab1), function(i) {
@@ -93,6 +101,7 @@ checkDup <- function(tab1,tab2) {
 
 }
 
+# Return a data.table from a bounds list. Easier to work with.
 boundsToDT <- function(bounds) {
   data.table(
     N = names(bounds)
@@ -103,6 +112,7 @@ boundsToDT <- function(bounds) {
   )
 }
 
+# Attempt to save bayesOpt object between optimization steps.
 saveSoFar <- function(optObj,verbose) {
   if (!is.null(optObj$saveFile)) {
     tryCatch(
@@ -117,8 +127,10 @@ saveSoFar <- function(optObj,verbose) {
   }
 }
 
+# Cannot pass `%dopar%` so we recreate it with this function.
 ParMethod <- function(x) if(x) {`%dopar%`} else {`%do%`}
 
+# Get information about the acquisition functions.
 getAcqInfo <- function(acq) {
   return(
     data.table(
@@ -129,6 +141,7 @@ getAcqInfo <- function(acq) {
   )
 }
 
+# Early checks for parameters.
 checkParameters <- function(
     bounds
   , iters.n
@@ -154,24 +167,29 @@ checkParameters <- function(
   if (!errorHandling %in% c("stop","continue") & !is.numeric(errorHandling)) stop("errorHandling is malformed: Must be one of 'stop', 'continue', or an integer.")
 }
 
+# Get the total time run of an object given the time it was started.
 totalTime <- function(optObj,startT) {
   optObj$elapsedTime + as.numeric(difftime(Sys.time(),startT,units = "secs"))
 }
 
+# Fill in any missing elements of otherHalting we need.
 formatOtherHalting <- function(otherHalting) {
   if (is.null(otherHalting$timeLimit)) otherHalting$timeLimit <- Inf
   if (is.null(otherHalting$minUtility)) otherHalting$minUtility <- 0
   return(otherHalting)
 }
 
+# When the process stops early it will print this color.
 #' @importFrom crayon make_style red
 returnEarly <- crayon::make_style("#FF6200")
 
+# Constructor for stopEarlyMsg class.
 makeStopEarlyMessage <- function(msg) {
   class(msg) <- "stopEarlyMsg"
   return(msg)
 }
 
+# Multiple places the process can stop early. This just prints the message.
 printStopStatus <- function(optObj,verbose) {
   if (verbose > 0) cat(returnEarly("\n",optObj$stopStatus,"\n"))
 }
