@@ -1,4 +1,4 @@
-#' @title Get Local Optimums of the Acquisition Function From a bayesOpt Object
+#' Get Local Optimums of acq From a bayesOpt Object
 #'
 #' Returns all local optimums of the acquisition function, no matter the utility.
 #'

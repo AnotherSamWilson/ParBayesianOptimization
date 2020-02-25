@@ -52,7 +52,7 @@ chosen with latin hypercube sampling within the bounds supplied.}
 \item{iters.k}{integer that specifies the number of times to sample FUN
 at each Epoch (optimization step). If running in parallel, good practice
 is to set \code{iters.k} to some multiple of the number of cores you have designated
-for this process. Must belower than, and preferrably some multiple of \code{iters.n}.}
+for this process. Must be lower than, and preferrably some multiple of \code{iters.n}.}
 
 \item{otherHalting}{A list of other halting specifications. The process will stop if any of
   the following is true. These checks are only performed in between optimization steps:

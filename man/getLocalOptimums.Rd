@@ -2,14 +2,7 @@
 % Please edit documentation in R/getLocalOptimums.R
 \name{getLocalOptimums}
 \alias{getLocalOptimums}
-\title{Get Local Optimums of the Acquisition Function From a bayesOpt Object
-
-Returns all local optimums of the acquisition function, no matter the utility.
-
-\code{gsPoints} points in the parameter space are randomly initialized, and
-the L-BFGS-B method is used to find the closest local optimum to each point.
-dbscan is then used to cluster points together which converged to the same
-optimum - only unique optimums are returned.}
+\title{Get Local Optimums of acq From a bayesOpt Object}
 \usage{
 getLocalOptimums(
   optObj,
@@ -49,10 +42,9 @@ utility relative to the max utility (relUtility), and the steps taken in the
 L-BFGS-B method (gradCount).
 }
 \description{
-Get Local Optimums of the Acquisition Function From a bayesOpt Object
-
 Returns all local optimums of the acquisition function, no matter the utility.
-
+}
+\details{
 \code{gsPoints} points in the parameter space are randomly initialized, and
 the L-BFGS-B method is used to find the closest local optimum to each point.
 dbscan is then used to cluster points together which converged to the same
