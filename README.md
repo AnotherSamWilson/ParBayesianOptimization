@@ -186,13 +186,12 @@ library(ParBayesianOptimization)
 
 FUN <- function(x) list(Score = simpleFunction(x))
 
-set.seed(0)
+set.seed(6)
 optObjSimp <- bayesOpt(
   FUN = FUN
   , bounds = bounds
   , initGrid = initGrid
   , iters.n = 2
-  , gsPoints = 25
 )
 ```
 
@@ -201,23 +200,23 @@ Let’s see how close the algorithm got to the global maximum:
 ``` r
 getBestPars(optObjSimp)
 #> $x
-#> [1] 7.110515
+#> [1] 6.718184
 ```
 
-The process is getting pretty close\! We were only about 11% shy of the
+The process is getting pretty close\! We were only about 3% shy of the
 global optimum:
 
 ``` r
-simpleFunction(7.023)/simpleFunction(getBestPars(optObjSimp)$x)
-#> [1] 1.002635
+simpleFunction(getBestPars(optObjSimp)$x)/simpleFunction(7.023)
+#> [1] 0.968611
 ```
 
 Let’s run the process for a little longer:
 
 ``` r
 optObjSimp <- addIterations(optObjSimp,iters.n=3,verbose=0)
-simpleFunction(7.023)/simpleFunction(getBestPars(optObjSimp)$x)
-#> [1] 1.002635
+simpleFunction(getBestPars(optObjSimp)$x)/simpleFunction(7.023)
+#> [1] 0.9958626
 ```
 
 We have now found an `x` very close to the global optimum.
@@ -316,14 +315,14 @@ to see the results:
 ``` r
 optObj$scoreSummary
 #>    Epoch Iteration max_depth min_child_weight subsample gpUtility acqOptimum inBounds Elapsed     Score nrounds errorMessage
-#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.11 0.9777163       2           NA
+#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.12 0.9777163       2           NA
 #> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.28 0.9763760      15           NA
-#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.45 0.9931657      18           NA
-#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.26 0.9981437       7           NA
+#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.46 0.9931657      18           NA
+#> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.27 0.9981437       7           NA
 #> 5:     1         5         4        21.871937 1.0000000 0.5857961       TRUE     TRUE    0.14 0.9945933       1           NA
-#> 6:     2         6         4         0.000000 0.9439879 0.6668303       TRUE     TRUE    0.26 0.9990567       7           NA
+#> 6:     2         6         4         0.000000 0.9439879 0.6668303       TRUE     TRUE    0.27 0.9990567       7           NA
 #> 7:     3         7         5         1.395119 0.7071802 0.2973497       TRUE     TRUE    0.23 0.9984577       4           NA
-#> 8:     4         8         5         0.000000 0.2500000 0.3221660       TRUE     TRUE    0.39 0.9994020      10           NA
+#> 8:     4         8         5         0.000000 0.2500000 0.3221660       TRUE     TRUE    0.38 0.9994020      10           NA
 ```
 
 ``` r
@@ -382,10 +381,10 @@ optimization steps, versus the 4 performed in the sequential example:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    0.92    0.05    6.61
+#>    0.89    0.04    6.82
 tNoPar
 #>    user  system elapsed 
-#>   22.75    2.04   21.78
+#>   21.92    2.19   21.47
 ```
 
 ## Sampling Multiple Promising Points at Once
