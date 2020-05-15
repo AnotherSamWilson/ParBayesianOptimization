@@ -207,10 +207,26 @@ addIterations <- function(
           )
         )
 
-        if (!any(class(Result) %in% c("simpleError","error","condition"))) {
-          return(data.table(nextPars[get("iter"),], Elapsed = Elapsed[[3]], as.data.table(Result),errorMessage = NA))
-        } else {
+      # Handle the Result.
+        if (any(class(Result) %in% c("simpleError","error","condition"))) {
           return(data.table(nextPars[get("iter"),], Elapsed = Elapsed[[3]],Score = NA, errorMessage = conditionMessage(Result)))
+        } else {
+
+          if (any(lengths(Result) != 1)) {
+            stop(
+              paste0(
+                  "FUN returned list with elements of length > 1. Cannot collapse into a data.table, so this is a fatal error. Parameters used were <"
+                , paste(names(Params),"=",Params,collapse = ", ")
+                , ">"
+              )
+            )
+          }
+
+          if (!is.numeric(Result$Score)) {
+            return(data.table(nextPars[get("iter"),], Elapsed = Elapsed[[3]], as.data.table(Result),errorMessage = "Score returned from FUN was not numeric."))
+          } else {
+            return(data.table(nextPars[get("iter"),], Elapsed = Elapsed[[3]], as.data.table(Result),errorMessage = NA))
+          }
         }
 
       }

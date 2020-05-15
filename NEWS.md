@@ -1,5 +1,9 @@
-## ParBayesianOptimization 1.1.0
+## ParBayesianOptimization 1.2.0
 
+# Changes
+Improved the way error handling works - any errors encountered in initialization will be returned.
+
+## ParBayesianOptimization 1.1.0
 
 # Changes
 Changed Gaussian Process package to DiceKriging. predict method is much faster.

@@ -2,7 +2,7 @@ context('errorHandling')
 
 testthat::test_that(
 
-  "continue"
+  "Error in FUN - Initialization"
 
   , {
 
@@ -11,7 +11,7 @@ testthat::test_that(
     sf <- function(x,y) 1000 - (x-5)^2 - (y + 10)^2
 
     FUN <- function(x,y) {
-      if (runif(1) > 0.5) stop("You foo'd when you should have bar'd.")
+      if (runif(1) > 0.25) stop("You foo'd when you should have bar'd.")
       return(list(Score = sf(x,y)))
     }
 
@@ -20,18 +20,16 @@ testthat::test_that(
       , y = c(-20,100)
     )
 
-    optObj <- bayesOpt(
-      FUN
-      , bounds
-      , initPoints = 3
-      , iters.n = 6
-      , errorHandling = "continue"
-      , verbose = 1
-    )
-
-    expect_equal(
-      optObj$stopStatus
-      , "OK"
+    expect_error(
+      bayesOpt(
+        FUN
+        , bounds
+        , initPoints = 3
+        , iters.n = 6
+        , errorHandling = "continue"
+        , verbose = 1
+      )
+      , "Errors encountered in initialization are listed above."
     )
 
   }
@@ -40,7 +38,7 @@ testthat::test_that(
 
 testthat::test_that(
 
-  "Error Limit"
+  "NA Return - Initialization"
 
   , {
 
@@ -49,8 +47,7 @@ testthat::test_that(
     sf <- function(x,y) 1000 - (x-5)^2 - (y + 10)^2
 
     FUN <- function(x,y) {
-      if (runif(1) > 0.5) stop("You foo'd when you should have bar'd.")
-      return(list(Score = sf(x,y)))
+      return(list(Score = if (runif(1) > 0.5) sf(x,y) else NA))
     }
 
     bounds = list(
@@ -58,18 +55,16 @@ testthat::test_that(
       , y = c(-20,100)
     )
 
-    optObj <- bayesOpt(
-      FUN
-      , bounds
-      , initPoints = 3
-      , iters.n = 8
-      , errorHandling = 2
-      , verbose = 1
-    )
-
-    expect_equal(
-      optObj$stopStatus
-      , ParBayesianOptimization:::makeStopEarlyMessage("Errors from FUN exceeded errorHandling limit")
+    expect_error(
+      bayesOpt(
+        FUN
+        , bounds
+        , initPoints = 3
+        , iters.n = 8
+        , errorHandling = 2
+        , verbose = 1
+      )
+      , "Errors encountered in initialization are listed above."
     )
 
   }
@@ -83,7 +78,7 @@ testthat::test_that(
   , {
 
     skip_on_cran()
-    set.seed(14)
+    set.seed(11)
     sf <- function(x) 1000 - x^2
 
     FUN <- function(x) {
@@ -95,20 +90,16 @@ testthat::test_that(
       x = c(-1000,1000)
     )
 
-    optObj <- bayesOpt(
-      FUN
-      , bounds
-      , initPoints = 3
-      , iters.n = 8
-      , errorHandling = 2
-      , verbose = 1
-    )
-
-    optObj$scoreSummary
-
-    expect_equal(
-      optObj$stopStatus
-      , ParBayesianOptimization:::makeStopEarlyMessage("Errors from FUN exceeded errorHandling limit")
+    expect_error(
+      bayesOpt(
+        FUN
+        , bounds
+        , initPoints = 3
+        , iters.n = 8
+        , errorHandling = 2
+        , verbose = 1
+      )
+      , "Errors encountered in initialization are listed above."
     )
 
   }
@@ -122,7 +113,7 @@ testthat::test_that(
   , {
 
     skip_on_cran()
-    set.seed(14)
+    set.seed(11)
     sf <- function(x) 1000 - x^2
 
     FUN <- function(x) {
@@ -143,6 +134,7 @@ testthat::test_that(
         , errorHandling = 2
         , verbose = 1
       )
+      , "Errors encountered in initialization are listed above."
     )
 
   }

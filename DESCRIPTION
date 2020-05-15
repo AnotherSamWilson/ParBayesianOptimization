@@ -1,6 +1,6 @@
 Package: ParBayesianOptimization
 Title: Parallel Bayesian Optimization of Hyperparameters
-Version: 1.1.0
+Version: 1.2.0
 Authors@R: person("Samuel", "Wilson", email = "samwilson303@gmail.com", role = c("aut", "cre"))
 Description: Fast, flexible framework for implementing Bayesian optimization of model 
 	hyperparameters according to the methods described in Snoek et al. <arXiv:1206.2944>.
@@ -15,6 +15,6 @@ Suggests: knitr, rmarkdown, xgboost, doParallel, testthat
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 VignetteBuilder: knitr
 Maintainer: Samuel Wilson <samwilson303@gmail.com>
