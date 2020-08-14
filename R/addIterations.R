@@ -74,7 +74,7 @@ addIterations <- function(
 
   # Set up for iterations
   FUN <- optObj$FUN
-  boundsDT <- boundsToDT(optObj$bounds)
+  boundsDT <- boundsToDT(bounds)
   scoreSummary <- optObj$scoreSummary
   Epoch <- max(scoreSummary$Epoch)
   `%op%` <- ParMethod(parallel)
@@ -141,6 +141,7 @@ addIterations <- function(
     tm <- system.time(
       LocalOptims <- getLocalOptimums(
           optObj
+        , bounds = bounds
         , parallel=parallel
         , verbose=verbose
       )

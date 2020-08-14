@@ -45,6 +45,23 @@ testthat::test_that(
       , gsPoints = 10
     )
 
-    expect_true(nrow(optObj$scoreSummary) == 10)
+
+    # Piggy back off of this test. Check new bounds.
+    newBounds <- list(
+      x = c(-5,20)
+      , y = c(-30,110)
+    )
+
+    optObj <- addIterations(
+      optObj
+      , bounds = newBounds
+      , iters.n = 2
+      , iters.k = 2
+      , verbose = 0
+      , gsPoints = 10
+    )
+
+    expect_true(nrow(optObj$scoreSummary) == 12)
+
   }
 )

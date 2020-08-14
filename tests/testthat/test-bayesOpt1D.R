@@ -7,7 +7,7 @@ test_that(
     skip_on_cran()
 
     set.seed(1991)
-    sf <- function(x) 100 - x^2
+    sf <- function(x) 100 - x^2/5
     FUN <- function(x) {
       return(list(Score = sf(x)))
     }
@@ -32,10 +32,12 @@ test_that(
       , gsPoints = 10
     )
 
-    # Test adding iterations with higher iters.k
+    # Test adding iterations with higher iters.k and different bounds
+    newBounds <- list(x=c(-2,8))
     optObj <- addIterations(
         optObj
-      , iters.n = 4
+      , bounds = newBounds
+      , iters.n = 6
       , iters.k = 2
       , verbose = 0
       , gsPoints = 10
@@ -43,7 +45,7 @@ test_that(
 
     print(optObj)
 
-    expect_equal(nrow(optObj$scoreSummary) , 12)
+    expect_equal(nrow(optObj$scoreSummary) , 14)
 
   }
 
