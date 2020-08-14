@@ -236,13 +236,13 @@ bayesOpt <- function(
 
   # Initialization Setup
   if (missing(initGrid) + missing(initPoints) != 1) stop("Please provide 1 of initGrid or initPoints, but not both.")
-  if (initPoints <= length(bounds)) stop("initPoints must be greater than the number of FUN inputs.")
   if (!missing(initGrid)) {
     setDT(initGrid)
     inBounds <- checkBounds(initGrid,bounds)
     inBounds <- as.logical(apply(inBounds,1,prod))
     if (any(!inBounds)) stop("initGrid not within bounds.")
     optObj$initPars$initialSample <- "User Provided Grid"
+    initPoints <- nrow(initGrid)
   } else {
     initGrid <- randParams(boundsDT, initPoints)
     optObj$initPars$initialSample <- "Latin Hypercube Sampling"
@@ -250,6 +250,7 @@ bayesOpt <- function(
   optObj$initPars$initGrid <- initGrid
   if (nrow(initGrid) <= 2) stop("Cannot initialize with less than 3 samples.")
   optObj$initPars$initPoints <- nrow(initGrid)
+  if (initPoints <= length(bounds)) stop("initPoints must be greater than the number of FUN inputs.")
 
   # Output from FUN is sunk into a temporary file.
   sinkFile <- file()

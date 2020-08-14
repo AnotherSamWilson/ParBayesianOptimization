@@ -75,10 +75,32 @@ testthat::test_that(
       , alpha = c(0,1)
     )
 
+    initGrid <- data.table(
+      max_depth = c(1,1,2,2,3,3,4,4,5)
+      , max_leaves = c(2,3,4,5,6,7,8,9,10)
+      , min_child_weight = seq(bounds$min_child_weight[1],bounds$min_child_weight[2],length.out = 9)
+      , subsample = seq(bounds$subsample[1],bounds$subsample[2],length.out = 9)
+      , colsample_bytree = seq(bounds$colsample_bytree[1],bounds$colsample_bytree[2],length.out = 9)
+      , gamma = seq(bounds$gamma[1],bounds$gamma[2],length.out = 9)
+      , lambda = seq(bounds$lambda[1],bounds$lambda[2],length.out = 9)
+      , alpha = seq(bounds$alpha[1],bounds$alpha[2],length.out = 9)
+    )
+
     optObj <- bayesOpt(
       FUN = scoringFunction
       , bounds = bounds
       , initPoints = 9
+      , iters.n = 4
+      , iters.k = 1
+      , gsPoints = 10
+    )
+
+    expect_equal(nrow(optObj$scoreSummary),13)
+
+    optObj <- bayesOpt(
+      FUN = scoringFunction
+      , bounds = bounds
+      , initGrid = initGrid
       , iters.n = 4
       , iters.k = 1
       , gsPoints = 10
