@@ -15,3 +15,4 @@ There are no downstream dependencies.
 
 ## Changes
 Improve error handling. Errors are now always returned without exception.
+Minor bug fixes
