@@ -8,11 +8,10 @@
 
 
 ## R CMD check results
-There were no ERRORs, WARNINGs or NOTEs
+There were no errors or notes. Only warnings explained that I am the maintainer and the package is currently archived.
 
 ## Downstream dependencies
 There are no downstream dependencies.
 
 ## Changes
-Improve error handling. Errors are now always returned without exception.
-Minor bug fixes
+Removed Plotly from dependencies - this package was causing a warning in check because it was not being used.

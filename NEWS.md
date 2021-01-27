@@ -1,3 +1,8 @@
+## ParBayesianOptimization 1.2.2
+### Changes  
+Removed Plotly from dependencies - this package was causing a warning in check because it was not being used.
+
+
 ## ParBayesianOptimization 1.2.1  
 ### Changes  
 Fixed a bug with initgrid on scoring functions with dimensionality over 4.
