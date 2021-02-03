@@ -14,4 +14,4 @@ There were no errors or notes. Only warnings explained that I am the maintainer 
 There are no downstream dependencies.
 
 ## Changes
-Removed Plotly from dependencies - this package was causing a warning in check because it was not being used.
+Removed Plotly from dependencies. Some suggested packages are now used conditionally in vignettes, reade, tests and examples since they might not be available on all checking machines.

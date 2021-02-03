@@ -1,6 +1,11 @@
+## ParBayesianOptimization 1.2.3
+### Changes  
+Some suggested packages are now used conditionally in vignettes, reade, tests and examples since they might not be available on all checking machines.
+
+
 ## ParBayesianOptimization 1.2.2
 ### Changes  
-Removed Plotly from dependencies - this package was causing a warning in check because it was not being used.
+Removed Plotly from dependencies.
 
 
 ## ParBayesianOptimization 1.2.1  
