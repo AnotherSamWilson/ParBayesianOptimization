@@ -93,7 +93,7 @@ getNextParameters <- function(
 
       # If we obtained any unique parameter sets:
       if (any(!fromNoise$Duplicate)) {
-        returnParameters <- rbind(returnParameters,fromNoise,fill=TRUE)
+        returnParameters <- rbind(returnParameters,fromNoise[!fromNoise$Duplicate],fill=TRUE)
         procure <- runNew - nrow(returnParameters)
       }
 
