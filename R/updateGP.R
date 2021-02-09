@@ -2,13 +2,35 @@
 #'
 #' To save time, Gaussian processes are not updated after the last iteration
 #' in \code{addIterations()}. The user can do this manually, using this function
-#' if they wish.
+#' if they wish. This is not necessary to continue optimization using \code{addIterations}.
 #' @param optObj an object of class bayesOpt
 #' @param bounds The bounds to scale the parameters within.
 #' @param verbose Should the user be warned if the GP is already up to date?
 #' @param ... passed to \code{DiceKriging::km()}
 #' @importFrom DiceKriging km
-#' @return a \code{bayesOpt} object with updated Gaussian Processes.
+#' @return An object of class \code{bayesOpt} with updated Gaussian processes.
+#' @examples
+#' # Create initial object
+#' scoringFunction <- function(x) {
+#'   a <- exp(-(2-x)^2)*1.5
+#'   b <- exp(-(4-x)^2)*2
+#'   c <- exp(-(6-x)^2)*1
+#'   return(list(Score = a+b+c))
+#' }
+#'
+#' bounds <- list(x = c(0,8))
+#'
+#' Results <- bayesOpt(
+#'     FUN = scoringFunction
+#'   , bounds = bounds
+#'   , initPoints = 3
+#'   , iters.n = 2
+#'   , gsPoints = 10
+#' )
+#'
+#' # At this point, the Gaussian Process has not been updated
+#' # with the most recent results. We can update it manually:
+#' Results <- updateGP(Results)
 #' @export
 updateGP <- function(optObj,bounds = optObj$bounds,verbose = 1, ...) {
 

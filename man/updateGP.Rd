@@ -16,10 +16,33 @@ updateGP(optObj, bounds = optObj$bounds, verbose = 1, ...)
 \item{...}{passed to \code{DiceKriging::km()}}
 }
 \value{
-a \code{bayesOpt} object with updated Gaussian Processes.
+An object of class \code{bayesOpt} with updated Gaussian processes.
 }
 \description{
 To save time, Gaussian processes are not updated after the last iteration
 in \code{addIterations()}. The user can do this manually, using this function
-if they wish.
+if they wish. This is not necessary to continue optimization using \code{addIterations}.
+}
+\examples{
+# Create initial object
+scoringFunction <- function(x) {
+  a <- exp(-(2-x)^2)*1.5
+  b <- exp(-(4-x)^2)*2
+  c <- exp(-(6-x)^2)*1
+  return(list(Score = a+b+c))
+}
+
+bounds <- list(x = c(0,8))
+
+Results <- bayesOpt(
+    FUN = scoringFunction
+  , bounds = bounds
+  , initPoints = 3
+  , iters.n = 2
+  , gsPoints = 10
+)
+
+# At this point, the Gaussian Process has not been updated
+# with the most recent results. We can update it manually:
+Results <- updateGP(Results)
 }

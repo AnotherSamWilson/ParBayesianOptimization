@@ -4,7 +4,28 @@
 #' @param optObj An object of class bayesOpt
 #' @param saveFile A filepath stored as a character. Must include the
 #' filename and extension as a .RDS.
-#' @return The same optObj with the updated saveFile.
+#' @return The same \code{optObj} with the updated saveFile.
+#' @examples
+#' \dontrun{
+#' scoringFunction <- function(x) {
+#'   a <- exp(-(2-x)^2)*1.5
+#'   b <- exp(-(4-x)^2)*2
+#'   c <- exp(-(6-x)^2)*1
+#'   return(list(Score = a+b+c))
+#' }
+#'
+#' bounds <- list(x = c(0,8))
+#'
+#' Results <- bayesOpt(
+#'     FUN = scoringFunction
+#'   , bounds = bounds
+#'   , initPoints = 3
+#'   , iters.n = 2
+#'   , gsPoints = 10
+#'   , saveFile = "filepath.RDS"
+#' )
+#' Results <- changeSaveFile(Results,saveFile = "DifferentFile.RDS")
+#' }
 #' @export
 changeSaveFile <- function(optObj,saveFile = NULL) {
 

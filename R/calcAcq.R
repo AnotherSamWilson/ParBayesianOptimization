@@ -1,17 +1,4 @@
-#' @title Calculate Acquisition Function
-#'
-#' @description
-#' Function to be Maximized
-#'
-#' @param par Parameter set to predict
-#' @param GPs an object of class gp
-#' @param GPe an object of class gp
-#' @param acq Acquisition function type to be used
-#' @param y_max The current maximum known value of the target utility function
-#' @param kappa tunable parameter kappa to balance exploitation against exploration
-#' @param eps tunable parameter epsilon to balance exploitation against exploration
 #' @importFrom stats dnorm pnorm predict
-#' @return The acquisition function value.
 #' @keywords internal
 calcAcq <- function(par, scoreGP, timeGP, acq, y_max, kappa, eps) {
 

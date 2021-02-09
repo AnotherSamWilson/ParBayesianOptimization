@@ -17,7 +17,7 @@ getLocalOptimums(
 )
 }
 \arguments{
-\item{optObj}{an object of class bayesOpt. The following parameters are all defaulted to
+\item{optObj}{an object of class \code{bayesOpt}. The following parameters are all defaulted to
 the options provided in this object, but can be manually specified.}
 
 \item{bounds}{Same as in \code{bayesOpt()}}
@@ -49,4 +49,23 @@ Returns all local optimums of the acquisition function, no matter the utility.
 the L-BFGS-B method is used to find the closest local optimum to each point.
 dbscan is then used to cluster points together which converged to the same
 optimum - only unique optimums are returned.
+}
+\examples{
+scoringFunction <- function(x) {
+  a <- exp(-(2-x)^2)*1.5
+  b <- exp(-(4-x)^2)*2
+  c <- exp(-(6-x)^2)*1
+  return(list(Score = a+b+c))
+}
+
+bounds <- list(x = c(0,8))
+
+Results <- bayesOpt(
+    FUN = scoringFunction
+  , bounds = bounds
+  , initPoints = 3
+  , iters.n = 2
+  , gsPoints = 10
+)
+print(getLocalOptimums(Results))
 }

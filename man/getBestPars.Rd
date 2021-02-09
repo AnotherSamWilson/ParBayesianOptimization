@@ -7,14 +7,34 @@
 getBestPars(optObj, N = 1)
 }
 \arguments{
-\item{optObj}{An object of class bayesOpt}
+\item{optObj}{An object of class \code{bayesOpt}}
 
 \item{N}{The number of parameter sets to return}
 }
-\description{
-Returns the parameter set which resulted in the maximum score from \code{FUN}.
+\value{
+A list containing the \code{FUN} inputs which resulted in the highest returned Score.
+If N > 1, a \code{data.table} is returned. Each row is a result from \code{FUN}, with results ordered by
+descending Score.
 }
-\details{
-If N > 1, a data.table with N rows is returned, order by score decreasing.
-If N = 1, a list of parameters is returned.
+\description{
+Returns the N parameter sets which resulted in the maximum scores from \code{FUN}.
+}
+\examples{
+scoringFunction <- function(x) {
+  a <- exp(-(2-x)^2)*1.5
+  b <- exp(-(4-x)^2)*2
+  c <- exp(-(6-x)^2)*1
+  return(list(Score = a+b+c))
+}
+
+bounds <- list(x = c(0,8))
+
+Results <- bayesOpt(
+    FUN = scoringFunction
+  , bounds = bounds
+  , initPoints = 3
+  , iters.n = 2
+  , gsPoints = 10
+)
+print(getBestPars(Results))
 }

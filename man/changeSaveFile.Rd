@@ -13,8 +13,30 @@ changeSaveFile(optObj, saveFile = NULL)
 filename and extension as a .RDS.}
 }
 \value{
-The same optObj with the updated saveFile.
+The same \code{optObj} with the updated saveFile.
 }
 \description{
 Use this to change the saveFile parameter in a pre-existing bayesOpt object.
+}
+\examples{
+\dontrun{
+scoringFunction <- function(x) {
+  a <- exp(-(2-x)^2)*1.5
+  b <- exp(-(4-x)^2)*2
+  c <- exp(-(6-x)^2)*1
+  return(list(Score = a+b+c))
+}
+
+bounds <- list(x = c(0,8))
+
+Results <- bayesOpt(
+    FUN = scoringFunction
+  , bounds = bounds
+  , initPoints = 3
+  , iters.n = 2
+  , gsPoints = 10
+  , saveFile = "filepath.RDS"
+)
+Results <- changeSaveFile(Results,saveFile = "DifferentFile.RDS")
+}
 }

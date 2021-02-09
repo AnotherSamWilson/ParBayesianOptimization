@@ -14,6 +14,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+backup_options <- options()
 options(width = 1000)
 set.seed(1991)
 ```
@@ -69,4 +70,6 @@ simpleFunction(7.023)/simpleFunction(getBestPars(optObj)$x)
 
 We have now found an ```x``` very close to the global optimum. 
 
-
+```{r revert_options, include=FALSE}
+options(backup_options)
+```

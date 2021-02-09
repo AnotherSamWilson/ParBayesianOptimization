@@ -34,36 +34,36 @@ at each Epoch (optimization step). If running in parallel, good practice
 is to set \code{iters.k} to some multiple of the number of cores you have designated
 for this process. Must belower than, and preferrably some multiple of \code{iters.n}.}
 
-\item{otherHalting}{Same as bayesOpt()}
+\item{otherHalting}{Same as \code{bayesOpt()}}
 
-\item{bounds}{Same as bayesOpt()}
+\item{bounds}{Same as \code{bayesOpt()}}
 
-\item{acq}{Same as bayesOpt()}
+\item{acq}{Same as \code{bayesOpt()}}
 
-\item{kappa}{Same as bayesOpt()}
+\item{kappa}{Same as \code{bayesOpt()}}
 
-\item{eps}{Same as bayesOpt()}
+\item{eps}{Same as \code{bayesOpt()}}
 
-\item{gsPoints}{Same as bayesOpt()}
+\item{gsPoints}{Same as \code{bayesOpt()}}
 
-\item{convThresh}{Same as bayesOpt()}
+\item{convThresh}{Same as \code{bayesOpt()}}
 
-\item{acqThresh}{Same as bayesOpt()}
+\item{acqThresh}{Same as \code{bayesOpt()}}
 
-\item{errorHandling}{Same as bayesOpt()}
+\item{errorHandling}{Same as \code{bayesOpt()}}
 
-\item{saveFile}{Same as bayesOpt()}
+\item{saveFile}{Same as \code{bayesOpt()}}
 
-\item{parallel}{Same as bayesOpt()}
+\item{parallel}{Same as \code{bayesOpt()}}
 
-\item{plotProgress}{Same as bayesOpt()}
+\item{plotProgress}{Same as \code{bayesOpt()}}
 
-\item{verbose}{Same as bayesOpt()}
+\item{verbose}{Same as \code{bayesOpt()}}
 
-\item{...}{Same as bayesOpt()}
+\item{...}{Same as \code{bayesOpt()}}
 }
 \value{
-A \code{bayesOpt} object.
+An object of class \code{bayesOpt} having run additional iterations.
 }
 \description{
 Use this function to continue optimization of a bayesOpt object.
@@ -75,4 +75,23 @@ If new bounds are used which cause some of the prior runs to fall outside of
 the bounds, these samples are removed from the optimization procedure, but
 will remain in \code{scoreSummary}. \code{FUN} should return the same elements
 and accept the same inputs as the original, or this function may fail.
+}
+\examples{
+scoringFunction <- function(x) {
+  a <- exp(-(2-x)^2)*1.5
+  b <- exp(-(4-x)^2)*2
+  c <- exp(-(6-x)^2)*1
+  return(list(Score = a+b+c))
+}
+
+bounds <- list(x = c(0,8))
+
+Results <- bayesOpt(
+    FUN = scoringFunction
+  , bounds = bounds
+  , initPoints = 3
+  , iters.n = 1
+  , gsPoints = 10
+)
+Results <- addIterations(Results,iters.n=1)
 }

@@ -8,7 +8,26 @@
 #' @importFrom ggplot2 ggplot aes_string xlab scale_color_discrete geom_point theme guides guide_legend margin element_text unit xlim ylab
 #' @importFrom ggpubr ggarrange annotate_figure text_grob
 #' @importFrom graphics plot
-#' @return an object of class ggarrange
+#' @return an object of class \code{ggarrange} from the \code{ggpubr} package.
+#' @examples
+#' scoringFunction <- function(x) {
+#'   a <- exp(-(2-x)^2)*1.5
+#'   b <- exp(-(4-x)^2)*2
+#'   c <- exp(-(6-x)^2)*1
+#'   return(list(Score = a+b+c))
+#' }
+#'
+#' bounds <- list(x = c(0,8))
+#'
+#' Results <- bayesOpt(
+#'     FUN = scoringFunction
+#'   , bounds = bounds
+#'   , initPoints = 3
+#'   , iters.n = 2
+#'   , gsPoints = 10
+#' )
+#' # This plot will also show in real time with parameter plotProgress = TRUE in bayesOpt()
+#' plot(Results)
 #' @export
 plot.bayesOpt <- function(x,...) {
 

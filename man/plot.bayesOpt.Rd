@@ -12,9 +12,29 @@
 \item{...}{Passed to \code{ggarrange()} when plots are stacked.}
 }
 \value{
-an object of class ggarrange
+an object of class \code{ggarrange} from the \code{ggpubr} package.
 }
 \description{
 Returns 2 stacked plots - the top shows the results from FUN at each iteration.
 The bottom shows the utility from each point before the search took place.
+}
+\examples{
+scoringFunction <- function(x) {
+  a <- exp(-(2-x)^2)*1.5
+  b <- exp(-(4-x)^2)*2
+  c <- exp(-(6-x)^2)*1
+  return(list(Score = a+b+c))
+}
+
+bounds <- list(x = c(0,8))
+
+Results <- bayesOpt(
+    FUN = scoringFunction
+  , bounds = bounds
+  , initPoints = 3
+  , iters.n = 2
+  , gsPoints = 10
+)
+# This plot will also show in real time with parameter plotProgress = TRUE in bayesOpt()
+plot(Results)
 }

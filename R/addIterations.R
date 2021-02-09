@@ -15,21 +15,39 @@
 #'   at each Epoch (optimization step). If running in parallel, good practice
 #'   is to set \code{iters.k} to some multiple of the number of cores you have designated
 #'   for this process. Must belower than, and preferrably some multiple of \code{iters.n}.
-#' @param otherHalting Same as bayesOpt()
-#' @param bounds Same as bayesOpt()
-#' @param acq Same as bayesOpt()
-#' @param kappa Same as bayesOpt()
-#' @param eps Same as bayesOpt()
-#' @param gsPoints Same as bayesOpt()
-#' @param convThresh Same as bayesOpt()
-#' @param acqThresh Same as bayesOpt()
-#' @param errorHandling Same as bayesOpt()
-#' @param saveFile Same as bayesOpt()
-#' @param parallel Same as bayesOpt()
-#' @param plotProgress Same as bayesOpt()
-#' @param verbose Same as bayesOpt()
-#' @param ... Same as bayesOpt()
-#' @return A \code{bayesOpt} object.
+#' @param otherHalting Same as \code{bayesOpt()}
+#' @param bounds Same as \code{bayesOpt()}
+#' @param acq Same as \code{bayesOpt()}
+#' @param kappa Same as \code{bayesOpt()}
+#' @param eps Same as \code{bayesOpt()}
+#' @param gsPoints Same as \code{bayesOpt()}
+#' @param convThresh Same as \code{bayesOpt()}
+#' @param acqThresh Same as \code{bayesOpt()}
+#' @param errorHandling Same as \code{bayesOpt()}
+#' @param saveFile Same as \code{bayesOpt()}
+#' @param parallel Same as \code{bayesOpt()}
+#' @param plotProgress Same as \code{bayesOpt()}
+#' @param verbose Same as \code{bayesOpt()}
+#' @param ... Same as \code{bayesOpt()}
+#' @return An object of class \code{bayesOpt} having run additional iterations.
+#' @examples
+#' scoringFunction <- function(x) {
+#'   a <- exp(-(2-x)^2)*1.5
+#'   b <- exp(-(4-x)^2)*2
+#'   c <- exp(-(6-x)^2)*1
+#'   return(list(Score = a+b+c))
+#' }
+#'
+#' bounds <- list(x = c(0,8))
+#'
+#' Results <- bayesOpt(
+#'     FUN = scoringFunction
+#'   , bounds = bounds
+#'   , initPoints = 3
+#'   , iters.n = 1
+#'   , gsPoints = 10
+#' )
+#' Results <- addIterations(Results,iters.n=1)
 #' @export
 addIterations <- function(
       optObj

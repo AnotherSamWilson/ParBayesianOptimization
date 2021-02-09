@@ -14,4 +14,10 @@ There were no errors or notes. Only warnings explained that I am the maintainer 
 There are no downstream dependencies.
 
 ## Changes
-Removed Plotly from dependencies. Some suggested packages are now used conditionally in vignettes, reade, tests and examples since they might not be available on all checking machines.
+#### Meta
+Package was removed because suggested package was not available on checking machine, which threw a warning when vignettes were built. Made vignettes and examples execution conditional on availability of suggested package. This doesn't affect the readability or educational value of the vignettes or examples.
+
+#### Documentation
+* Added missing value fields to .Rd files of exported functions, and improved the documentation of existing value fields. 
+* Added testable examples to all exported functions that were missing any. 
+* Reset any options that were changed by vignettes.

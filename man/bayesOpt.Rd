@@ -126,7 +126,22 @@ are scaled from 0-1 before being passed to km. FUN inputs are scaled within \cod
 and scores are scaled by 0 = min(scores), 1 = max(scores).}
 }
 \value{
-A \code{bayesOpt} object, containing information about the process.
+An object of class \code{bayesOpt} containing information about the process.
+\itemize{
+  \item \code{FUN}          The scoring function.
+  \item \code{bounds}       The bounds originally supplied.
+  \item \code{iters}        The total iterations that have been run.
+  \item \code{initPars}     The initialization parameters.
+  \item \code{optPars}      The optimization parameters.
+  \item \code{GauProList}   A list containing information on the Gaussian Processes used in optimization.
+  \item \code{scoreSummary} A \code{data.table} with results from the execution of \code{FUN}
+  at different inputs. Includes information on the epoch, iteration, function inputs, score, and any other
+  information returned by \code{FUN}.
+  \item \code{stopStatus}   Information on what caused the function to stop running. Possible explenations are
+  time limit, minimum utility not met, errors in \code{FUN}, iters.n was reached, or the Gaussian Process encountered
+  an error.
+  \item \code{elapsedTime} The total time in seconds the function was executing.
+}
 }
 \description{
 Maximizes a user defined function within a set of bounds. After the function

@@ -11,6 +11,7 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+backup_options <- options()
 options(width = 1000)
 set.seed(1991)
 ```
@@ -29,3 +30,7 @@ In this case, there are 3 promising candidate parameters. We may want to run our
 
 ### Adding Noise  
 If there are only 2 local optimums, and ```iters.k``` is 3, we still need to obtain another parameter set to run. We could choose a random parameter set within the bounds, however it is usually more worthwhile to decrease uncertainty around the promising points. Therefore, ```bayesOpt``` will randomly select points around our local optimums to sample if there aren't enough local optimums to satisfy ```iters.k```.
+
+```{r revert_options, include=FALSE}
+options(backup_options)
+```

@@ -7,7 +7,7 @@
 #' dbscan is then used to cluster points together which converged to the same
 #' optimum - only unique optimums are returned.
 #'
-#' @param optObj an object of class bayesOpt. The following parameters are all defaulted to
+#' @param optObj an object of class \code{bayesOpt}. The following parameters are all defaulted to
 #' the options provided in this object, but can be manually specified.
 #' @param bounds Same as in \code{bayesOpt()}
 #' @param acq Same as in \code{bayesOpt()}
@@ -20,6 +20,24 @@
 #' @return A data table of local optimums, including the utility (gpUtility), the
 #' utility relative to the max utility (relUtility), and the steps taken in the
 #' L-BFGS-B method (gradCount).
+#' @examples
+#' scoringFunction <- function(x) {
+#'   a <- exp(-(2-x)^2)*1.5
+#'   b <- exp(-(4-x)^2)*2
+#'   c <- exp(-(6-x)^2)*1
+#'   return(list(Score = a+b+c))
+#' }
+#'
+#' bounds <- list(x = c(0,8))
+#'
+#' Results <- bayesOpt(
+#'     FUN = scoringFunction
+#'   , bounds = bounds
+#'   , initPoints = 3
+#'   , iters.n = 2
+#'   , gsPoints = 10
+#' )
+#' print(getLocalOptimums(Results))
 #' @importFrom stats optim
 #' @importFrom data.table as.data.table
 #' @import foreach
