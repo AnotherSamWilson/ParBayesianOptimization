@@ -273,14 +273,19 @@ addIterations <- function(
     }
 
     # Keep track of performance.
-    scoreSummary <- rbind(
-      scoreSummary
-      , data.table(
-        "Epoch" = rep(Epoch,nrow(NewResults))
-        , "Iteration" = 1:nrow(NewResults) + nrow(scoreSummary)
-        , "inBounds" = rep(TRUE,nrow(NewResults))
-        , NewResults
+    # fill is true because users can pass their own columns.
+    scoreSummary <- rbindlist(
+      list(
+        scoreSummary
+        , data.table(
+          "Epoch" = rep(Epoch,nrow(NewResults))
+          , "Iteration" = 1:nrow(NewResults) + nrow(scoreSummary)
+          , "inBounds" = rep(TRUE,nrow(NewResults))
+          , NewResults
+        )
       )
+      , use.names=TRUE
+      , fill=TRUE
     )
     optObj$scoreSummary <- scoreSummary
     optObj$GauProList$gpUpToDate <- FALSE
