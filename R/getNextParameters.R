@@ -16,7 +16,13 @@ getNextParameters <- function(
 
   LocalOptims <- LocalOptims[get("relUtility") >= acqThresh,]
   LocalOptims <- LocalOptims[,c(boundsDT$N,"gpUtility"),with=FALSE]
-  setorder(LocalOptims,-"gpUtility")
+  
+  # using only one criteria to sort leads to not reproducible order
+  setorder(
+    LocalOptims,
+    cols = c("gpUtility", "Score", "inBounds"),
+    order = c(-1, -1, -1)
+  )
   LocalOptims$acqOptimum <- TRUE
 
   # Mark clusters as duplicates if they have already been attempted. Note that
