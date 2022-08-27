@@ -29,7 +29,7 @@
 #' @export
 changeSaveFile <- function(optObj,saveFile = NULL) {
 
-  if (class(optObj) != "bayesOpt") stop("optObj should be of class bayesOpt.")
+  if (!inherits(x = optObj, what = "bayesOpt")) stop("optObj should be of class bayesOpt.")
 
   # See if saveFile can be written to.
   if (!is.null(saveFile)) {

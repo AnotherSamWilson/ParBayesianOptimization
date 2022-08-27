@@ -1,5 +1,7 @@
 #' @importFrom dbscan dbscan
-#' @importFrom data.table fintersect uniqueN .SD
+#' @importFrom data.table fintersect
+#' @importFrom data.table uniqueN
+#' @importFrom data.table ".SD"
 getNextParameters <- function(
     LocalOptims
   , boundsDT

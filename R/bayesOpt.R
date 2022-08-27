@@ -309,7 +309,7 @@ bayesOpt <- function(
 
       # Make sure everything was returned in the correct format. Any errors here will be passed.
       if (any(class(Result) %in% c("simpleError","error","condition"))) return(Result)
-      if (class(Result) != "list") stop("Object returned from FUN was not a list.")
+      if (!inherits(x = Result, what = "list")) stop("Object returned from FUN was not a list.")
       resLengths <- lengths(Result)
       if (!any(names(Result) == "Score")) stop("FUN must return list with element 'Score' at a minimum.")
       if (!is.numeric(Result$Score)) stop("Score returned from FUN was not numeric.")
