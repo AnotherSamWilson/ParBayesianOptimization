@@ -5,7 +5,7 @@
 Status](https://api.travis-ci.org/AnotherSamWilson/ParBayesianOptimization.svg)](https://travis-ci.org/AnotherSamWilson/ParBayesianOptimization)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/ParBayesianOptimization)](https://CRAN.R-project.org/package=ParBayesianOptimization)
 [![DEV\_Version\_Badge](https://img.shields.io/badge/Dev-1.2.5-blue.svg)](https://CRAN.R-project.org/package=ParBayesianOptimization)
-[![CRAN\_Downloads](https://cranlogs.r-pkg.org/badges/ParBayesianOptimization)](https://CRAN.R-project.org/package=ParBayesianOptimization)
+[![CRAN\_Downloads](https://cranlogs.r-pkg.org/badges/grand-total/mltools)](https://CRAN.R-project.org/package=ParBayesianOptimization)
 [![Coverage
 Status](https://codecov.io/gh/AnotherSamWilson/ParBayesianOptimization/branch/master/graph/badge.svg)](https://codecov.io/gh/AnotherSamWilson/ParBayesianOptimization/branch/master)
 
@@ -315,14 +315,14 @@ to see the results:
 ``` r
 optObj$scoreSummary
 #>    Epoch Iteration max_depth min_child_weight subsample gpUtility acqOptimum inBounds Elapsed     Score nrounds errorMessage
-#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.13 0.9777163       2           NA
+#> 1:     0         1         2         1.670129 0.7880670        NA      FALSE     TRUE    0.14 0.9777163       2           NA
 #> 2:     0         2         2        14.913213 0.8763154        NA      FALSE     TRUE    0.33 0.9763760      15           NA
-#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.44 0.9931657      18           NA
+#> 3:     0         3         4        18.833690 0.3403900        NA      FALSE     TRUE    0.43 0.9931657      18           NA
 #> 4:     0         4         4         8.639925 0.5499186        NA      FALSE     TRUE    0.23 0.9981437       7           NA
-#> 5:     1         5         4        21.871937 1.0000000 0.5857961       TRUE     TRUE    0.11 0.9945933       1           NA
-#> 6:     2         6         4         0.000000 0.9439879 0.6668303       TRUE     TRUE    0.24 0.9990567       7           NA
+#> 5:     1         5         4        21.871937 1.0000000 0.5857961       TRUE     TRUE    0.12 0.9945933       1           NA
+#> 6:     2         6         4         0.000000 0.9439879 0.6668303       TRUE     TRUE    0.25 0.9990567       7           NA
 #> 7:     3         7         5         1.395119 0.7071802 0.2973497       TRUE     TRUE    0.18 0.9984577       4           NA
-#> 8:     4         8         5         0.000000 0.2500000 0.3221660       TRUE     TRUE    0.28 0.9994020      10           NA
+#> 8:     4         8         5         0.000000 0.2500000 0.3221660       TRUE     TRUE    0.32 0.9994020      10           NA
 ```
 
 ``` r
@@ -381,10 +381,10 @@ optimization steps, versus the 4 performed in the sequential example:
 ``` r
 tWithPar
 #>    user  system elapsed 
-#>    0.92    0.02    7.39
+#>    0.99    0.03    7.91
 tNoPar
 #>    user  system elapsed 
-#>   23.14    2.36   21.16
+#>   24.13    2.40   21.70
 ```
 
 ## Sampling Multiple Promising Points at Once
