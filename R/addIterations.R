@@ -70,7 +70,7 @@ addIterations <- function(
 ) {
 
   startT <- Sys.time()
-  if(class(optObj) != "bayesOpt") stop("optObj must be of class bayesOpt")
+  if (!inherits(x = optObj, what = "bayesOpt")) stop("optObj must be of class bayesOpt")
 
   # Check the parameters
   checkParameters(

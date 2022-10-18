@@ -14,6 +14,6 @@ Imports: data.table (>= 1.11.8), DiceKriging, stats, foreach, dbscan, lhs, crayo
 Suggests: knitr, rmarkdown, xgboost, doParallel, testthat
 License: GPL-2
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 VignetteBuilder: knitr
 Maintainer: Samuel Wilson <samwilson303@gmail.com>

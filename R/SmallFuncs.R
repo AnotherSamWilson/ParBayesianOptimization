@@ -160,7 +160,7 @@ checkParameters <- function(
   if (parallel & (getDoParWorkers() == 1)) stop("parallel is set to TRUE but no back end is registered.\n")
   if (!parallel & getDoParWorkers() > 1 & verbose > 0) message("parallel back end is registered, but parallel is set to false. Process will not be run in parallel.")
   if (any(!names(otherHalting) %in% c("timeLimit","minUtility"))) stop("otherHalting element not recognized. Must be one of timeLimit and minUtility.")
-  if (class(bounds) != "list") stop("bounds must be a list of parameter bounds with the same arguments as FUN.")
+  if (!inherits(x = bounds, what = "list")) stop("bounds must be a list of parameter bounds with the same arguments as FUN.")
   if (any(lengths(bounds) != 2)) stop("Not all elements in bounds are length 2.")
   if (acqThresh > 1 | acqThresh < 0) stop("acqThresh must be in [0,1]")
   if (!is.logical(plotProgress)) stop("plotProgress must be logical")

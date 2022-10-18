@@ -75,7 +75,7 @@ updateGP <- function(optObj,bounds = optObj$bounds,verbose = 1, ...) {
         }
       )
 
-      if (class(sgp) == "stopEarlyMsg") {
+      if (inherits(x = sgp, what = "stopEarlyMsg")) {
         optObj$stopStatus <- sgp
         return(optObj)
       } else {

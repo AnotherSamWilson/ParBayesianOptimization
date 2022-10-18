@@ -1,5 +1,7 @@
 #' @importFrom dbscan dbscan
-#' @importFrom data.table fintersect uniqueN setorder
+#' @importFrom data.table fintersect
+#' @importFrom data.table uniqueN
+#' @importFrom data.table ".SD"
 getNextParameters <- function(
     LocalOptims
   , boundsDT
@@ -15,8 +17,12 @@ getNextParameters <- function(
 ) {
 
   LocalOptims <- LocalOptims[get("relUtility") >= acqThresh,]
-  LocalOptims <- LocalOptims[,c(boundsDT$N,"gpUtility"),with=FALSE]
-  setorder(LocalOptims,-"gpUtility")
+  LocalOptims <- LocalOptims[
+    ,
+    .SD,
+    .SDcols = c(boundsDT$N,"gpUtility")
+  ]
+
   LocalOptims$acqOptimum <- TRUE
 
   # Mark clusters as duplicates if they have already been attempted. Note that
@@ -24,8 +30,8 @@ getNextParameters <- function(
   # parameters is experimental, and could cause problems as the parameter space
   # becomes more fully explored.
   LocalOptims$Duplicate <- checkDup(
-      LocalOptims[,boundsDT$N,with=FALSE]
-    , scoreSummary[,boundsDT$N,with=FALSE]
+      LocalOptims[, boundsDT$N, with = FALSE]
+    , scoreSummary[, boundsDT$N, with = FALSE]
   )
 
   # If we already have runNew non-duplicate local optims, use the best of those.
